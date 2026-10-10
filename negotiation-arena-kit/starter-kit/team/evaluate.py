@@ -12,6 +12,7 @@ Output: runs/<time>_<label>/ with summary.md (read this), results.csv and one JS
 import argparse
 import csv
 import importlib
+import inspect
 import json
 import logging
 import socket
@@ -28,6 +29,7 @@ from arena_kit.client import ArenaClient, ArenaError
 from arena_kit.play import RemoteTable, hosted, play
 
 from .levers import _label, best_per_field
+from .runner import play_case
 
 RUNS = Path("runs")
 PARTS = (
@@ -76,11 +78,16 @@ def start_sim(data=None):
     return ArenaClient(url, key), url
 
 
-def play_one(client, case, new_agent):
+def play_one(client, case, new_agent, cap=None):
     table = RemoteTable(client, case)
     t0 = time.monotonic()
+    agent = new_agent()
+    deadline = time.time() + cap if cap else None
     try:
-        result = play(table, case["case_id"], new_agent())
+        if "sid" in inspect.signature(agent.decide).parameters:  # our agent: one worker per thread
+            result = play_case(table, case["case_id"], agent, deadline)
+        else:
+            result = play(table, case["case_id"], agent, deadline)
     except Exception as e:  # one broken case must not stop the run
         log.exception("%s failed", case["case_id"])
         return {"case": case, "error": f"{type(e).__name__}: {e}", "session_id": table.session_id}
@@ -97,6 +104,7 @@ def play_one(client, case, new_agent):
         "seconds": round(time.monotonic() - t0, 1),
         "result": {**result, **{k: v for k, v in full.items() if k not in result}},
         "replay_url": session.get("replay_url"),
+        "moves": [list(m) for m in getattr(agent, "log", [])],
     }
 
 
@@ -202,6 +210,8 @@ def write_outputs(out_dir, rows, args, base_url):
         for m in missed_levers(case, res):
             md.append(f"- missed: {m['field']} {_label(m['current'])} -> {_label(m['option'])} "
                       f"would have saved {-m['delta_eur']:,.0f} EUR")
+        for sid, rnd, source, why in row.get("moves") or []:
+            md.append(f"- our move {rnd} to {sid} ({source}): {why}")
         for r in reasons(res):
             md.append(f"- supplier {r}")
         if row.get("error"):
@@ -214,12 +224,13 @@ def write_outputs(out_dir, rows, args, base_url):
 def main(argv=None):
     load_env()
     ap = argparse.ArgumentParser(prog="evaluate", description=__doc__.split("\n\n")[0])
-    ap.add_argument("--agent", default="llm", help="naive, llm or module:factory")
+    ap.add_argument("--agent", default="team.agent:make", help="naive, llm or module:factory")
     ap.add_argument("--cases", nargs="*", help="case IDs (default: every playable case of the set)")
     ap.add_argument("--set", default="practice")
     ap.add_argument("--sim", action="store_true", help="play against the local simulator (free)")
     ap.add_argument("--data", default=None, help="data package folder (default: ARENA_DATA)")
     ap.add_argument("--parallel", type=int, default=5)
+    ap.add_argument("--cap", type=float, default=None, help="seconds per case, like a Live Final wave (480)")
     ap.add_argument("--label", default="run")
     ap.add_argument("--yes", action="store_true", help="do not ask before using practice sessions")
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -242,7 +253,7 @@ def main(argv=None):
             raise SystemExit(f"not playable here: {sorted(missing)}")
     if not cases:
         raise SystemExit("no cases to play")
-    if not a.sim and a.set == "practice" and not a.yes:
+    if not a.sim and a.set == "practice" and not a.yes:  # sandbox sessions are free
         left = (client.me().get("practice") or {}).get("left")
         answer = input(f"This uses {len(cases)} practice sessions ({left} left today for the whole team). Go? [y/N] ")
         if answer.strip().lower() not in ("y", "yes", "j", "ja"):
@@ -252,7 +263,7 @@ def main(argv=None):
     out_dir = RUNS / f"{datetime.now():%m%d-%H%M}_{a.label}"
     print(f"playing {len(cases)} cases with {a.agent} ({min(a.parallel, 10)} at once) ...", flush=True)
     with ThreadPoolExecutor(max_workers=min(a.parallel, 10)) as pool:
-        rows = list(pool.map(lambda c: play_one(client, c, new_agent), cases))
+        rows = list(pool.map(lambda c: play_one(client, c, new_agent, a.cap), cases))
     mean = write_outputs(out_dir, rows, a, base_url)
     for row in rows:
         res = row.get("result") or {}
