@@ -197,14 +197,9 @@ class TeamAgent:
         mine = [ts["terms"] for m in events if m.get("from") == "buyer" for ts in (m.get("term_sheets") or [])]
         r = sum(m.get("from") == "buyer" for m in events)  # our messages so far
         budget = self.rounds_budget(case, events)
-        # the best value of every non-price lever, from their standing offer
-        best, base_c = {}, self.cost(case, theirs, std, sup)
-        for row in lever_table(case, theirs, std, sup):
-            # small levers are not worth asking for: the supplier prices every demand into the price
-            big = -row["delta_eur"] >= MIN_LEVER_SHARE * base_c or row["field"] in COVERAGE
-            if row["field"] != "unit_price" and row["must_haves_ok"] and row["delta_eur"] < 0 and big:
-                if row["field"] not in best or row["delta_eur"] < best[row["field"]]["delta_eur"]:
-                    best[row["field"]] = row
+        # the best value of every non-price lever, first at their price (for floor and anchor)
+        base = self.keep_must_haves(case, complete_offer(case, theirs), std)  # levers from a valid sheet
+        best = self.best_levers(case, base, std, sup)
         levers = {f: row["option"] for f, row in best.items()}
         # price floor: below it C rises again (relationship charge), or the should-cost minus a bit
         floor = self.price_floor(case, {**theirs, **levers}, std, sup, their_price)
@@ -225,7 +220,10 @@ class TeamAgent:
         if mine:  # never step back from a price we offered
             target = max(target, max(t.get("unit_price") or 0 for t in mine))
         target = round(min(max(target, floor), their_price), 2)
-        a = self.keep_must_haves(case, complete_offer(case, {**theirs, **levers, "unit_price": target}), std)
+        # then at OUR price: whether covering the whole need pays depends on the price we get for it
+        best = self.best_levers(case, {**base, "unit_price": target}, std, sup)
+        levers = {f: row["option"] for f, row in best.items()}
+        a = self.keep_must_haves(case, complete_offer(case, {**base, **levers, "unit_price": target}), std)
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
@@ -235,6 +233,17 @@ class TeamAgent:
                 sheets.append(v)
         return {"sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup, "levers": best,
                 "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r}
+
+    def best_levers(self, case, terms, std, sup):
+        """{field: lever row} - the best option per non-price field that saves at least MIN_LEVER_SHARE of C
+        (small levers are not worth asking for: the supplier prices every demand into the price)."""
+        best, base_c = {}, self.cost(case, terms, std, sup)
+        for row in lever_table(case, terms, std, sup):
+            big = -row["delta_eur"] >= MIN_LEVER_SHARE * base_c or row["field"] in COVERAGE
+            if row["field"] != "unit_price" and row["must_haves_ok"] and row["delta_eur"] < 0 and big:
+                if row["field"] not in best or row["delta_eur"] < best[row["field"]]["delta_eur"]:
+                    best[row["field"]] = row
+        return best
 
     @staticmethod
     def keep_must_haves(case, sheet, std):
