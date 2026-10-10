@@ -56,8 +56,11 @@ case ─► 1 PREPARE  briefing.py   supplier profile + arguments that check out
 | Dress rehearsal | `uv run python -m team.final --rehearse case:D02` | free |
 | **Live Final** (start before 12:00, leave running) | `uv run python -m team.final` | - |
 
-Practice score (mean of 10 cases x 100): kit naive/llm agent ~? | v2 13.3 (pushed past final offers -> walk-aways)
-| v4 56.3 (accept final offers) | v5 56.7 | v6 48.6 (one accept bug, fixed) | v7 see `runs/`.
+Practice score (mean of 10 cases x 100, 8-min cap, `gpt-6-luna`): v2 13.3 (pushed past final offers ->
+walk-aways) | v4 56.3 (accept final offers) | v5 56.7 | v6 48.6 / v7 49.5 / v8 42.4 (bugs, fixed) |
+**v9 56.9, all 10 deals** | v9 with `gpt-6.1-sol` 58.1 (within noise; luna stays default). Runs vary by
+about +-0.2 per case: compare versions on all 10 cases, not on one.
+Weakest: P02 (copper index, firm "pricing committee"), P18/P08 (raw material: index clause + base price).
 
 ## Learned so far
 - Suppliers **walk away** when pushed after `final_offer` -> accept it (or confirm its price with our terms once).
