@@ -29,31 +29,49 @@ uv run arena me             # quota left
 Never commit `.env` or print keys. Entire must stay enabled (`entire enable` after cloning).
 Default model `gpt-6-luna` (cheap, fast); compare with `gpt-6.1-sol` later.
 
-## Done
-| Tool | What | Run (from `starter-kit`) |
+## Architecture (all in `negotiation-arena-kit/starter-kit/team/`)
+```
+case ─► 1 PREPARE  briefing.py   supplier profile + arguments that check out (pure SQL, < 1 s)
+     ─► 2 NEGOTIATE agent.py     levers.py (EUR per lever) → planner: sheet A on a concession path +
+                                 2 equal-cost alternatives (MESO) → LLM writes the e-mail, code caps
+                                 every sheet at the planned C and drops unknown IDs
+     ─► 3 CLOSE     agent.py     hard rules: accept on agreed / first final_offer / stall / round budget,
+                                 confirm missing terms + full coverage once, take back an earlier cheaper
+                                 offer once, never break a must-have, never worse than the alternative
+        runner.py                one worker per supplier thread (each thread has its own 60 s clock),
+                                 accept retry when a timeout moved the offer ID, closes before a wave cap
+   4 MEASURE  evaluate.py        runs cases, summary.md per run (score vs previous, missed levers, reasons)
+   5 DELIVER  final.py           Live Final runner, --rehearse, --check (pre-flight)
+```
+
+## Run (from `negotiation-arena-kit/starter-kit`)
+| What | Command | Cost |
 |---|---|---|
-| `team/levers.py` | EUR value of every negotiable lever from a term sheet (official cost function), also per unit | `uv run python -m team.levers case:P01 --price 135.10` |
-| `team/evaluate.py` | Plays cases in parallel, writes `runs/<time>_<label>/summary.md`: score vs previous run, levers left on the table, supplier reasons from the trace | `uv run python -m team.evaluate --sim` (free) / `--agent llm --label x` (10 sessions, asks first) |
+| Levers of a case | `uv run python -m team.levers case:P01 --price 135.10` | free |
+| Briefing of a case | `uv run python -m team.briefing case:P01` | free |
+| Simulator (scripted supplier) | `uv run python -m team.evaluate --sim` | free (LLM cents) |
+| Sandbox (real demo suppliers D01, D02) | `uv run python -m team.evaluate --set sandbox` | free |
+| All 10 practice cases, final-like | `uv run python -m team.evaluate --label <change> --cap 480 --parallel 10` | 10 sessions |
+| Pre-flight | `uv run python -m team.final --check` | free |
+| Dress rehearsal | `uv run python -m team.final --rehearse case:D02` | free |
+| **Live Final** (start before 12:00, leave running) | `uv run python -m team.final` | - |
 
-Baseline: kit `llm` agent on P01 = 0.70 (missed: later effective_date worth ~19k EUR).
+Practice score (mean of 10 cases x 100): kit naive/llm agent ~? | v2 13.3 (pushed past final offers -> walk-aways)
+| v4 56.3 (accept final offers) | v5 56.7 | v6 48.6 (one accept bug, fixed) | v7 see `runs/`.
 
-## To build (in this order; claim one by writing your name next to it)
-1. **Our agent `team/agent.py`** (start from `arena_kit/agents/llm.py`): `render()` adds `levers.render()` for every
-   standing term sheet; strategy per `category_goal` and case `type`; plug in via `--agent team.agent:make`.
-2. **Supplier profile**: before round 1, pull the supplier's notes, letters, news, scorecards, invoices from the
-   data package (`arena_kit.data.DataPackage`, `lookup(id)`) and summarise what moves it (cash-short? full capacity?).
-3. **Argument finder**: facts with IDs and exact figures (index moves, should-cost, other quotes, quality issues)
-   to cite; only facts that check out.
-4. **Offer planner**: 2-3 term sheets per message that trade cheap-for-us vs. valuable-for-them levers; a
-   concession schedule over the rounds; estimate the supplier's value with `arena_kit.cost.supplier_value`
-   to avoid the relationship charge.
-5. **Close policy**: when to accept / push once more / walk (status `final_offer`, rounds left, alternative,
-   RFQ: play suppliers against each other), always must-haves ok, read the quote PDF standard terms.
-6. **Speed guard**: every move well under 60 s (LLM timeout + fallback move), test with `--parallel 10`.
-7. **Final runner `team/final.py`**: `arena run --set final` only knows `naive|llm`, so we need a runner that calls
-   `arena_kit.play.play_waves` with our agent. Rehearse Sunday 09:00.
-8. **Lessons loop**: an LLM reads the last runs' `summary.md` and proposes one prompt/strategy change at a time.
-9. **Pitch material**: score progression per version, one replay story.
+## Learned so far
+- Suppliers **walk away** when pushed after `final_offer` -> accept it (or confirm its price with our terms once).
+- Pushing small levers (e.g. a chargeback worth 0.3 % of C) makes suppliers raise the price far more -> skip them.
+- **Uncovered need** is the biggest cost: a 12-month deal on a 24-month need costs ~500k at the fallback price.
+- In an RFQ every thread has its own 60 s clock; calls on one session queue on the server.
+- Open practice sessions count against the 10 open sessions per key -> the final runner closes them first.
+- The LLM tends to concede too fast -> code caps every sheet at the planned C.
+
+## Still open (claim by writing your name)
+- Kit baseline on all practice cases for the pitch (`--agent llm`, 10 sessions).
+- Per-type playbooks: tune with replays (P02 copper index clause, P10 capacity, P18 index deadband).
+- Answer supplier questions with data attachments (they ask "which figures?" - md/csv attachments are read).
+- Pitch: score progression per version, one replay story (P01 notice-period argument).
 
 ## Conventions
 - Code in `negotiation-arena-kit/starter-kit/team/` (keep the vendored kit untouched so it can be updated).

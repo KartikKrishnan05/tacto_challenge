@@ -8,6 +8,7 @@ them as `verified`. Pure SQL and arithmetic, no LLM: it runs in well under a sec
 import argparse
 import json
 import logging
+import threading
 from datetime import date
 
 log = logging.getLogger("arena")
@@ -22,9 +23,13 @@ def _months_back(month, n):
     return f"{y:04d}-{m:02d}"
 
 
+_DB_LOCK = threading.Lock()  # one SQLite connection, shared by the cases of a wave
+
+
 def _q(p, sql, *args):
     try:
-        return p.query(sql, args)
+        with _DB_LOCK:
+            return p.query(sql, args)
     except Exception as e:  # a missing table in a later package must not stop the case
         log.warning("briefing query failed: %s", e)
         return []
@@ -177,7 +182,8 @@ class Briefing:
         for d in _q(p, "SELECT id, date, kind, subject FROM documents WHERE supplier_id = ? ORDER BY date DESC LIMIT ?",
                     sid, MAX_DOCS):
             try:
-                text = self.p.document(d["id"])
+                with _DB_LOCK:
+                    text = self.p.document(d["id"])
                 text = " ".join(line for line in text.splitlines()[2:] if line.strip())[:500]
             except (FileNotFoundError, ValueError):
                 text = ""
