@@ -32,14 +32,20 @@ Default model `gpt-6-luna` (cheap, fast); compare with `gpt-6.1-sol` later.
 ## Architecture (all in `negotiation-arena-kit/starter-kit/team/`)
 ```
 case ─► 1 PREPARE  briefing.py   supplier profile + arguments that check out (pure SQL, < 1 s)
-     ─► 2 NEGOTIATE agent.py     levers.py (EUR per lever) → planner: sheet A on a concession path +
-                                 2 equal-cost alternatives (MESO) → LLM writes the e-mail, code caps
-                                 every sheet at the planned C and drops unknown IDs
-     ─► 3 CLOSE     agent.py     hard rules: accept on agreed / first final_offer / stall / round budget,
-                                 confirm missing terms + full coverage once, take back an earlier cheaper
-                                 offer once, never break a must-have, never worse than the alternative
-        runner.py                one worker per supplier thread (each thread has its own 60 s clock),
-                                 accept retry when a timeout moved the offer ID, closes before a wave cap
+     ─► 2 NEGOTIATE agent.py     levers.py (EUR per lever, priced at the supplier's REVEALED slopes from its
+                                 own sheet pairs) → planner: fixed anchor, steps of 0/15/30/45/60 % of the C
+                                 gap, full coverage locked, 2 equal-cost MESO variants (incl. a payment probe)
+                                 → LLM writes the e-mail; code caps sheets to the plan's C band, completes
+                                 them from OUR sheet A, drops repeated / unknown IDs. RFQ message 1: no LLM,
+                                 cites the cheapest rival offer ID. LLM gets only what is left of the 60 s.
+     ─► 3 CLOSE     agent.py     accept LADDER over every sheet ever offered (main + alternatives), cheapest
+                                 first; final_offer = accept now (repair message only if nothing is
+                                 acceptable); 'agreed' / stall -> its earlier cheaper sheet once; never send a
+                                 sheet dearer than one already on the table; never break a must-have
+        runner.py                one worker per supplier thread, retries + landing check on network errors,
+                                 waits for in-flight rival replies before an accept, done only when the
+                                 arena ended the session, closes on the ladder before a wave cap
+   (supplier model: full cost = should-cost / 1.02, cash-short only from the supplier's own words)
    4 MEASURE  evaluate.py        runs cases, summary.md per run (score vs previous, missed levers, reasons)
    5 DELIVER  final.py           Live Final runner, --rehearse, --check (pre-flight)
 ```
@@ -52,6 +58,7 @@ case ─► 1 PREPARE  briefing.py   supplier profile + arguments that check out
 | Simulator (scripted supplier) | `uv run python -m team.evaluate --sim` | free (LLM cents) |
 | Sandbox (real demo suppliers D01, D02) | `uv run python -m team.evaluate --set sandbox` | free |
 | All 10 practice cases, final-like | `uv run python -m team.evaluate --label <change> --cap 480 --parallel 10` | 10 sessions |
+| Offline tests on recorded negotiations | `uv run --group dev pytest team/tests -q` | free, no API |
 | Pre-flight | `uv run python -m team.final --check` | free |
 | Dress rehearsal | `uv run python -m team.final --rehearse case:D02` | free |
 | **Live Final** (start before 12:00, leave running) | `uv run python -m team.final` | - |
@@ -63,7 +70,17 @@ about +-0.2 per case: compare versions on all 10 cases, not on one.
 Weakest: P02 (copper index, firm "pricing committee"), P18/P08 (raw material: index clause + base price).
 
 ## Learned so far
-- Suppliers **walk away** when pushed after `final_offer` -> accept it (or confirm its price with our terms once).
+Offline mining of ~80 recorded practice negotiations (Sat night, no API; rules kept only if seen in >= 3 cases):
+- **Message 1 carries ~90 % of the value**: the supplier's reply to it gains +0.46 score on average, replies 2-4
+  together +0.08. Put the full structure (coverage, payment variants, rival quote) into message 1.
+- **The best sheet ever offered was often not taken** (P01 7/7 runs): taking it would have given 0.586 vs 0.550.
+  30 % of supplier replies carry an alternative sheet, 38 % of those are cheaper for us than its main sheet.
+- Any message after a `final_offer` -> walked away **8/8**; accepting it -> deal 38/38.
+- 12-month packages on a 2-year need: P08 0.08 vs 0.44, P10 volume cut below the must-have 4/4.
+- Suppliers charge 3-7x the value for faster lead time / chargebacks -> ask only what the need requires.
+- Price-history claims "hold, but do not change our calculation" 41/46 -> context only, not an argument.
+- Zero-step messages drew a final offer 37 % of the time, steps >= 15 % of the gap 17 %.
+- Suppliers **walk away** when pushed after `final_offer` -> accept it.
 - Pushing small levers (e.g. a chargeback worth 0.3 % of C) makes suppliers raise the price far more -> skip them.
 - **Uncovered need** is bought at `fallback_unit_price`: expensive in most cases, but cheaper than the offer in
   some (P08: fallback 5.72 < offer 5.98) - the lever table knows which, trust it.
