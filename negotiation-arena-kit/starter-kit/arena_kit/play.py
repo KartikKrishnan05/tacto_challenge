@@ -79,7 +79,26 @@ class RemoteTable:
         return self.client.send_message(self.session_id, supplier_id, message)
 
     def close(self, supplier_id, message):
-        reply = self.client.send_message(self.session_id, supplier_id, message)
+        try:
+            reply = self.client.send_message(self.session_id, supplier_id, message)
+        except ArenaError as e:
+            # An accept of a sheet the arena does not hold as standing (P01: a final offer's `-a`
+            # alternative) leaves the case open until it times out at no deal. Accept the thread's
+            # standing offer instead - the supplier's own sheet from the same e-mail.
+            action = message.get("action") or {}
+            if e.status != 422 or action.get("type") != "accept":
+                raise
+            t = self.client.thread(self.session_id, supplier_id)
+            if t.get("closed") or not t.get("offer_id") or t["offer_id"] == action.get("term_sheet_id"):
+                raise
+            log.warning("%s: accept %s refused (%s) - accepting %s", supplier_id, action.get("term_sheet_id"),
+                        e.detail, t["offer_id"])  # fmt: skip
+            if rec := runlog.current():
+                rec.agent_note(
+                    f"accept of {action.get('term_sheet_id')} refused ({e.detail}); accepted {t['offer_id']}"
+                )
+            message = {**message, "action": {"type": "accept", "term_sheet_id": t["offer_id"]}}
+            reply = self.client.send_message(self.session_id, supplier_id, message)
         if (rec := runlog.current()) and reply.get("body"):
             rec.received(supplier_id, reply)
         return reply.get("result", reply)  # the supplier's last e-mail carries the result

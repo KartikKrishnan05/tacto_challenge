@@ -317,3 +317,24 @@ def test_a_quote_that_breaks_a_must_have_neither_closes_the_case_nor_goes_unansw
     moves = {d["supplier_id"]: d["message"] for d in DualAgent(None, None).decide_all(case, {a: [slow], b: [fast]})}
     assert not any(m.get("action") for m in moves.values())
     assert moves[a]["term_sheets"] and all(t["terms"]["lead_time_days"] <= 35 for t in moves[a]["term_sheets"])
+
+
+def test_a_refused_accept_of_an_alternative_accepts_the_standing_offer():
+    from arena_kit.client import ArenaError
+
+    class Client:
+        sent = []
+
+        def send_message(self, session_id, supplier_id, message):
+            self.sent.append(message["action"]["term_sheet_id"])
+            if message["action"]["term_sheet_id"].endswith("-a"):
+                raise ArenaError(422, "not a standing offer in this session")
+            return {"result": {"deal": True, "offer_id": message["action"]["term_sheet_id"]}}
+
+        def thread(self, session_id, supplier_id):
+            return {"offer_id": "offer:1-5", "closed": None}
+
+    table = RemoteTable(Client())
+    table.session_id = "s"
+    out = table.close("sup:1", {"action": {"type": "accept", "term_sheet_id": "offer:1-5-a"}})
+    assert out == {"deal": True, "offer_id": "offer:1-5"} and Client.sent == ["offer:1-5-a", "offer:1-5"]
