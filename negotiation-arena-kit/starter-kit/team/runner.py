@@ -34,7 +34,7 @@ MAX_FAILURES = 3  # consecutive failures before a worker gives its thread up
 
 def retryable(e):
     """Venue Wi-Fi and server hiccups, not our mistakes (and not the practice quota or the session limit)."""
-    if isinstance(e, httpx.TransportError | httpx.TimeoutException):
+    if isinstance(e, httpx.TransportError):
         return True
     if isinstance(e, ArenaError):
         detail = str(e.detail)
@@ -71,7 +71,7 @@ def play_case(table, case_id, agent, deadline=None):
         for m in events:
             safe_documents(table, m)
     lock, close_lock, done = threading.Lock(), threading.Lock(), threading.Event()
-    out, slowest, dead = {}, [0.0], set()
+    out, slowest = {}, [0.0]
 
     def cap():
         return deadline() if callable(deadline) else deadline
@@ -151,7 +151,7 @@ def play_case(table, case_id, agent, deadline=None):
             except ArenaError as e:
                 if not retryable(e):
                     raise
-            except (httpx.TransportError, httpx.TimeoutException) as e:
+            except httpx.TransportError as e:
                 log.warning("%s %s: send failed (%s) - checking whether it landed", case_id, target, e)
             for _ in range(30):  # did the arena take it? then wait for the supplier's reply instead
                 try:
@@ -169,7 +169,7 @@ def play_case(table, case_id, agent, deadline=None):
 
     def worker(sid):
         failures = 0
-        while not done.is_set() and sid not in dead and failures < MAX_FAILURES:
+        while not done.is_set() and failures < MAX_FAILURES:
             with lock:
                 if sid not in live_threads(threads) or moves_left(case, threads[sid]) < 0:
                     return
@@ -185,8 +185,7 @@ def play_case(table, case_id, agent, deadline=None):
                                 "message": {"action": {"type": "accept", "term_sheet_id": oid}}}
                 else:
                     decision = closing_move(case, view)
-                if not close(decision):
-                    dead.add(sid)
+                close(decision)
                 return
             if hasattr(agent, "deadline"):
                 agent.deadline = c

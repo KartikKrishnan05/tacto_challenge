@@ -28,7 +28,7 @@ from arena_kit.cli import agent_factory, load_env
 from arena_kit.client import ArenaClient, ArenaError
 from arena_kit.play import RemoteTable, hosted, play
 
-from .levers import _label, best_per_field
+from .levers import _label, best_per_field, lever_table
 from .runner import play_case
 
 RUNS = Path("runs")
@@ -121,17 +121,12 @@ def missed_levers(case, result):
     """For a deal: the single best move per field we could still have made, by the cost function."""
     if not result.get("deal") or not result.get("terms"):
         return []
-    return [r for r in best_per_field(_lever_rows(case, result["terms"])) if r["delta_eur"] < -1]
-
-
-def _lever_rows(case, terms):
-    from .levers import lever_table
-
     try:
-        return lever_table(case, terms)
+        rows = lever_table(case, result["terms"])
     except Exception as e:  # odd terms must not stop the report
         log.warning("levers failed for %s: %s", case["case_id"], e)
         return []
+    return [r for r in best_per_field(rows) if r["delta_eur"] < -1]
 
 
 def reasons(result, limit=12):

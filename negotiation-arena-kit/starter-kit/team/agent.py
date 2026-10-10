@@ -240,7 +240,7 @@ class TeamAgent:
         sup = self.supplier(case, sid, std)
         _, theirs = self.best_sheet(case, events, sid)  # plan from the cheapest sheet it has on the table
         if theirs.get("unit_price") is None:
-            return {"sheets": [], "floor": None, "target": None, "std": std, "sup": sup}
+            return {"sheets": [], "floor": None, "std": std, "sup": sup}
         their_price = theirs["unit_price"]
         goal = case["buyer"].get("category_goal")
         delivered = [m for m in events if m.get("from") == "buyer" and not m.get("undelivered")]
@@ -283,7 +283,6 @@ class TeamAgent:
         target_c = min(target_c, 0.997 * c_their)
         a = self.iso_price(case, struct, target_c, std, sup, floor) or struct
         a = {**a, "unit_price": round(min(max(a["unit_price"], floor), their_price), 2)}
-        target = a["unit_price"]
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
@@ -295,9 +294,9 @@ class TeamAgent:
         cover = {f: a[f] for f in COVERAGE if f in case["negotiable"] and a.get(f) is not None}
         last_sheets = (delivered[-1].get("term_sheets") or []) if delivered else []
         sent = [complete_offer(case, ts["terms"]) for ts in last_sheets]
-        repeat = bool(sent) and all(any(same(s, t) for t in sent) for s in sheets[:3])
-        return {"repeat": repeat, "sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup,
-                "levers": best, "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget,
+        repeat = bool(sent) and all(any(same(s, t) for t in sent) for s in sheets)
+        return {"repeat": repeat, "sheets": sheets, "floor": floor, "std": std, "sup": sup,
+                "levers": best, "costs": [self.cost(case, s, std, sup) for s in sheets], "budget": budget,
                 "round": r, "cover": cover, "their_price": their_price}
 
     def best_levers(self, case, terms, std, sup, slopes=None):
@@ -392,10 +391,10 @@ class TeamAgent:
 
     def rounds_budget(self, case, events):
         """How many of our messages we plan for: the round limit, our target, the time left."""
-        left_msgs = moves_left(case, events) + sum(m.get("from") == "buyer" for m in events)
+        spent = sum(m.get("from") == "buyer" for m in events)
+        left_msgs = moves_left(case, events) + spent
         budget = min(left_msgs, ROUND_BUDGET)
         if self.deadline:
-            spent = sum(m.get("from") == "buyer" for m in events)
             by_time = spent + int(max(0, self.deadline - time.time() - 60) // SECONDS_PER_ROUND)
             budget = min(budget, max(by_time, spent + 1))
         return max(budget, 1)
@@ -404,9 +403,9 @@ class TeamAgent:
     def decide(self, case, threads, sid=None):
         if case["case_id"] != self.case_id:
             self.prepare(case)
-        if sid is not None and sid not in live_threads(threads):
-            return {"supplier_id": sid, "idle": True}
         live = live_threads(threads)
+        if sid is not None and sid not in live:
+            return {"supplier_id": sid, "idle": True}
         for s in live:  # a reply asking for faster payment marks a supplier short of cash - unless it echoes us
             mine = ""
             for m in threads[s]:
@@ -421,7 +420,7 @@ class TeamAgent:
             plan = self.plan(case, events, sid, threads)
         except Exception as e:  # never let a planning bug cost the case
             log.exception("plan failed: %s", e)
-            plan = {"sheets": [], "floor": None, "target": None, "std": self.std(events), "sup": None}
+            plan = {"sheets": [], "floor": None, "std": self.std(events), "sup": None}
         rule = self.close_rule(case, threads, sid, plan)
         if rule:
             self.log.append((sid, plan.get("round"), "rule", rule[1]))
@@ -490,9 +489,6 @@ class TeamAgent:
     def standing_cost(self, case, threads, sid):
         rows = [r["c"] for r in self.thread_sheets(case, threads[sid], sid) if r["latest"]]
         return min(rows) if rows else math.inf
-
-    def acceptable(self, case, events, sid):
-        return any(r["valid"] and r["latest"] for r in self.thread_sheets(case, events, sid))
 
     def best_thread(self, case, threads):
         ladder = self.accept_candidates(case, threads)
@@ -606,9 +602,9 @@ class TeamAgent:
         rule = self.close_rule(case, threads, sid, plan)
         if rule:
             return rule[0]
-        if plan["sheets"]:
-            return self.planned_move(case, events, sid, plan, threads)
-        return self.accept(case, threads) or self.planned_move(case, events, sid, plan, threads)
+        if not plan["sheets"] and (accept := self.accept(case, threads)):
+            return accept
+        return self.planned_move(case, events, sid, plan, threads)
 
     def planned_move(self, case, events, sid, plan, threads=None):
         sheets, instead = self.no_regress(case, threads or {sid: events}, sid, plan, plan["sheets"])
@@ -749,8 +745,6 @@ class TeamAgent:
                       if 0.998 * c_plan <= self.cost(case, t, plan.get("std"), plan.get("sup")) <= 1.002 * c_plan]
             if plan["sheets"][0] not in sheets and len(sheets) < 3:
                 sheets.insert(0, plan["sheets"][0])  # the planned package always goes out
-        if not sheets and plan["sheets"]:
-            sheets = plan["sheets"]
         sheets, instead = self.no_regress(case, threads, sid, plan, sheets)
         if not sheets:
             return instead
