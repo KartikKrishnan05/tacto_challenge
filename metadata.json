@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4KJAPXCZDEVSPJW5VFNCV5S",
+  "strategy": "manual-commit",
+  "branch": "feature/dual-agent-pipeline",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/arena_kit/agents/llm.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/runlog.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 68,
+    "cache_creation_tokens": 273690,
+    "cache_read_tokens": 7263012,
+    "output_tokens": 86946,
+    "api_call_count": 34
+  }
+}

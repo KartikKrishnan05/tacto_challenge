@@ -1,0 +1,126 @@
+<pasted_content id="c699">
+# Task: Dual-agent negotiation pipeline (new agent, A/B against the existing BuyerAgent)
+
+## Setup
+- Create and switch to branch `feature/dual-agent-pipeline` off `feature/buyer-agent`.
+- Work in `negotiation-arena-kit/starter-kit`.
+- Before writing code, read: `../brief/brief.md`, `../brief/api.md`, and
+  `arena_kit/{cost,dossier,claims,strategy,play,client,runlog,writing}.py`,
+  `arena_kit/agents/{buyer,llm}.py`. Understand the reply format (term_sheets, status, signals,
+  claim_results, missing_fields), the 60 s per-message limit, the 10-round limit, and the
+  8-minute wave cap.
+- Never commit `.env` or API keys.
+
+## Architecture
+Build a NEW agent in `arena_kit/agents/dual.py` (class `DualAgent`), registered in `cli.py` as
+`--agent dual`, with the same interface `play.py` expects (`prime`, `decide` / `decide_all`).
+Do not modify or delete the existing `BuyerAgent`; it is the baseline for comparison.
+REUSE these modules as libraries; do not reimplement them:
+- `cost.py` (total_cost C, must_haves_ok, complete_offer, closing_terms): the score is C, so
+  every number decision goes through it.
+- `dossier.gather/render`: supplier information (contracts, correspondence, intel, cash signals,
+  scorecards, should-cost).
+- `claims.candidates` + `claims.Ledger`: verified data arguments with IDs; never re-cite a claim
+  already marked verified or duplicate.
+- `strategy.py`: anchor, concession targets, term-sheet construction. ALL prices and terms come
+  from code. LLMs never choose numbers.
+
+Two agents per case, running concurrently (thread pool / executor, one Analyst per supplier thread):
+
+### Agent 1: Negotiator (critical path, must send within 60 s of each supplier reply)
+1. Case open: from the first supplier mail(s), extract supplier_id and part_id(s), then call
+   `dossier.gather` for each supplier and load our own company context
+   (`data/company.md` + case file: need, goal, rates, must-haves, alternative). Do this in `prime`
+   before the clock runs where possible.
+2. First mail: term sheets from strategy.py (anchor + lever-trade alternatives, up to 3 sheets).
+   Wording: our payment-term position and why it matters, plus either a counter price or a
+   request for a cost breakdown. If the supplier's letter states cost drivers (index, % change,
+   cost share), use the Analyst's weighted-impact figure to challenge the requested increase.
+3. Every later round: read the Analyst's latest `Intel` snapshot (non-blocking; use whatever is
+   ready), pick ONE tactic from TACTICS that best fits the supplier's current state, and pass it
+   to the writer as tone/wording guidance. Re-pick freely every round, with no penalty for
+   switching. The tactic changes WORDING ONLY and never the numbers.
+4. If the Analyst found an alternative offer stated only in prose (e.g. "with 30 days net:
+   €137.00"), compute its C; if it beats the standing offer, propose it back verbatim as one of
+   our term sheets to lock it in.
+5. Concession guard (in code): our step toward their price ≤ strategy.RECIPROCITY × their last
+   step; never propose their current standing price unless we are closing.
+
+TACTICS (wording styles, in `arena_kit/tactics.py`, each a short style instruction plus when it fits):
+- `competitive_pressure`: we have other options; in RFQ cases cite real rival quotes; never
+  invent data or IDs (a contradicted claim costs trust).
+- `firm_disappointment`: polite but clearly unhappy with the price; this is not acceptable.
+- `measured_lowball`: frames our anchor confidently without insulting them.
+- `humor_rapport`: light, friendly, one small joke; fits relationship-driven suppliers.
+- `lever_trade`: offer payment days / volume / contract length / effective date / index clause
+  in exchange for price; fits cash-short suppliers (dossier cash_signals).
+- `data_argument`: verified index / should-cost / cost-share arithmetic with IDs.
+- `appreciation_close`: warm, partnership-focused, nudging to agree.
+Do not implement tactics that fake our financial situation, invent personal or family stories,
+or create fake urgency: the API states manipulation has consequences and urgency leaks our position.
+
+### Agent 2: Analyst (background, per supplier thread)
+On every incoming supplier mail, update a thread-safe `Intel` snapshot:
+- Structured (from the API, no LLM): standing term sheet + delta vs last round, status, signals
+  (reply_delay_days, validity_days), claim_results, missing_fields, sender role (`from`).
+- LLM extraction from the body text (JSON output):
+  (a) alternative offers stated only in prose → candidate term sheets;
+  (b) cost-driver claims (index, % change, cost share) → compute the weighted cost impact IN CODE
+      and the gap vs the requested increase;
+  (c) newly named cost drivers / indices → look them up in the dataset (DataPackage / facts.json)
+      and add usable claims;
+  (d) stated constraints / lever hints ("earliest effective date", "standard 30 days");
+  (e) tone (-2..+2) and relationship style;
+  (f) open questions they asked us and info we are still missing.
+- Between mails, keep mining the dossier for missing information and clues (correspondence,
+  call notes, news, quote remarks) relevant to the current gap.
+- `walk_risk` (0..1), computed in code from: status == final_offer; price unchanged 2 rounds;
+  reply_delay rising; validity shrinking; sender escalated to boss; tone drop ≥ 2 vs previous;
+  explicit withdraw/end language (LLM flag). Compare across ALL mails in the thread, not just
+  the last one.
+
+## Closing rules (wall clock measured from case open; configurable constants)
+- `NO_NEW_COUNTER_AT = 360 s`: after this, send no new counter-offers.
+- `FORCE_CLOSE_AT = 420 s`: at the latest, close.
+- Close earlier when: status == agreed; status == final_offer; walk_risk ≥ 0.7; or rounds_left ≤ 1.
+- Closing = accept the standing offer with the lowest C among offers where
+  C < C(alternative) AND must_haves_ok. If none qualifies, walk away (no deal scores the
+  alternative). Never accept a deal that breaks a must-have.
+- RFQ cases: one Analyst per thread; Agent 1 closes on the single best offer across all threads.
+- Read the quote PDF / missing_fields before accepting: unstated terms close on standard terms;
+  compute C on the completed terms.
+
+## Models
+- Both agents use the Anthropic provider via `llm.llm_from_env`.
+- Negotiator: `LLM_MODEL=claude-sonnet-5-5`.
+- Analyst: new env var `LLM_ANALYST_MODEL`, default `claude-sonnet-5-5`.
+- Optional prep (before the clock): `LLM_PREP_MODEL` as already supported.
+- Every LLM call has a timeout and a code-only fallback so a slow or failed call never causes a
+  60 s timeout.
+
+## Logging
+Per round, via runlog.py: tactic chosen + reason, Intel snapshot (incl. extracted prose offers,
+cost-gap figure, walk_risk and its contributing signals), C of every term sheet sent / received,
+elapsed seconds, close reason.
+
+## Tests (tests/test_dual.py)
+- walk_risk on synthetic event sequences (calm thread → low; final_offer + stale price → high).
+- Prose-offer extraction → candidate term sheet with correct C (mock the LLM).
+- Weighted cost-impact arithmetic (e.g. 2.7 % × 30 % + 6.5 % × 24 % ≈ 2.4 %).
+- Concession guard never exceeds RECIPROCITY × their step.
+- Closing with a fake clock: no counter after 360 s, accept by 420 s.
+- Never accepts C ≥ C(alternative) or a broken must-have; walks instead.
+- Run the existing test suite too; it must still pass.
+
+## Verification
+1. `arena-sim` cases S01–S03 with `--agent dual` and `--agent buyer`; report per case: C, score,
+   rounds, tactic sequence, close time, close reason.
+2. Then the hosted practice cases (watch the 200/24 h quota; check `GET /v1/me` first): run P01
+   with both agents and compare. In P01, check specifically that the agent challenges the +9.5 %
+   with the cost-share arithmetic and picks up the prose "Alternatively, with 30 days net" offer.
+3. Run a full parallel practice set with `--agent dual` and confirm every case closes within
+   420 s of opening.
+4. Summarise results in a table and list the weaknesses seen in the replays.
+
+Commit in logical steps on the branch. Do not merge or push without asking.
+</pasted_content id="c699">
