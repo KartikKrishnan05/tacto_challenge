@@ -38,6 +38,7 @@ def agent_factory(name, data):
         from .data import DataPackage
 
         package = DataPackage(data)
+        package.lookup("")  # build the ID index once, before agents share it
     if name == "dual":  # LLM_PROVIDER: LLM_MODEL writes, LLM_ANALYST_MODEL reads, LLM_PREP_MODEL profiles
         from .agents.dual import llms_from_env
 
