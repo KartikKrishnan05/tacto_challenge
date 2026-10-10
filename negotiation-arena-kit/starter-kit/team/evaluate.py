@@ -84,10 +84,19 @@ def play_one(client, case, new_agent, cap=None):
     agent = new_agent()
     deadline = time.time() + cap if cap else None
     try:
-        if "sid" in inspect.signature(agent.decide).parameters:  # our agent: one worker per thread
-            result = play_case(table, case["case_id"], agent, deadline)
-        else:
-            result = play(table, case["case_id"], agent, deadline)
+        for _ in range(40):  # someone else's run holds the 10 open sessions per key: wait, nothing has started
+            try:
+                if "sid" in inspect.signature(agent.decide).parameters:  # our agent: one worker per thread
+                    result = play_case(table, case["case_id"], agent, deadline)
+                else:
+                    result = play(table, case["case_id"], agent, deadline)
+                break
+            except ArenaError as e:
+                if e.status != 429 or "open sessions" not in str(e.detail) or table.session_id:
+                    raise
+                log.warning("%s: 10 sessions open on our key - waiting", case["case_id"])
+                time.sleep(15)
+                deadline = time.time() + cap if cap else None
     except Exception as e:  # one broken case must not stop the run
         log.exception("%s failed", case["case_id"])
         return {"case": case, "error": f"{type(e).__name__}: {e}", "session_id": table.session_id}

@@ -62,7 +62,10 @@ Practice score (mean of 10 cases x 100): kit naive/llm agent ~? | v2 13.3 (pushe
 ## Learned so far
 - Suppliers **walk away** when pushed after `final_offer` -> accept it (or confirm its price with our terms once).
 - Pushing small levers (e.g. a chargeback worth 0.3 % of C) makes suppliers raise the price far more -> skip them.
-- **Uncovered need** is the biggest cost: a 12-month deal on a 24-month need costs ~500k at the fallback price.
+- **Uncovered need** is bought at `fallback_unit_price`: expensive in most cases, but cheaper than the offer in
+  some (P08: fallback 5.72 < offer 5.98) - the lever table knows which, trust it.
+- **One full practice run at a time per team**: the key allows 10 open sessions, a second run gets HTTP 429.
+  Say in the team chat before you start one. Quota is now 600 sessions per day.
 - In an RFQ every thread has its own 60 s clock; calls on one session queue on the server.
 - Open practice sessions count against the 10 open sessions per key -> the final runner closes them first.
 - The LLM tends to concede too fast -> code caps every sheet at the planned C.
