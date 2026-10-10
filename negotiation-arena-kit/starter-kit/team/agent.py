@@ -21,7 +21,7 @@ import httpx
 
 from arena_kit.agents.llm import ID_RE, parse
 from arena_kit.cli import load_env
-from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, must_haves_ok, total_cost
+from arena_kit.cost import OPS, RELATIONSHIP_GOALS, closing_terms, complete_offer, must_haves_ok, total_cost
 from arena_kit.docs import standard_terms
 from arena_kit.play import latest, live_threads, moves_left, standing
 
@@ -194,11 +194,16 @@ class TeamAgent:
         for sid in case["suppliers"]:
             text = getattr(self.brief, "supplier_text", {}).get(sid, "")
             self.supplier_est[sid] = {"cash_short": bool(CASH.search(text))}
-        self.should_cost = next((c["value"] for c in self.brief.claims if c["kind"] == "should_cost"), None)
+        # should-cost: one part only (several parts have no single unit cost); for the supplier model only
+        # the estimate made for that supplier (FULL_COST_K was fitted on such estimates)
+        costs = [c for c in self.brief.claims if c["kind"] == "should_cost"] if len(case.get("parts", [])) == 1 else []
+        self.should_cost = costs[0]["value"] if costs else None
+        self.should_cost_by = {c["supplier"]: c["value"] for c in costs if c.get("supplier")}
 
     def supplier(self, case, sid, std):
         """Our estimate of the supplier for the relationship term (strategic goals only)."""
-        if case["buyer"].get("category_goal") not in RELATIONSHIP_GOALS or not self.should_cost or not std:
+        full = getattr(self, "should_cost_by", {}).get(sid)
+        if case["buyer"].get("category_goal") not in RELATIONSHIP_GOALS or not full or not std:
             return None
         rate = 0.10 if self.supplier_est.get(sid, {}).get("cash_short") else 0.08
         if (slope := self.slopes.get(sid, {}).get("payment_days")) and slope > 0:  # its revealed cost of money
@@ -210,7 +215,7 @@ class TeamAgent:
             **{k: v for k, v in std.items() if v is not None},
         }
         return {"standard": full_std, "interest_rate": rate, "usual_rate": 0.08,
-                "full_cost": self.should_cost / FULL_COST_K}
+                "full_cost": full / FULL_COST_K}
 
     @staticmethod
     def std(events):
@@ -254,8 +259,8 @@ class TeamAgent:
         # price floor: below it C rises again (relationship charge), or the should-cost minus a bit
         floor = self.price_floor(case, {**theirs, **levers}, std, sup, their_price)
         # the lowest price anyone has put on the table (all threads), our reference for the anchor
-        seen = [ts["terms"]["unit_price"] for ev in (threads or {sid: events}).values() for m in ev
-                if m.get("from") != "buyer" for ts in (m.get("term_sheets") or []) if ts["terms"].get("unit_price")]
+        seen = [r["terms"]["unit_price"] for s, ev in (threads or {sid: events}).items()
+                for r in self.thread_sheets(case, ev, s) if r["valid"]]  # sheets that keep the must-haves
         reference = min(seen + [their_price])
         if case.get("type") == "price_increase" and case["buyer"].get("current_unit_price"):
             anchor = case["buyer"]["current_unit_price"]
@@ -319,13 +324,24 @@ class TeamAgent:
 
     @staticmethod
     def keep_must_haves(case, sheet, std):
-        """Move every field that breaks a must-have to the allowed option closest to its value that keeps it."""
-        for m in case["buyer"].get("must_haves", []):
-            if not must_haves_ok(case, sheet, std):
-                ok = [o for o in case.get("term_options", {}).get(m["field"], [])
-                      if must_haves_ok(case, {**sheet, m["field"]: o}, std)]
-                if ok:
-                    sheet = {**sheet, m["field"]: min(ok, key=lambda o: distance(o, sheet.get(m["field"])))}
+        """Move every field that breaks a must-have to the allowed option closest to its value that keeps it
+        (each rule on its own: two broken rules at once must both be repaired)."""
+        def keeps(m, s):
+            value = closing_terms(case, s, std).get(m["field"])
+            if value is None:
+                return m["op"] in ("==", "!=") and OPS[m["op"]](value, m["value"])
+            try:
+                return OPS[m["op"]](value, m["value"])
+            except TypeError:
+                return False
+
+        for _ in range(2):
+            for m in case["buyer"].get("must_haves", []):
+                if not keeps(m, sheet):
+                    options = case.get("term_options", {}).get(m["field"], [])
+                    ok = [o for o in options if keeps(m, {**sheet, m["field"]: o})]
+                    if ok:
+                        sheet = {**sheet, m["field"]: min(ok, key=lambda o: distance(o, sheet.get(m["field"])))}
         return sheet
 
     def menu(self, case, a, theirs, std, sup, floor, c_a, slopes=None):
@@ -511,6 +527,9 @@ class TeamAgent:
         left = moves_left(case, events)
         accept = self.accept(case, threads)
         best = accept["supplier_id"] if accept else None
+        if status in ("agreed", "final_offer") and accept and self.rival_still_open(case, threads, sid, accept):
+            # RFQ: the cheapest sheet is a rival's that is still moving - do not let this supplier end the case
+            return {"supplier_id": sid, "idle": True}, "a cheaper rival is still negotiating"
         if status == "agreed" and accept:
             # 'agreed' only echoes our last sheet: if it offered something cheaper before, ask for that once
             earlier = self.better_earlier(case, events, sid, plan)
@@ -542,6 +561,13 @@ class TeamAgent:
             if not accept:
                 return {"supplier_id": sid, "message": {"action": {"type": "walk_away"}}}, "nothing acceptable"
         return None
+
+    @staticmethod
+    def rival_still_open(case, threads, sid, accept):
+        other = accept["supplier_id"]
+        if other == sid or other not in threads:
+            return False
+        return latest(threads[other]).get("status") == "open" and moves_left(case, threads[other]) > 1
 
     def hopeless(self, case, threads, sid):
         """3+ live threads, 2+ replies here, its best sheet > 8 % dearer than the best anywhere, last step < 1 %."""

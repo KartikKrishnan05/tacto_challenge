@@ -115,21 +115,24 @@ def play_case(table, case_id, agent, deadline=None):
             if msg["action"].get("type") != "accept":
                 try:
                     out["result"] = call(table.close, decision["supplier_id"], msg)
-                except ArenaError as e:
-                    log.warning("%s: walk away failed: %s", case_id, e.detail)
+                except Exception as e:
+                    log.warning("%s: walk away failed: %s", case_id, e)
                 if out.get("result") or ended():
                     done.set()
                 return done.is_set()
             candidates = decision.get("candidates") or [(decision["supplier_id"], msg["action"]["term_sheet_id"])]
             for rnd in range(2):
                 for sid, oid in candidates[:4]:
-                    try:
+                    try:  # straight to the API: a refused ID must move on to the next VALIDATED candidate, not
+                        # to the kit's fallback that takes the standing offer unchecked
                         log.info("%s %s accept %s", case_id, sid, oid)
-                        out["result"] = call(table.close, sid, {"action": {"type": "accept", "term_sheet_id": oid}})
+                        reply = call(table.client.send_message, table.session_id, sid,
+                                     {"action": {"type": "accept", "term_sheet_id": oid}})
+                        out["result"] = reply.get("result", reply)
                         done.set()
                         return True
-                    except ArenaError as e:
-                        log.warning("%s: accept %s refused: %s", case_id, oid, e.detail)
+                    except Exception as e:
+                        log.warning("%s: accept %s refused: %s", case_id, oid, getattr(e, "detail", e))
                         if state := ended():
                             out["result"] = state.get("result") or table.result()
                             done.set()
@@ -147,8 +150,8 @@ def play_case(table, case_id, agent, deadline=None):
 
     def send_safe(target, msg):
         """Send once; after a transport error check whether it landed before sending again."""
-        with lock:
-            mine = sum(m.get("from") == "buyer" for m in threads[target])
+        with lock:  # what the arena holds from us: messages answered by a timeout never reached it
+            mine = sum(m.get("from") == "buyer" and not m.get("undelivered") for m in threads[target])
         for attempt in range(3):
             try:
                 return table.send(target, msg)
@@ -161,7 +164,8 @@ def play_case(table, case_id, agent, deadline=None):
                 try:
                     t = call(table.client.thread, table.session_id, target)
                 except Exception:
-                    break
+                    time.sleep(2)  # no blind resend: a double message may land after a final offer
+                    continue
                 held = t.get("messages") or []
                 if sum(m.get("from") == "buyer" for m in held) <= mine:
                     break  # it did not land: send again
@@ -211,75 +215,85 @@ def play_case(table, case_id, agent, deadline=None):
                 return
             target, msg = d["supplier_id"], d["message"]
             if msg.get("action"):
-                if msg["action"].get("type") == "accept" and len(live_threads(view)) > 1:
-                    # a rival reply may be on its way: wait for it (at most until our own clock runs short)
-                    closing.set()
-                    while any(busy for s, busy in inflight.items() if s != sid) and \
-                            time.monotonic() < reply_at.get(sid, 0) + 45:
-                        time.sleep(0.5)
-                    with lock:
-                        view = copy.deepcopy(threads)
-                    d = (agent.accept(case, view) if hasattr(agent, "accept") else None) or d
-                ok = close(d)
-                closing.clear()
+                try:
+                    if msg["action"].get("type") == "accept" and len(live_threads(view)) > 1:
+                        # a rival reply may be on its way: wait for it (at most until our own clock runs short)
+                        closing.set()
+                        while any(busy for s, busy in inflight.items() if s != sid) and \
+                                time.monotonic() < reply_at.get(sid, 0) + 45 and not near_cap():
+                            time.sleep(0.5)
+                        with lock:
+                            view = copy.deepcopy(threads)
+                        d = (agent.accept(case, view) if hasattr(agent, "accept") else None) or d
+                    ok = close(d)
+                except Exception:
+                    log.exception("%s %s: close failed", case_id, sid)
+                    ok = False
+                finally:
+                    closing.clear()
                 if ok:
                     return
                 failures += 1
                 continue
-            while closing.is_set() and not done.is_set():  # another thread is closing the case
-                time.sleep(0.5)
+            waited = time.monotonic()
+            while closing.is_set() and not done.is_set() and not near_cap() and time.monotonic() - waited < 50:
+                time.sleep(0.5)  # another thread is closing the case
             if done.is_set():
                 return
             if first and rank:  # RFQ: the most promising supplier goes first, calls on a session queue up
                 time.sleep(0.3 * rank)
-            first, late = False, False
+            first = False
             inflight[target] = True
-            try:
-                reply = send_safe(target, msg)
-            except ArenaError as e:
-                if done.is_set():
-                    return
-                if e.status == 409:  # late, round limit or the thread ended: the arena says what happened
-                    late = True
-                    try:
-                        reply = table.missed(target, e)
-                    except Exception as e2:
-                        log.warning("%s %s: %s", case_id, target, e2)
-                        failures += 1
-                        refresh(target)
-                        continue
-                elif e.status == 422 and hasattr(agent, "fallback"):  # invalid message, nothing happened
-                    log.warning("%s %s: message refused (%s) - planned move", case_id, target, e.detail)
-                    try:
-                        reply = send_safe(target, agent.fallback(case, view, target)["message"])
-                    except Exception as e2:
-                        log.warning("%s %s: planned move failed too: %s", case_id, target, e2)
-                        failures += 1
-                        refresh(target)
-                        continue
-                else:
-                    log.warning("%s %s: %s", case_id, target, e)
+            try:  # `inflight` drops only once the reply is in the threads: a closing rival waits for it
+                got = deliver(target, msg, view)
+                if got is None:
                     failures += 1
-                    refresh(target)
                     continue
-            except Exception as e:
-                log.warning("%s %s: send failed: %s", case_id, target, e)
-                failures += 1
-                refresh(target)
-                continue
+                reply, msg, late = got
+                failures = 0
+                reply_at[target] = time.monotonic()
+                if "result" in reply:
+                    with close_lock:
+                        out.setdefault("result", reply["result"])
+                        done.set()
+                    return
+                reply = safe_documents(table, reply)
+                with lock:  # a message answered by a timeout did not reach the supplier: plans must not count it
+                    threads[target] += [{**msg, "from": "buyer", **({"undelivered": True} if late else {})}, reply]
+                    slowest[0] = max(slowest[0], time.monotonic() - t0)
             finally:
                 inflight[target] = False
-            failures = 0
-            reply_at[target] = time.monotonic()
-            if "result" in reply:
-                with close_lock:
-                    out.setdefault("result", reply["result"])
-                    done.set()
-                return
-            reply = safe_documents(table, reply)
-            with lock:  # a message answered by a timeout did not reach the supplier: plans must not count it
-                threads[target] += [{**msg, "from": "buyer", **({"undelivered": True} if late else {})}, reply]
-                slowest[0] = max(slowest[0], time.monotonic() - t0)
+
+    def near_cap():
+        c = cap()
+        return bool(c) and time.time() > c - max(CLOSE_BEFORE_CAP_S, slowest[0] + ROUND_MARGIN_S)
+
+    def deliver(target, msg, view):
+        """(supplier reply, the message that was really sent, late?) or None (refreshed; the loop decides again)."""
+        try:
+            return send_safe(target, msg), msg, False
+        except ArenaError as e:
+            if done.is_set():
+                return None
+            if e.status == 409:  # late, round limit or the thread ended: the arena says what happened
+                try:
+                    return table.missed(target, e), msg, True
+                except Exception as e2:
+                    log.warning("%s %s: %s", case_id, target, e2)
+            elif e.status == 422 and hasattr(agent, "fallback"):  # invalid message, nothing happened
+                log.warning("%s %s: message refused (%s) - planned move", case_id, target, e.detail)
+                try:
+                    fb = agent.fallback(case, view, target)
+                    if fb and not fb.get("idle") and not fb["message"].get("action"):
+                        return send_safe(target, fb["message"]), fb["message"], False
+                except Exception as e2:
+                    log.warning("%s %s: planned move failed too: %s", case_id, target, e2)
+            else:
+                log.warning("%s %s: %s", case_id, target, e)
+        except Exception as e:
+            log.warning("%s %s: send failed: %s", case_id, target, e)
+        refresh(target)
+        return None
 
     if hasattr(agent, "prepare"):  # the briefing once, before the threads share the agent
         agent.prepare(case)

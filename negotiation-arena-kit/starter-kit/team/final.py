@@ -58,8 +58,9 @@ def one(client, case, deadline, folder):
     while True:
         try:
             result = play_case(RemoteTable(client, case), case["case_id"], make(), deadline)
-            if isinstance(result, dict) and "deal" in result:
-                break
+            if isinstance(result, dict) and (result.get("ended") or result.get("status") == "ended"
+                                             or result.get("score") is not None):
+                break  # only an ended session is a result: an open one is resumed by the next try
             log.warning("%s: no result yet (%s) - retrying", case["case_id"], result)
         except ArenaError as e:
             result = e

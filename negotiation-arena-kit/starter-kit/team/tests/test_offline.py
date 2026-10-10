@@ -194,3 +194,14 @@ def test_repeated_claims_are_dropped_keeping_paragraphs():
     body = "Dear team,\n\nIndex fell (idx:A@2025-08, idx:A@2026-08). Your OTD was 80% (sc:1@2026Q3).\n\nRegards"
     out = a.drop_repeated_claims(threads, "sup:1", body)
     assert "idx:A" not in out and "sc:1@2026Q3" in out and out.startswith("Dear team,\n\n")
+
+
+def test_two_broken_must_haves_are_both_repaired():
+    case = {"negotiable": ["unit_price", "lead_time_days", "volume_per_year"],
+            "term_options": {"lead_time_days": [28, 35, 42, 56], "volume_per_year": [1000, 1500, 2000]},
+            "buyer": {"must_haves": [{"field": "lead_time_days", "op": "<=", "value": 42},
+                                     {"field": "volume_per_year", "op": ">=", "value": 1800}],
+                      "need_per_year": 2000, "horizon_years": 1, "reference_payment_days": 60,
+                      "need_lead_time_days": 42, "freight_eur_per_unit": {"EXW": 1.0, "FCA": 0.5, "DAP": 0.0}}}
+    sheet = TeamAgent.keep_must_haves(case, {"unit_price": 10.0, "lead_time_days": 56, "volume_per_year": 1000}, {})
+    assert sheet["lead_time_days"] == 42 and sheet["volume_per_year"] == 2000  # nearest options that keep both
