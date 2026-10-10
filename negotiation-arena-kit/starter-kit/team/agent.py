@@ -9,6 +9,7 @@ out with a template e-mail, so no move is ever late.
     --agent team.agent:make           (team.evaluate, team.final)
 """
 
+import base64
 import json
 import logging
 import math
@@ -19,7 +20,7 @@ import time
 import httpx
 
 from arena_kit.agents.llm import ID_RE, parse
-from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, cost_breakdown, must_haves_ok, total_cost
+from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, must_haves_ok, total_cost
 from arena_kit.docs import standard_terms
 from arena_kit.play import latest, live_threads, moves_left, standing
 
@@ -96,6 +97,8 @@ GOAL_NOTE = {
     "leverage": "Category goal LEVERAGE: competition and data should bring the price down - push hard but fair.",
     "routine": "Category goal ROUTINE: keep it efficient; a clean deal on good terms, no drama.",
 }
+ASK_DATA = re.compile(r"send (?:us )?the data|which figures|share the (?:detailed )?(?:forecast )?data|provide the "
+                      r"(?:forecast|data|figures)|verify (?:this|it)", re.I)
 CASH_WORDS = re.compile(r"cash|liquidity|pay(?:ment)? (?:of )?invoices|within \d+ days|early payment|skonto|discount",
                         re.I)
 
@@ -222,7 +225,7 @@ class TeamAgent:
         if mine:  # never step back from a price we offered
             target = max(target, max(t.get("unit_price") or 0 for t in mine))
         target = round(min(max(target, floor), their_price), 2)
-        a = complete_offer(case, {**theirs, **levers, "unit_price": target})
+        a = self.keep_must_haves(case, complete_offer(case, {**theirs, **levers, "unit_price": target}), std)
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
@@ -232,6 +235,17 @@ class TeamAgent:
                 sheets.append(v)
         return {"sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup, "levers": best,
                 "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r}
+
+    @staticmethod
+    def keep_must_haves(case, sheet, std):
+        """Move every field that breaks a must-have to the nearest allowed option that keeps it."""
+        for m in case["buyer"].get("must_haves", []):
+            if not must_haves_ok(case, sheet, std):
+                for o in case.get("term_options", {}).get(m["field"], []):
+                    if must_haves_ok(case, {**sheet, m["field"]: o}, std):
+                        sheet = {**sheet, m["field"]: o}
+                        break
+        return sheet
 
     def menu(self, case, a, theirs, std, sup, floor, c_a):
         """Equal-cost variants of sheet A, the cheapest gives first: [sheet]."""
@@ -351,11 +365,12 @@ class TeamAgent:
                                                                      "term_sheet_id": standing(threads[s])[0]}}}
         if status == "agreed" and self.acceptable(case, events, sid) and best == sid:
             return accept(sid), "agreed to our terms"
-        if status == "final_offer" and best:  # its last word: pushing on makes it walk away
+        if status == "final_offer":  # its last word: pushing on makes it walk away
             confirm = self.confirm_final(case, events, sid, plan)
-            if confirm and best == sid:
+            if confirm and best in (sid, None):
                 return confirm, "accept its price, confirm our terms"
-            return accept(best), "final offer"
+            if best:
+                return accept(best), "final offer"
         if self.stalled(case, threads, sid) and best == sid:
             earlier = self.better_earlier(case, events, sid, plan)
             if earlier:
@@ -380,11 +395,19 @@ class TeamAgent:
         if sid in self.confirmed or moves_left(case, events) <= 0 or not theirs.get("unit_price"):
             return None
         # fields it left out, and the coverage of our need (an uncovered need is bought at the fallback price)
-        wanted = set(missing) | {"contract_months", "volume_per_year"}
+        std, sup = plan.get("std"), plan.get("sup")
+        must = {m["field"] for m in case["buyer"].get("must_haves", [])}
+        wanted = set(missing) | COVERAGE | must
         levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in wanted}
+        broken = not must_haves_ok(case, theirs, std)
+        if broken:  # its offer breaks a must-have: ask for the nearest option that keeps it, at its price
+            for f in must:
+                for o in case.get("term_options", {}).get(f, []):
+                    if must_haves_ok(case, {**theirs, **levers, f: o}, std):
+                        levers.setdefault(f, o)
+                        break
         if not levers:
             return None
-        std, sup = plan.get("std"), plan.get("sup")
         sheet = complete_offer(case, {**theirs, **levers})
         sheets = [sheet]
         if "index_clause" in case["negotiable"] and not sheet.get("index_clause"):  # longer only with a clause?
@@ -393,7 +416,8 @@ class TeamAgent:
                 best = min(clauses, key=lambda o: self.cost(case, {**sheet, "index_clause": o}, std, sup))
                 sheets.append(complete_offer(case, {**sheet, "index_clause": best}))
         c_now = self.cost(case, theirs, std, sup)
-        sheets = [s for s in sheets if self.cost(case, s, std, sup) <= 0.995 * c_now]
+        sheets = [s for s in sheets if must_haves_ok(case, s, std)
+                  and (broken or self.cost(case, s, std, sup) <= 0.995 * c_now)]
         if not sheets:
             return None
         self.confirmed.add(sid)
@@ -486,15 +510,11 @@ class TeamAgent:
                    f"{plan.get('round')}, planned total {plan.get('budget')}, messages left {moves_left(case, events)}")
         out.append(f"THEIR STANDING OFFER {sheet_id}: {json.dumps(terms, default=str)} -> C = "
                    + (f"{c_now:,.0f}" if math.isfinite(c_now) else "-"))
-        if terms.get("unit_price") is not None:
-            try:
-                gap = cost_breakdown(case, terms, plan.get("std"))["uncovered_need"]
-            except Exception:
-                gap = 0
-            if gap > 0:
-                out.append(f"WARNING: their offer leaves need uncovered, costing us {gap:,.0f} EUR at the fallback "
-                           "price. Covering the full need (contract_months / volume_per_year) comes first - it is "
-                           "worth more than any price cut; trade other terms for it.")
+        cover = {f: row for f, row in (plan.get("levers") or {}).items() if f in COVERAGE}
+        if cover and terms.get("unit_price") is not None:  # only when covering the need lowers C
+            saving = max(-row["delta_eur"] for row in cover.values())
+            out.append(f"WARNING: their offer leaves need uncovered; covering it ({', '.join(cover)}) saves us "
+                       f"{saving:,.0f} EUR - get it into the deal, trade other terms for it.")
         if plan.get("std"):
             out.append("THEIR STANDARD TERMS (apply to anything not in a term sheet): " + json.dumps(plan["std"]))
         if plan.get("levers"):
@@ -573,5 +593,25 @@ class TeamAgent:
         body = re.sub(r"\s*\(\s*[,;\s]*\)", "", ID_RE.sub(known, str(d.get("body", "")))).strip()[:8000]
         if not body:
             return None
-        return {"supplier_id": sid, "message": {"subject": str(d.get("subject") or f"Re: {case['title']}")[:300],
-                                                 "body": body, "term_sheets": [{"terms": t} for t in sheets]}}
+        message = {"subject": str(d.get("subject") or f"Re: {case['title']}")[:300], "body": body,
+                   "term_sheets": [{"terms": t} for t in sheets]}
+        if att := self.data_attachment(threads, body):
+            message["attachments"] = [att]
+        return {"supplier_id": sid, "message": message}
+
+    def data_attachment(self, threads, body):
+        """When a supplier asks for our figures, attach them: every fact we cite, with its ID and the
+        values from the data package (md attachments are read by the supplier)."""
+        asked = any(ASK_DATA.search(str(m.get("body", ""))) for ev in threads.values() for m in ev[-1:]
+                    if m.get("from") != "buyer")
+        if not asked or not self.brief:
+            return None
+        ids = list(dict.fromkeys(ID_RE.findall(body) + [i for m in self.all_buyer_messages(threads)
+                                                         for i in ID_RE.findall(m.get("body", ""))]))
+        rows = [(i, self.brief.facts[i]) for i in ids if i in self.brief.facts]
+        if not rows:
+            return None
+        lines = ["# Data behind our figures (Hollerau Pumpenwerke, Purchasing)", "", "| ID | data |", "|---|---|"]
+        lines += [f"| {i} | {json.dumps(f, ensure_ascii=False, default=str)[:300]} |" for i, f in rows[:20]]
+        content = base64.b64encode("\n".join(lines).encode("utf-8")).decode("ascii")
+        return {"name": "our-figures.md", "type": "md", "content_b64": content}
