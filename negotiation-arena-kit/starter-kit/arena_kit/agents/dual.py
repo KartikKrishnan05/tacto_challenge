@@ -156,6 +156,7 @@ class DualAgent:
         self.last_sheets, self.tactic_log, self.latencies = {}, {}, []
         self.t_open = self.last_sent_at = None
         self.pool = ThreadPoolExecutor(max_workers=4 * len(case["suppliers"]) + 2, thread_name_prefix="analyst")
+        self.db = self._db_context(case)
         self.company = self._company_context()
         self.context = self._case_context(case)
         for sid in case["suppliers"]:
@@ -172,16 +173,39 @@ class DualAgent:
 
     def _gather(self, case, sid):
         if sid not in self.dossiers:
-            self.dossiers[sid] = dossier.gather(self.package, case, sid)
+            self.dossiers[sid] = {**dossier.gather(self.package, case, sid), **dossier.from_context(self.db, sid)}
             self.plans[sid] = strategy.Plan()
             self.profiles.setdefault(sid, self._default_profile(case, sid))
 
+    def _db_context(self, case):
+        """Supplier, product and company records for the case: a Python lookup, cached on disk, no model."""
+        if not hasattr(self.package, "negotiation_context"):
+            return {}
+        t0 = time.monotonic()
+        try:
+            ctx = self.package.negotiation_context(case)
+        except Exception as e:  # the case still runs on the dossier queries
+            log.warning("negotiation_context failed (%s) - dossiers only", e)
+            return {}
+        if rec := runlog.current():
+            found = [sid for sid, d in ctx.get("suppliers", {}).items() if d.get("supplier_master_record_found")]
+            rec.agent_note(
+                f"database context in {1000 * (time.monotonic() - t0):.0f} ms: supplier records for "
+                f"{', '.join(found) or 'none'}; product: {ctx.get('product', {}).get('availability')}"
+            )
+        return ctx
+
     def _company_context(self):
+        out = ""
         root = getattr(self.package, "root", None)
         for path in [root / "company.md"] if root else []:
             if path.is_file():
-                return path.read_text(encoding="utf-8")[:3000]
-        return ""
+                out = path.read_text(encoding="utf-8")[:3000]
+        if company := dossier.prune(self.db.get("company")):
+            records = json.dumps(company, ensure_ascii=False, default=str)
+            head = "INTERNAL RECORDS (policies, approved sources, spend, forecasts - never quote them)"
+            out += f"\n\n{head}\n{records[:5000]}"
+        return out
 
     @staticmethod
     def _case_context(case):

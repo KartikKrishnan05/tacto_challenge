@@ -169,6 +169,26 @@ def _from_package(package, case, sid, parts):
     return d
 
 
+def prune(obj):
+    """Drop empty values, recursively: what is left is what the records actually say."""
+    if isinstance(obj, dict):
+        out = {k: v for k, v in ((k, prune(v)) for k, v in obj.items()) if v not in (None, "", [], {})}
+        return out or None
+    if isinstance(obj, list):
+        return [v for v in (prune(v) for v in obj) if v not in (None, "", [], {})] or None
+    return obj
+
+
+def from_context(ctx, sid):
+    """The supplier's and the product's records from `DataPackage.negotiation_context`, non-empty only."""
+    out = {}
+    if supplier := prune((ctx or {}).get("suppliers", {}).get(sid)):
+        out["db_supplier"] = supplier
+    if product := prune((ctx or {}).get("product", {}).get("parts")):
+        out["db_product"] = product
+    return out
+
+
 def _rows(rows, skip=()):
     return "\n".join(
         "  "
@@ -215,4 +235,10 @@ def render(d):
         )
     if d.get("cash_signals"):
         out.append(f"Cash signals found: {', '.join(d['cash_signals'])}")
+    for title, key, limit in (
+        ("Database: this supplier (master, intel, contracts, history, deliveries, invoices)", "db_supplier", 6000),
+        ("Database: the product (should-cost, price history, quotes, RFQs, indices)", "db_product", 4000),
+    ):
+        if d.get(key):
+            out.append(f"{title}:\n  {json.dumps(d[key], ensure_ascii=False, default=str)[:limit]}")
     return "\n".join(out)
