@@ -36,7 +36,6 @@ def agent_factory(name, data):
         from .data import DataPackage
 
         package = DataPackage(data)
-        package.lookup("")  # build the ID index once, before agents share it
     complete = llm_from_env()
     return lambda: LLMAgent(complete, package)
 
