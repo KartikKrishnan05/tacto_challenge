@@ -348,13 +348,25 @@ class TeamAgent:
             move = None
         return move or self.planned_move(case, events, sid, plan)
 
+    def best_sheet(self, case, events, sid=None):
+        """(term_sheet_id, terms) of the cheapest sheet on the table now: the supplier's main offer or an
+        alternative it sent in the same message (C with its standard terms; sheets keeping the must-haves first).
+        Accepting an alternative the arena refuses falls back to the main offer (runner retry)."""
+        sheets = [(ts.get("term_sheet_id"), ts.get("terms") or {}) for ts in (latest(events).get("term_sheets") or [])]
+        sheets = [s for s in sheets if s[0] and s[1].get("unit_price") is not None]
+        if len(sheets) < 2:
+            return standing(events)
+        std = standard_terms(events)
+        sup = self.supplier(case, sid, std) if sid else None
+        return min(sheets, key=lambda s: (not must_haves_ok(case, s[1], std), self.cost(case, s[1], std, sup)))
+
     def standing_cost(self, case, threads, sid):
-        _, terms = standing(threads[sid])
+        _, terms = self.best_sheet(case, threads[sid], sid)
         std = standard_terms(threads[sid])
         return self.cost(case, terms, std, self.supplier(case, sid, std)) if terms.get("unit_price") else math.inf
 
     def acceptable(self, case, events, sid):
-        sheet_id, terms = standing(events)
+        sheet_id, terms = self.best_sheet(case, events, sid)
         std = standard_terms(events)
         if not sheet_id or terms.get("unit_price") is None or not must_haves_ok(case, terms, std):
             return False
@@ -371,7 +383,8 @@ class TeamAgent:
         left = moves_left(case, events)
         best = self.best_thread(case, threads)
         accept = lambda s: {"supplier_id": s, "message": {"action": {"type": "accept",  # noqa: E731
-                                                                     "term_sheet_id": standing(threads[s])[0]}}}
+                                                                     "term_sheet_id": self.best_sheet(
+                                                                         case, threads[s], s)[0]}}}
         if status == "agreed" and self.acceptable(case, events, sid) and best == sid:
             return accept(sid), "agreed to our terms"
         if status == "final_offer":  # its last word: pushing on makes it walk away
@@ -507,18 +520,24 @@ class TeamAgent:
             out.append("IDS WE ALREADY CITED (do not cite again): " + ", ".join(used))
         rivals = [s for s in live_threads(threads) if s != sid]
         for s in rivals:
-            rid, rterms = standing(threads[s])
+            rid, rterms = self.best_sheet(case, threads[s], s)
             if rid:
                 out.append(f"RIVAL {s}: standing {rid} unit_price {rterms.get('unit_price')} -> C = "
                            f"{self.standing_cost(case, threads, s):,.0f} (cite '{rid}' with its price to create "
                            f"competition)")
         events = threads[sid]
-        sheet_id, terms = standing(events)
+        sheet_id, terms = self.best_sheet(case, events, sid)
         c_now = self.standing_cost(case, threads, sid)
         out.append(f"\nTHREAD WITH {sid}: status {latest(events).get('status')}, our messages so far "
                    f"{plan.get('round')}, planned total {plan.get('budget')}, messages left {moves_left(case, events)}")
-        out.append(f"THEIR STANDING OFFER {sheet_id}: {json.dumps(terms, default=str)} -> C = "
+        out.append(f"THEIR CHEAPEST SHEET ON THE TABLE {sheet_id}: {json.dumps(terms, default=str)} -> C = "
                    + (f"{c_now:,.0f}" if math.isfinite(c_now) else "-"))
+        others = [ts for ts in (latest(events).get("term_sheets") or []) if ts.get("term_sheet_id") != sheet_id]
+        for ts in others:  # its other sheets show what it can give
+            c = self.cost(case, ts.get("terms") or {}, plan.get("std"), plan.get("sup"))
+            terms_txt = json.dumps(ts.get("terms"), default=str)
+            out.append(f"  its other sheet {ts.get('term_sheet_id')}: {terms_txt} -> C = "
+                       + (f"{c:,.0f}" if math.isfinite(c) else "-"))
         cover = {f: row for f, row in (plan.get("levers") or {}).items() if f in COVERAGE}
         if cover and terms.get("unit_price") is not None:  # only when covering the need lowers C
             saving = max(-row["delta_eur"] for row in cover.values())
@@ -561,7 +580,8 @@ class TeamAgent:
             # no accepting an open offer early: it can still move
             if best == sid and (status in ("final_offer", "agreed") or r >= 2):
                 return {"supplier_id": sid,
-                        "message": {"action": {"type": "accept", "term_sheet_id": standing(events)[0]}}}
+                        "message": {"action": {"type": "accept",
+                                               "term_sheet_id": self.best_sheet(case, events, sid)[0]}}}
             return None
         if kind == "walk_away":
             alt = self.c_alt(case)
@@ -590,7 +610,8 @@ class TeamAgent:
             sheets.append(plan["sheets"][0])  # always offer the planned package too
         if not sheets and plan["sheets"]:
             sheets = plan["sheets"]
-        offers = {standing(ev)[0] for ev in threads.values()}
+        offers = {ts.get("term_sheet_id") for ev in threads.values() for m in ev if m.get("from") != "buyer"
+                  for ts in (m.get("term_sheets") or [])}  # every offer ID in this session is citable
 
         def known(m):  # an ID the data does not have would read as a lie
             ref = m.group(0)
