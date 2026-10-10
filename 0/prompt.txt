@@ -1,0 +1,9 @@
+what do you mean with dual agent and single agent? why are there two ways?
+
+---
+
+the goal would be that the first agent can get information from the database with no llm call but rather with a python function. The dataset was created once and doesn't have to be created again?
+
+---
+
+ok so it should be done and lets test it... please log all the conversation and write an data file which inclued tipps and tricks for future cases based of its old result. Meaning if we run it 300 more times there should be a (not overfitted) cheatsheet which helps the agent ... for now just start creating the tipps and tricks cheatsheet but not use it in the negotiation proecess yet. please run each use case once and give me the replay link to each
