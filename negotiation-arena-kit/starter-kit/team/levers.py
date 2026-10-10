@@ -9,7 +9,9 @@ trade, e.g. "30 more payment days are worth 0.40 EUR/unit to us".
 """
 
 import argparse
+import itertools
 import json
+import statistics
 
 from arena_kit.cost import closing_terms, must_haves_ok, total_cost
 
@@ -29,9 +31,36 @@ def _label(value):
     return "none" if value is None else str(value)
 
 
-def lever_table(case, terms, standard=None, supplier=None):
+def _key(value):
+    return json.dumps(value, sort_keys=True, default=str)
+
+
+def revealed_slopes(case, messages):
+    """What the supplier itself charges for a term, from its own sheet pairs that differ in one field only:
+    {field: relative price change per unit} for numbers (payment days, lead time, ppm, ...) and
+    {(field, from, to): price ratio} for the rest (index clause, effective date, Incoterm). Median per field."""
+    fields = [f for f in case.get("negotiable", []) if f != "unit_price"]
+    seen = {}
+    for m in messages:
+        sheets = [ts.get("terms") or {} for ts in m.get("term_sheets") or []]
+        sheets = [t for t in sheets if t.get("unit_price")]
+        for a, b in itertools.combinations(sheets, 2):
+            diff = [f for f in fields if a.get(f) != b.get(f)]
+            if len(diff) != 1 or a.get(diff[0]) is None or b.get(diff[0]) is None:
+                continue
+            f, (va, vb), (pa, pb) = diff[0], (a[diff[0]], b[diff[0]]), (a["unit_price"], b["unit_price"])
+            if all(isinstance(v, int | float) and not isinstance(v, bool) for v in (va, vb)):
+                seen.setdefault(f, []).append((pb / pa - 1) / (vb - va))
+            else:
+                seen.setdefault((f, _key(va), _key(vb)), []).append(pb / pa)
+                seen.setdefault((f, _key(vb), _key(va)), []).append(pa / pb)
+    return {k: statistics.median(v) for k, v in seen.items()}
+
+
+def lever_table(case, terms, standard=None, supplier=None, slopes=None):
     """Every single-field move from `terms`, cheapest first:
-    [{field, current, option, c, delta_eur, price_equiv, must_haves_ok}]. delta_eur < 0 saves money."""
+    [{field, current, option, c, delta_eur, price_equiv, must_haves_ok}]. delta_eur < 0 saves money.
+    With `slopes` (revealed_slopes), a move also carries the price the supplier would charge for it."""
     base_terms = closing_terms(case, terms, standard)
     if base_terms.get("unit_price") is None:
         return []
@@ -39,8 +68,18 @@ def lever_table(case, terms, standard=None, supplier=None):
     units = committed_units(case, terms, standard) or 1.0
     rows = []
 
+    def priced(field, option):
+        p, cur = base_terms["unit_price"], base_terms.get(field)
+        if not slopes or field == "unit_price":
+            return p
+        if field in slopes and isinstance(option, int | float) and isinstance(cur, int | float):
+            return round(p * (1 + slopes[field] * (option - cur)), 2)
+        return round(p * slopes.get((field, _key(cur), _key(option)), 1.0), 2)
+
     def add(field, option):
         moved = {**terms, field: option}
+        if field != "unit_price":
+            moved["unit_price"] = priced(field, option)
         c = total_cost(case, moved, standard, supplier)
         rows.append(
             {

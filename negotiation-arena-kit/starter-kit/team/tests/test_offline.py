@@ -156,3 +156,33 @@ def test_never_offer_more_than_the_supplier_already_offered():
             assert must_haves_ok(d["case"], ts["terms"], plan.get("std"))
             if valid and ts["terms"] not in its_own:
                 assert a.cost(d["case"], ts["terms"], plan.get("std"), plan.get("sup")) < 0.999 * min(valid), path
+
+
+def test_revealed_payment_slope_from_main_vs_alternative():
+    from team.levers import revealed_slopes
+
+    case = {"negotiable": ["unit_price", "payment_days", "effective_date"]}
+    msg = {"term_sheets": [{"terms": {"unit_price": 140.2, "payment_days": 90, "effective_date": "2027-04-01"}},
+                           {"terms": {"unit_price": 135.5, "payment_days": 14, "effective_date": "2027-04-01"}}]}
+    slope = revealed_slopes(case, [msg])["payment_days"]
+    assert 0.1 < slope * 360 < 0.2  # about 16 % a year: what paying later costs it
+
+
+def test_no_stricter_ask_than_needed():
+    """Equal C: ask for the option closest to the supplier's value (lead 42 for a 42-day need, not 35)."""
+    for path in RUNS:
+        d = load(path)
+        case = d["case"]
+        if "lead_time_days" not in case["negotiable"]:
+            continue
+        a = agent_for(case)
+        need = case["buyer"]["need_lead_time_days"]
+        options = case["term_options"].get("lead_time_days", [])
+        threads = threads_until(d, 1 + len(case["suppliers"]) - 1)
+        for sid, ev in threads.items():
+            plan = a.plan(case, ev, sid, threads)
+            for s in plan["sheets"]:
+                stricter = [o for o in options if o < need]
+                if stricter and s["lead_time_days"] in stricter:
+                    assert a.cost(case, {**s, "lead_time_days": min(o for o in options if o >= need)},
+                                  plan["std"], plan["sup"]) > a.cost(case, s, plan["std"], plan["sup"]) + 1, path

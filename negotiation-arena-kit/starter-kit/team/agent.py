@@ -26,7 +26,7 @@ from arena_kit.docs import standard_terms
 from arena_kit.play import latest, live_threads, moves_left, standing
 
 from .briefing import Briefing
-from .levers import _label, lever_table
+from .levers import _label, lever_table, revealed_slopes
 
 log = logging.getLogger("arena")
 
@@ -130,6 +130,26 @@ def openai_complete(timeout=LLM_TIMEOUT_S):
 _PACKAGE = None
 
 
+def numeric(v):
+    """An LLM value as the arena wants it: '45' -> 45, '5.10' -> 5.1, a date with a time -> the date."""
+    if isinstance(v, str):
+        s = v.strip()
+        if re.fullmatch(r"-?\d+", s):
+            return int(s)
+        if re.fullmatch(r"-?\d+\.\d+", s):
+            return float(s)
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}T.*", s):
+            return s[:10]
+    return v
+
+
+def distance(a, b):
+    """How far an option is from a value: numbers by difference, anything else 0 if equal else 1."""
+    if isinstance(a, int | float) and isinstance(b, int | float) and not isinstance(a, bool):
+        return abs(a - b)
+    return 0 if a == b else 1
+
+
 def make():
     """Factory for team.evaluate / team.final: one agent per case, the data package loaded once."""
     global _PACKAGE
@@ -147,7 +167,7 @@ def make():
 class TeamAgent:
     def __init__(self, complete, package=None):
         self.complete, self.package = complete, package
-        self.case_id, self.brief, self.supplier_est, self.confirmed = None, None, {}, set()
+        self.case_id, self.brief, self.supplier_est, self.confirmed, self.slopes = None, None, {}, set(), {}
         self.deadline = None  # set by the runner in the Live Final (time.time() of the wave's cap)
         self.log = []  # (sid, round, source, why) for the evaluation
 
@@ -159,7 +179,7 @@ class TeamAgent:
         except Exception as e:  # data trouble must not cost the case
             log.warning("briefing failed: %s", e)
             self.brief = Briefing(case, None)
-        self.supplier_est, self.confirmed = {}, set()
+        self.supplier_est, self.confirmed, self.slopes = {}, set(), {}
         for sid in case["suppliers"]:
             text = getattr(self.brief, "supplier_text", {}).get(sid, "")
             self.supplier_est[sid] = {"cash_short": bool(CASH.search(text))}
@@ -170,6 +190,8 @@ class TeamAgent:
         if case["buyer"].get("category_goal") not in RELATIONSHIP_GOALS or not self.should_cost or not std:
             return None
         rate = 0.10 if self.supplier_est.get(sid, {}).get("cash_short") else 0.08
+        if (slope := self.slopes.get(sid, {}).get("payment_days")) and slope > 0:  # its revealed cost of money
+            rate = min(max(slope * 360, 0.03), 0.40)
         b, fixed = case["buyer"], case.get("fixed_terms", {})
         full_std = {  # the quote PDF may leave fields out: fill them as the buyer would assume
             "payment_days": b["reference_payment_days"],
@@ -201,9 +223,12 @@ class TeamAgent:
     # ---- the planner -----------------------------------------------------------------------------
     def plan(self, case, events, sid, threads=None):
         """2-3 term sheets on the concession path, the price floor and the C of each."""
-        _, theirs = standing(events)
         std = self.std(events)
+        # what it charges per term, from its own sheet pairs (e.g. main vs alternative): our lever prices
+        slopes = revealed_slopes(case, [m for m in events if m.get("from") != "buyer"])
+        self.slopes[sid] = slopes
         sup = self.supplier(case, sid, std)
+        _, theirs = self.best_sheet(case, events, sid)  # plan from the cheapest sheet it has on the table
         if theirs.get("unit_price") is None:
             return {"sheets": [], "floor": None, "target": None, "std": std, "sup": sup}
         their_price = theirs["unit_price"]
@@ -213,7 +238,7 @@ class TeamAgent:
         budget = self.rounds_budget(case, events)
         # the best value of every non-price lever, first at their price (for floor and anchor)
         base = self.keep_must_haves(case, complete_offer(case, theirs), std)  # levers from a valid sheet
-        best = self.best_levers(case, base, std, sup)
+        best = self.best_levers(case, base, std, sup, slopes)
         levers = {f: row["option"] for f, row in best.items()}
         # price floor: below it C rises again (relationship charge), or the should-cost minus a bit
         floor = self.price_floor(case, {**theirs, **levers}, std, sup, their_price)
@@ -235,49 +260,58 @@ class TeamAgent:
             target = max(target, max(t.get("unit_price") or 0 for t in mine))
         target = round(min(max(target, floor), their_price), 2)
         # then at OUR price: whether covering the whole need pays depends on the price we get for it
-        best = self.best_levers(case, {**base, "unit_price": target}, std, sup)
+        best = self.best_levers(case, {**base, "unit_price": target}, std, sup, slopes)
         levers = {f: row["option"] for f, row in best.items()}
         a = self.keep_must_haves(case, complete_offer(case, {**base, **levers, "unit_price": target}), std)
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
         # the same value back in price - we do not care which it picks, its pick shows what it values.
-        for v in self.menu(case, a, theirs, std, sup, floor, c_a)[:2]:
+        for v in self.menu(case, a, theirs, std, sup, floor, c_a, slopes)[:2]:
             if v not in sheets:
                 sheets.append(v)
+        # coverage lock: once sheet A covers the need, no sheet we send covers less
+        cover = {f: a[f] for f in COVERAGE if f in case["negotiable"] and a.get(f) is not None}
         return {"sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup, "levers": best,
-                "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r}
+                "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r,
+                "cover": cover, "their_price": their_price}
 
-    def best_levers(self, case, terms, std, sup):
+    def best_levers(self, case, terms, std, sup, slopes=None):
         """{field: lever row} - the best option per non-price field that saves at least MIN_LEVER_SHARE of C
-        (small levers are not worth asking for: the supplier prices every demand into the price)."""
-        best, base_c = {}, self.cost(case, terms, std, sup)
-        for row in lever_table(case, terms, std, sup):
+        (small levers are not worth asking for: the supplier prices every demand into the price). With the
+        supplier's revealed prices a lever counts only if it saves more than it charges; on a tie (within
+        1 EUR) the option closest to the supplier's own value wins - no stricter ask than needed."""
+        rows, base_c = {}, self.cost(case, terms, std, sup)
+        for row in lever_table(case, terms, std, sup, slopes):
             big = -row["delta_eur"] >= MIN_LEVER_SHARE * base_c or row["field"] in COVERAGE
             if row["field"] != "unit_price" and row["must_haves_ok"] and row["delta_eur"] < 0 and big:
-                if row["field"] not in best or row["delta_eur"] < best[row["field"]]["delta_eur"]:
-                    best[row["field"]] = row
+                rows.setdefault(row["field"], []).append(row)
+        best = {}
+        for f, rs in rows.items():
+            top = min(r["delta_eur"] for r in rs)
+            ties = [r for r in rs if r["delta_eur"] - top < 1]
+            best[f] = min(ties, key=lambda r: distance(r["option"], r["current"]))
         return best
 
     @staticmethod
     def keep_must_haves(case, sheet, std):
-        """Move every field that breaks a must-have to the nearest allowed option that keeps it."""
+        """Move every field that breaks a must-have to the allowed option closest to its value that keeps it."""
         for m in case["buyer"].get("must_haves", []):
             if not must_haves_ok(case, sheet, std):
-                for o in case.get("term_options", {}).get(m["field"], []):
-                    if must_haves_ok(case, {**sheet, m["field"]: o}, std):
-                        sheet = {**sheet, m["field"]: o}
-                        break
+                ok = [o for o in case.get("term_options", {}).get(m["field"], [])
+                      if must_haves_ok(case, {**sheet, m["field"]: o}, std)]
+                if ok:
+                    sheet = {**sheet, m["field"]: min(ok, key=lambda o: distance(o, sheet.get(m["field"])))}
         return sheet
 
-    def menu(self, case, a, theirs, std, sup, floor, c_a):
+    def menu(self, case, a, theirs, std, sup, floor, c_a, slopes=None):
         """Equal-cost variants of sheet A, the cheapest gives first: [sheet]."""
         neg, options = case["negotiable"], case.get("term_options", {})
         full = complete_offer(case, {**{k: v for k, v in (std or {}).items() if k in neg}, **theirs})
         variants = []
         for f in neg:
-            if f != "unit_price" and full.get(f) is not None and full.get(f) != a.get(f):
-                variants.append(complete_offer(case, {**a, f: full[f]}))
+            if f not in COVERAGE and f != "unit_price" and full.get(f) is not None and full.get(f) != a.get(f):
+                variants.append(complete_offer(case, {**a, f: full[f]}))  # never give back coverage
         if "index_clause" in neg and full.get("index_clause") and not a.get("index_clause"):
             # it wants an index clause: offer its series with the deadband that costs us least
             series = full["index_clause"]["series"]
@@ -286,9 +320,15 @@ class TeamAgent:
                 best = min(same, key=lambda o: self.cost(case, {**a, "index_clause": o}, std, sup))
                 variants.append(complete_offer(case, {**a, "index_clause": best}))
         if "payment_days" in neg and options.get("payment_days"):  # paying faster: cash for it, cheap for us
-            fast = min(options["payment_days"], key=lambda d: abs(d - 30))
-            if fast != a.get("payment_days"):
-                variants.append(complete_offer(case, {**a, "payment_days": fast}))
+            pay = options["payment_days"]
+            if "payment_days" in (slopes or {}):
+                other = min(pay, key=lambda d: abs(d - 30))
+            elif (a.get("payment_days") or 0) > case["buyer"]["reference_payment_days"]:  # probe its rate
+                other = min(pay, key=lambda d: abs(d - (full.get("payment_days") or 30)))
+            else:
+                other = max(pay)
+            if other != a.get("payment_days"):
+                variants.append(complete_offer(case, {**a, "payment_days": other}))
         out = []
         for v in variants:
             # each structure has its own floor: faster payment is worth more to it, so it can go lower
@@ -655,15 +695,21 @@ class TeamAgent:
             return None
         if kind != "send" or moves_left(case, events) <= 0:
             return None
-        _, theirs = standing(events)
+        _, theirs = self.best_sheet(case, events, sid)
+        their_price = plan.get("their_price") or theirs.get("unit_price")
         floor = plan.get("floor") or 0
+        base = plan["sheets"][0] if plan["sheets"] else theirs  # what the LLM leaves out comes from OUR plan
         sheets = []
         for ts in (d.get("term_sheets") or [])[:3]:
-            t = complete_offer(case, {**theirs, **ts.get("terms", ts)})
+            raw = ts.get("terms", ts) if isinstance(ts, dict) else {}
+            t = complete_offer(case, {**base, **{k: numeric(v) for k, v in raw.items() if k in case["negotiable"]}})
+            for f, v in (plan.get("cover") or {}).items():  # coverage lock: never cover less than sheet A
+                if (t.get(f) or 0) < v:
+                    t[f] = v
             if t.get("unit_price") is not None:
                 t["unit_price"] = round(max(t["unit_price"], floor), 2)
-                if theirs.get("unit_price"):
-                    t["unit_price"] = round(min(t["unit_price"], theirs["unit_price"]), 2)
+                if their_price:
+                    t["unit_price"] = round(min(t["unit_price"], their_price), 2)
             if plan["sheets"] and t.get("unit_price") is not None:
                 # the concession path is ours: a sheet that costs more than the planned one gets a lower price
                 c_plan = plan["costs"][0]
