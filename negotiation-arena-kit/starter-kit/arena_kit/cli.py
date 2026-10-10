@@ -208,10 +208,6 @@ def dispatch(args):
             print(f"replay {c['case_id']}: {c.get('replay_url') or '-'}")
     if args.cmd in ("play", "run") and client.practice_remaining is not None:
         print(f"practice sessions left today: {client.practice_remaining}")
-    if args.cmd in ("play", "run"):  # learn from the sessions just played (no agent reads it yet)
-        from .cheatsheet import after_run
-
-        after_run()
 
 
 if __name__ == "__main__":
