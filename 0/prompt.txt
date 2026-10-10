@@ -1,0 +1,80 @@
+ok what did you do and why did you do it?
+
+---
+
+ok I will run it once give me the terminal command to use
+
+---
+
+what does this do:  --agent buyer -v
+
+---
+
+i got this replay: https://arena.tacto.ai/replay/d57fead2d1cff118 this is worse than the default this is an example replay of the default: https://arena.tacto.ai/replay/ec2f55197dc4c1e5
+
+---
+
+but the default was also not good enough we don't know the perfect value?
+
+---
+
+but right now this is hard coded no?
+
+---
+
+ok so this would also work on a different case and get good results?
+
+---
+
+explain the current code and what it does. How does it influence the ai agent to improve the negotiation. what negotiation tactic does it use?
+
+---
+
+it could also suggest multiple offers does this agent do that?
+
+---
+
+could you run it on the demo case which doesnt use a test from the 200 and show me the comminucation pelase
+
+---
+
+what would a good model be cheap fast but also good enough
+
+---
+
+i want to use openai please give me a good model from there
+
+---
+
+yes or give it to me and I can copy it into my env keep the answer very short
+
+---
+
+<!-- reply 1 -->
+> I can fix all five and re-run both sandbox cases, which costs no practice sessions. Fixes 1 and 2 matter most: they’re the difference between 42 and a good score in D02, and they’ll apply to every case type.
+
+yes please fix this I am also using a better chatgpt model now that should help too
+
+---
+
+how about we add a bit of manipulation and making them feel sad about us a little and also use the mc donald pricing strategy of small medium and big so that the offer which is most profitable for use looks best for them?
+
+---
+
+don't run a test to the api call please
+
+---
+
+did you push it once. If yes give me the link for the reply which was given
+
+---
+
+I already had 7 pushes can I see all the replay links somehow?
+
+---
+
+give me an overview of what the agent is doing right now. Explain the whole code please and the strategy which is currently running?
+
+---
+
+what is a target total cost?
