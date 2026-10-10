@@ -116,13 +116,13 @@ def openai_complete(timeout=LLM_TIMEOUT_S):
     headers = {"Authorization": f"Bearer {os.environ.get('LLM_API_KEY', '')}"}
     client = httpx.Client(timeout=timeout)
 
-    def complete(system, user):
+    def complete(system, user, timeout=timeout):
         body = {
             "model": model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             "response_format": {"type": "json_object"},
         }
-        r = client.post(f"{base}/chat/completions", json=body, headers=headers)
+        r = client.post(f"{base}/chat/completions", json=body, headers=headers, timeout=timeout)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"]
 
@@ -178,6 +178,7 @@ class TeamAgent:
         self.complete, self.package = complete, package
         self.case_id, self.brief, self.supplier_est, self.confirmed, self.slopes = None, None, {}, set(), {}
         self.anchor = {}  # sid -> our fixed anchor price
+        self.reply_at, self.inflight = {}, {}  # set by the runner: when each supplier last replied, who is busy
         self.deadline = None  # set by the runner in the Live Final (time.time() of the wave's cap)
         self.log = []  # (sid, round, source, why) for the evaluation
 
@@ -425,9 +426,18 @@ class TeamAgent:
         if rule:
             self.log.append((sid, plan.get("round"), "rule", rule[1]))
             return rule[0]
+        rfq = len(case["suppliers"]) > 1
+        if rfq and not plan.get("round"):  # RFQ message 1: no LLM (three first messages would miss the clock)
+            return self.planned_move(case, events, sid, plan, threads, extra=self.rival_line(case, threads, sid))
+        # the LLM gets what is left of the 60 s since its reply, minus room for calls queued on the session
+        since = time.monotonic() - self.reply_at.get(sid, time.monotonic())
+        budget = 50 - since - 15 * sum(1 for s, busy in self.inflight.items() if busy and s != sid)
+        if budget < 10:
+            log.warning("%s: %.0fs left for the LLM - planned move", sid, budget)
+            return self.planned_move(case, events, sid, plan, threads)
         t0 = time.monotonic()
         try:
-            reply = self.complete(SYSTEM, self.render(case, threads, sid, plan))
+            reply = self.complete(SYSTEM, self.render(case, threads, sid, plan), timeout=min(LLM_TIMEOUT_S, budget))
             d = parse(reply)
             move = self.guard(case, threads, sid, plan, d)
             self.log.append((sid, plan.get("round"), "llm", d.get("why", "")))
@@ -520,6 +530,8 @@ class TeamAgent:
             if earlier:
                 return earlier, "back to its own earlier, cheaper offer"
             return accept, "no more movement"
+        if self.hopeless(case, threads, sid):  # RFQ with 3+: stop feeding a far dearer supplier that does not move
+            return {"supplier_id": sid, "idle": True}, "far dearer than the best rival and not moving"
         spent = plan.get("round") or 0
         if (left <= 0 or spent >= plan.get("budget", ROUND_BUDGET)) and accept:
             if best == sid or len(live_threads(threads)) == 1:
@@ -530,6 +542,22 @@ class TeamAgent:
             if not accept:
                 return {"supplier_id": sid, "message": {"action": {"type": "walk_away"}}}, "nothing acceptable"
         return None
+
+    def hopeless(self, case, threads, sid):
+        """3+ live threads, 2+ replies here, its best sheet > 8 % dearer than the best anywhere, last step < 1 %."""
+        live = live_threads(threads)
+        if len(live) < 3:
+            return False
+        valid = {s: [r["c"] for r in self.thread_sheets(case, threads[s], s) if r["valid"]] for s in live}
+        if not valid.get(sid) or not any(valid.values()):
+            return False
+        best_all = min(min(v) for v in valid.values() if v)
+        std = self.std(threads[sid])
+        replies = [m for m in threads[sid] if m.get("from") != "buyer" and m.get("term_sheets")]
+        if len(replies) < 3 or min(valid[sid]) <= 1.08 * best_all:
+            return False
+        cs = [min(self.cost(case, ts.get("terms") or {}, std, None) for ts in m["term_sheets"]) for m in replies[-2:]]
+        return cs[0] - cs[1] < 0.01 * cs[0]
 
     def confirm_final(self, case, events, sid, plan):
         """Only when nothing on the table is acceptable (its final offer breaks a must-have or costs more than
@@ -606,7 +634,17 @@ class TeamAgent:
             return accept
         return self.planned_move(case, events, sid, plan, threads)
 
-    def planned_move(self, case, events, sid, plan, threads=None):
+    def rival_line(self, case, threads, sid):
+        """RFQ: the cheapest valid rival sheet below this supplier's price, as a checkable claim."""
+        mine = self.standing_cost(case, threads, sid)
+        rivals = [(r["c"], r["terms"]["unit_price"], r["id"]) for s in live_threads(threads) if s != sid
+                  for r in self.thread_sheets(case, threads[s], s) if r["latest"] and r["valid"]]
+        if not rivals or min(rivals)[0] >= mine:
+            return ""
+        _, price, oid = min(rivals)
+        return f"A competing supplier has offered EUR {price:.2f} per unit ({oid}). "
+
+    def planned_move(self, case, events, sid, plan, threads=None, extra=""):
         sheets, instead = self.no_regress(case, threads or {sid: events}, sid, plan, plan["sheets"])
         if plan["sheets"] and not sheets and instead:
             self.log.append((sid, plan.get("round"), "planned", "nothing cheaper to offer than its own sheets"))
@@ -617,7 +655,7 @@ class TeamAgent:
                     "your standard terms?\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
         else:
             body = ("Thank you for your offer. We value working with you and have looked at the whole package. "
-                    "Please find our proposals attached as term sheets - we are flexible on how we get there "
+                    f"{extra}Please find our proposals attached as term sheets - we are flexible on how we get there "
                     "and would appreciate your best terms.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
         self.log.append((sid, plan.get("round"), "planned", ""))
         return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,

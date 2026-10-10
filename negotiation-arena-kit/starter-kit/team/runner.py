@@ -70,8 +70,12 @@ def play_case(table, case_id, agent, deadline=None):
     for events in threads.values():
         for m in events:
             safe_documents(table, m)
-    lock, close_lock, done = threading.Lock(), threading.Lock(), threading.Event()
+    lock, close_lock, done, closing = threading.Lock(), threading.Lock(), threading.Event(), threading.Event()
     out, slowest = {}, [0.0]
+    reply_at = {sid: time.monotonic() for sid in threads}  # each thread's 60 s run from its last reply
+    inflight = {sid: False for sid in threads}  # a call to this supplier is on its way
+    if hasattr(agent, "reply_at"):
+        agent.reply_at, agent.inflight = reply_at, inflight
 
     def cap():
         return deadline() if callable(deadline) else deadline
@@ -167,8 +171,8 @@ def play_case(table, case_id, agent, deadline=None):
             time.sleep(RETRY_SLEEP_S[attempt])
         raise ArenaError(503, "send failed three times")
 
-    def worker(sid):
-        failures = 0
+    def worker(sid, rank=0):
+        failures, first = 0, True
         while not done.is_set() and failures < MAX_FAILURES:
             with lock:
                 if sid not in live_threads(threads) or moves_left(case, threads[sid]) < 0:
@@ -207,18 +211,36 @@ def play_case(table, case_id, agent, deadline=None):
                 return
             target, msg = d["supplier_id"], d["message"]
             if msg.get("action"):
-                if close(d):
+                if msg["action"].get("type") == "accept" and len(live_threads(view)) > 1:
+                    # a rival reply may be on its way: wait for it (at most until our own clock runs short)
+                    closing.set()
+                    while any(busy for s, busy in inflight.items() if s != sid) and \
+                            time.monotonic() < reply_at.get(sid, 0) + 45:
+                        time.sleep(0.5)
+                    with lock:
+                        view = copy.deepcopy(threads)
+                    d = (agent.accept(case, view) if hasattr(agent, "accept") else None) or d
+                ok = close(d)
+                closing.clear()
+                if ok:
                     return
                 failures += 1
                 continue
+            while closing.is_set() and not done.is_set():  # another thread is closing the case
+                time.sleep(0.5)
             if done.is_set():
                 return
+            if first and rank:  # RFQ: the most promising supplier goes first, calls on a session queue up
+                time.sleep(0.3 * rank)
+            first, late = False, False
+            inflight[target] = True
             try:
                 reply = send_safe(target, msg)
             except ArenaError as e:
                 if done.is_set():
                     return
                 if e.status == 409:  # late, round limit or the thread ended: the arena says what happened
+                    late = True
                     try:
                         reply = table.missed(target, e)
                     except Exception as e2:
@@ -245,20 +267,26 @@ def play_case(table, case_id, agent, deadline=None):
                 failures += 1
                 refresh(target)
                 continue
+            finally:
+                inflight[target] = False
             failures = 0
+            reply_at[target] = time.monotonic()
             if "result" in reply:
                 with close_lock:
                     out.setdefault("result", reply["result"])
                     done.set()
                 return
             reply = safe_documents(table, reply)
-            with lock:
-                threads[target] += [{**msg, "from": "buyer"}, reply]
+            with lock:  # a message answered by a timeout did not reach the supplier: plans must not count it
+                threads[target] += [{**msg, "from": "buyer", **({"undelivered": True} if late else {})}, reply]
                 slowest[0] = max(slowest[0], time.monotonic() - t0)
 
     if hasattr(agent, "prepare"):  # the briefing once, before the threads share the agent
         agent.prepare(case)
-    workers = [threading.Thread(target=worker, args=(sid,), daemon=True) for sid in live_threads(threads)]
+    live = live_threads(threads)
+    if len(live) > 1 and hasattr(agent, "standing_cost"):
+        live = sorted(live, key=lambda s: agent.standing_cost(case, threads, s))
+    workers = [threading.Thread(target=worker, args=(sid, rank), daemon=True) for rank, sid in enumerate(live)]
     for w in workers:
         w.start()
     for w in workers:

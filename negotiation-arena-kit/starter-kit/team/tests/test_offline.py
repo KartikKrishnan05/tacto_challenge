@@ -29,7 +29,7 @@ def package():
 PKG = package()
 
 
-def stub(system, user):
+def stub(system, user, **kw):
     raise TimeoutError("LLM stubbed")
 
 

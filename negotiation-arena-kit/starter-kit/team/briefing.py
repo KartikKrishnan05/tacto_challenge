@@ -13,6 +13,7 @@ from datetime import date
 
 log = logging.getLogger("arena")
 MAX_DOCS = 8
+PACKAGE_AS_OF = "2026-09-30"  # the data package README: everything is as of this date
 
 
 def _months_back(month, n):
@@ -65,6 +66,23 @@ class Briefing:
         for sid in case.get("suppliers", []):
             self._supplier(sid)
         self._notice()
+        self._memos()
+
+    def _memos(self):
+        """Internal memos (the Sunday release adds one): company-wide guidance, not tied to a supplier."""
+        out, ours = [], set(self.case.get("parts", [])) | set(self.case.get("suppliers", []))
+        for d in _q(self.p, "SELECT id, date, subject FROM documents WHERE kind = 'memo' ORDER BY date DESC LIMIT 20"):
+            try:
+                with _DB_LOCK:
+                    text = self.p.document(d["id"])
+            except (FileNotFoundError, ValueError):
+                continue
+            # only memos about this case's parts or suppliers, or newer than the package (the Sunday release)
+            if not any(i in text for i in ours) and str(d["date"]) <= PACKAGE_AS_OF:
+                continue
+            out.append(f"- {d['id']} {d['date']} '{d['subject']}': " + " ".join(text.split())[:700])
+        if out:
+            self.sections.append("BUYER MEMOS (internal guidance)\n" + "\n".join(out))
 
     # ---- parts: cost drivers, should-cost, forecast -------------------------------------------
     def _part(self, part):
