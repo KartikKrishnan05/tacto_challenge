@@ -15,6 +15,7 @@ Every `arena` command (and every `play()` from your own script) writes a run fol
           session.json                 case file, every thread, result, back office
           decisions.jsonl              every move the agent chose, and how long it took
           llm.jsonl                    every model call: prompt, raw reply, what was sent
+          rounds.jsonl                 agents that log their rounds (DualAgent): tactic, intel, C, close
           http.jsonl                   every API call of this case: request, response, status, ms
           attachments/                 the supplier documents as received (quote PDFs, XLSX)
 
@@ -39,7 +40,10 @@ _lock = threading.Lock()
 _local = threading.local()
 _run = None
 # Shown in run.json: never a key.
-ENV_KEYS = ("ARENA_URL", "ARENA_DATA", "LLM_PROVIDER", "LLM_MODEL", "LLM_EFFORT", "LLM_BASE_URL")
+ENV_KEYS = (
+    "ARENA_URL", "ARENA_DATA", "LLM_PROVIDER", "LLM_MODEL", "LLM_EFFORT", "LLM_BASE_URL", "LLM_ANALYST_MODEL",
+    "LLM_PREP_MODEL",
+)  # fmt: skip
 
 
 def enabled():
@@ -211,7 +215,7 @@ class CaseLog:
         self.threads, self.note, self.flag, self.rounds = {}, None, None, 0
         self.saved_attachments = {}
         self._md(f"# {case_id}\n\n- Started: {self.started:%Y-%m-%d %H:%M:%S %Z}\n- Agent: {self.agent}\n")
-        if self.agent in ("LLMAgent", "BuyerAgent") and (model := os.environ.get("LLM_MODEL")):
+        if self.agent in ("LLMAgent", "BuyerAgent", "DualAgent") and (model := os.environ.get("LLM_MODEL")):
             self._md(f"- Model: {os.environ.get('LLM_PROVIDER', '')} {model}\n")
         self._md(f"- Run: `{run.dir.name}`\n")
 
@@ -296,6 +300,14 @@ class CaseLog:
 
     def http(self, record):
         self._jsonl("http.jsonl", record)
+
+    def agent_round(self, **record):
+        """One round as the agent saw it: its reasons, its view of each thread, what it sent."""
+        self._jsonl("rounds.jsonl", record)
+
+    def agent_note(self, text):
+        """A line in the transcript, before the e-mails it explains."""
+        self._md(f"\n*{text}*\n")
 
     # --- the end ---------------------------------------------------------------------------
     def finish(self, result=None, table=None, error=None):

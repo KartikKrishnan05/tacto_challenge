@@ -65,24 +65,36 @@ Reply with ONE JSON object and nothing else:
   120 words, no placeholders."""
 
 
-def llm_from_env(model=None, timeout=45.0):
+# Models that take the server-side refusal fallback ("default" form, Claude API only).
+FALLBACK_MODELS = ("claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5", "claude-fable-5-1")
+
+
+def llm_from_env(model=None, timeout=45.0, provider=None, retries=None):
     """LLM_PROVIDER=anthropic (Anthropic SDK) or openai (any OpenAI-compatible endpoint). `model`
-    overrides LLM_MODEL, e.g. a stronger model for preparing before the clock runs."""
-    provider, model = os.environ.get("LLM_PROVIDER", "openai"), model or os.environ["LLM_MODEL"]
+    overrides LLM_MODEL, e.g. a stronger model for preparing before the clock runs; `provider`
+    overrides LLM_PROVIDER; `retries` caps the SDK's retries (a timeout is retried, so wall clock
+    can reach timeout × (retries + 1))."""
+    provider = provider or os.environ.get("LLM_PROVIDER", "openai")
+    model = model or os.environ["LLM_MODEL"]
     if provider == "anthropic":
         import anthropic
 
-        client = anthropic.Anthropic(timeout=timeout)
+        client = anthropic.Anthropic(timeout=timeout, **({} if retries is None else {"max_retries": retries}))
         extra = {"output_config": {"effort": e}} if (e := os.environ.get("LLM_EFFORT")) else {}
+        if model in FALLBACK_MODELS:  # a safety decline is re-run on a fallback model in the same call
+            extra |= {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}
+        create = client.beta.messages.create if "betas" in extra else client.messages.create
 
         def complete(system, user):
-            r = client.messages.create(
+            r = create(
                 model=model,
                 max_tokens=16000,
                 system=system,
                 messages=[{"role": "user", "content": user}],
                 **extra,
             )
+            if r.stop_reason == "refusal":
+                raise RuntimeError("the model declined the request")
             return "".join(b.text for b in r.content if b.type == "text")
 
         return complete
