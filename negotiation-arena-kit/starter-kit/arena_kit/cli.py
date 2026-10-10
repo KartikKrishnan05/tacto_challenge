@@ -29,7 +29,7 @@ def load_env(path=".env"):
 
 
 def agent_factory(name, data):
-    from .agents import BuyerAgent, LLMAgent, NaiveAgent, llm_from_env
+    from .agents import BuyerAgent, DualAgent, LLMAgent, NaiveAgent, llm_from_env
 
     if name == "naive":
         return NaiveAgent
@@ -38,6 +38,11 @@ def agent_factory(name, data):
         from .data import DataPackage
 
         package = DataPackage(data)
+    if name == "dual":  # Anthropic: LLM_MODEL writes, LLM_ANALYST_MODEL reads, LLM_PREP_MODEL profiles
+        from .agents.dual import llms_from_env
+
+        negotiator, analyst, prep = llms_from_env()
+        return lambda: DualAgent(negotiator, package, analyst, prep)
     complete = llm_from_env()
     if name == "buyer":  # LLM_PREP_MODEL: a stronger model for the profiles, read before the clock runs
         prep = llm_from_env(os.environ["LLM_PREP_MODEL"], timeout=90.0) if os.environ.get("LLM_PREP_MODEL") else None
@@ -91,11 +96,11 @@ def main(argv=None):
     c.add_argument("--save", help="also write the case files to this JSON file (for `arena-sim serve --cases`)")
     p = sub.add_parser("play", help="play one case")
     p.add_argument("case_id")
-    p.add_argument("--agent", default="naive", choices=["naive", "llm", "buyer"])
+    p.add_argument("--agent", default="naive", choices=["naive", "llm", "buyer", "dual"])
     p.add_argument("--data", **data)
     a = sub.add_parser("run", help="play every case of a set in parallel")
     a.add_argument("--set", **sets)
-    a.add_argument("--agent", default="naive", choices=["naive", "llm", "buyer"])
+    a.add_argument("--agent", default="naive", choices=["naive", "llm", "buyer", "dual"])
     a.add_argument("--data", **data)
     a.add_argument("--parallel", type=int, default=8, help="cases at once (at most 10)")
     a.add_argument("--waves", type=int, default=5, help="final: stop after this many waves have closed")
