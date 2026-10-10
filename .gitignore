@@ -2,3 +2,7 @@
 .env
 .env.*
 !.env.example
+
+# Local evaluation runs (team/evaluate.py)
+runs/
+
