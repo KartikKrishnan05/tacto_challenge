@@ -59,24 +59,32 @@ BREAKDOWN_Q = "Could you share a cost breakdown for this part - material, conver
 
 
 def llms_from_env():
-    """(negotiator, analyst, prep) completions on the Anthropic provider, or None each when no
-    credentials are set (the agent then writes code-only). LLM_MODEL / LLM_ANALYST_MODEL /
-    LLM_PREP_MODEL pick the models; ARENA_DUAL_LLM=0 switches the models off."""
+    """(negotiator, analyst, prep) completions on LLM_PROVIDER (as `llm_from_env`), or None each
+    when no model or credentials are set (the agent then writes code-only).
+      LLM_MODEL           the negotiator's writer (anthropic default: claude-sonnet-5-5)
+      LLM_ANALYST_MODEL   the analyst (default: LLM_MODEL; anthropic: claude-sonnet-5-5)
+      LLM_PREP_MODEL      optional profiles before the clock runs
+    ARENA_DUAL_LLM=0 switches the models off."""
     from .llm import llm_from_env
 
     if os.environ.get("ARENA_DUAL_LLM", "1").lower() in ("0", "false", "no", "off"):
         return None, None, None
-    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
-        log.warning("dual agent: no Anthropic credentials - negotiating with code-written e-mails")
+    provider = os.environ.get("LLM_PROVIDER", "openai")
+    model, analyst = os.environ.get("LLM_MODEL") or "", os.environ.get("LLM_ANALYST_MODEL")
+    if provider == "anthropic":
+        if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+            log.warning("dual agent: no Anthropic credentials - negotiating with code-written e-mails")
+            return None, None, None
+        model = model if model.startswith("claude") else NEGOTIATOR_MODEL
+        analyst = analyst or ANALYST_MODEL
+    elif not (model and os.environ.get("LLM_API_KEY")):
+        log.warning("dual agent: no LLM_MODEL / LLM_API_KEY for %s - code-written e-mails", provider)
         return None, None, None
-    env = os.environ.get("LLM_MODEL") or ""
-    negotiator = env if env.startswith("claude") else NEGOTIATOR_MODEL
-    analyst = os.environ.get("LLM_ANALYST_MODEL") or ANALYST_MODEL
     prep = os.environ.get("LLM_PREP_MODEL")
     return (
-        llm_from_env(negotiator, timeout=WRITE_TIMEOUT_S, provider="anthropic", retries=0),
-        llm_from_env(analyst, timeout=ANALYST_GRACE_S + 15, provider="anthropic", retries=0),
-        llm_from_env(prep, timeout=PROFILE_TIMEOUT_S, provider="anthropic") if prep else None,
+        llm_from_env(model, timeout=WRITE_TIMEOUT_S, provider=provider, retries=0),
+        llm_from_env(analyst or model, timeout=ANALYST_GRACE_S + 15, provider=provider, retries=0),
+        llm_from_env(prep, timeout=PROFILE_TIMEOUT_S, provider=provider) if prep else None,
     )
 
 

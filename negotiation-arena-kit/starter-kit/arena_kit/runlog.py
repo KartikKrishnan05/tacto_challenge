@@ -120,8 +120,14 @@ class _Tee:
 class Run:
     def __init__(self, name, argv, meta=None):
         self.started = _now()
-        self.dir = _unique(log_root() / f"{self.started:%Y-%m-%d_%H%M%S}_{_slug(name)}")
-        self.dir.mkdir(parents=True)
+        base = log_root() / f"{self.started:%Y-%m-%d_%H%M%S}_{_slug(name)}"
+        while True:  # two commands started in the same second must not share (or crash on) a folder
+            self.dir = _unique(base)
+            try:
+                self.dir.mkdir(parents=True)
+                break
+            except FileExistsError:
+                continue
         self.meta = {
             "run": self.dir.name,
             "argv": argv,

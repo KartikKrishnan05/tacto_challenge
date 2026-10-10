@@ -38,7 +38,7 @@ def agent_factory(name, data):
         from .data import DataPackage
 
         package = DataPackage(data)
-    if name == "dual":  # Anthropic: LLM_MODEL writes, LLM_ANALYST_MODEL reads, LLM_PREP_MODEL profiles
+    if name == "dual":  # LLM_PROVIDER: LLM_MODEL writes, LLM_ANALYST_MODEL reads, LLM_PREP_MODEL profiles
         from .agents.dual import llms_from_env
 
         negotiator, analyst, prep = llms_from_env()
