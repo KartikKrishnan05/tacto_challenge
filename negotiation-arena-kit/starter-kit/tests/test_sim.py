@@ -306,3 +306,35 @@ def test_each_wave_plays_to_its_own_cap(sim, monkeypatch):
     script = [[(*one, True)], [(*one, False), (*two, True)], [(*one, False), (*two, False)]]
     play_waves(Waves(team(url), script, caps={1: 480, 2: 600}), NaiveAgent, waves=2, poll=0)
     assert 470 < seen["case:S01"] <= 480 and 590 < seen["case:S02"] <= 600  # 8 minutes; wave 2 extended by 2
+
+
+def test_the_run_log_keeps_every_e_mail(sim, monkeypatch, tmp_path, capsys):
+    from arena_kit import cli, runlog
+
+    url, _, _ = sim
+    client = team(url)
+    monkeypatch.setenv("ARENA_LOG_DIR", str(tmp_path))
+    monkeypatch.setattr(runlog, "_run", None)
+    runlog.start_run("test")
+    result = play(RemoteTable(client), "case:S01", LLMAgent(scripted))
+    runlog.end_run()
+
+    [entry] = [json.loads(line) for line in (tmp_path / "index.jsonl").read_text().splitlines()]
+    assert entry["case_id"] == "case:S01" and entry["score"] == result["score"] and entry["rounds"] > 1
+    case_dir = tmp_path / entry["path"]
+    transcript = (case_dir / "transcript.md").read_text()
+    assert "Thank you. Could you send a cost breakdown?" in transcript and "## Result" in transcript
+    assert "LLMAgent" in transcript and "Term sheet `offer:" in transcript
+    assert len((case_dir / "llm.jsonl").read_text().splitlines()) == entry["rounds"] + 1  # + the system prompt
+    assert json.loads((case_dir / "session.json").read_text())["result"]["score"] == result["score"]
+    assert any(p.suffix == ".pdf" for p in (case_dir / "attachments").iterdir())
+    run = json.loads((case_dir.parent / "run.json").read_text())
+    assert run["status"] == "ok" and run["cases"][0]["session_id"] == entry["session_id"]
+    key = client.http.headers["X-API-Key"]
+    assert not any(key in p.read_text(errors="ignore") for p in tmp_path.rglob("*") if p.is_file())
+
+    capsys.readouterr()
+    cli.main(["logs"])
+    assert "case:S01" in capsys.readouterr().out
+    cli.main(["logs", entry["session_id"]])
+    assert "Thank you. Could you send a cost breakdown?" in capsys.readouterr().out

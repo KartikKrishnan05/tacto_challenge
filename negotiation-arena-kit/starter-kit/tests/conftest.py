@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 import time
@@ -36,3 +37,9 @@ def sim():
     yield f"http://127.0.0.1:{port}", state, clock
     server.should_exit = True
     thread.join()
+
+
+@pytest.fixture(autouse=True, scope="session")
+def run_log_outside_the_repo(tmp_path_factory):
+    """The run log of the tests goes to a temporary folder, not to logs/."""
+    os.environ["ARENA_LOG_DIR"] = str(tmp_path_factory.mktemp("logs"))

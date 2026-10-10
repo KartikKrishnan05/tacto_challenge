@@ -709,6 +709,7 @@ def main(argv=None):
     ap.add_argument("--data", help="data package folder: cited IDs are checked against it")
     ap.add_argument("--event-code", default="sim")
     ap.add_argument("--no-clock", action="store_true", help="no 60-second rule: threads wait forever (by hand)")
+    ap.add_argument("--cases", help="a JSON file of more case files (e.g. `arena cases --save`), played by the script")
     a = ap.parse_args(argv)
     facts = {}
     if a.data:
@@ -721,5 +722,10 @@ def main(argv=None):
         print("arena-sim: --no-clock - no 60-second rule, threads wait forever (the arena keeps the rule)", flush=True)
     else:
         print("arena-sim: the 60-second rule is on, as on the arena (--no-clock switches it off)", flush=True)
-    app = create_app(Sim(load_cases(), facts, a.event_code, no_clock=a.no_clock))
+    cases = load_cases()
+    if (
+        a.cases
+    ):  # e.g. the practice case files: the case, the data and your e-mails are real, the supplier is the script
+        cases |= {c["case_id"]: {**c, "set": "practice"} for c in json.loads(Path(a.cases).read_text(encoding="utf-8"))}
+    app = create_app(Sim(cases, facts, a.event_code, no_clock=a.no_clock))
     uvicorn.run(app, host=a.host, port=a.port)
