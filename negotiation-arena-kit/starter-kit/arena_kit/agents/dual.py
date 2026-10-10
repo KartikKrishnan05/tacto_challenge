@@ -56,6 +56,11 @@ QUESTIONS = {
     "bundling": "Which further parts or volumes would make a bundle more attractive for you?",
     "raw_material": "Which base month and deadband would you consider fair for an index clause?",
 }
+# The kit's writer rules, plus: no promises the agent cannot keep (P01: "we will send the source data").
+WRITER_SYSTEM = writing.SYSTEM + (
+    "\n\nNever promise documents, data, calls or meetings we would send or hold later - this e-mail is all "
+    "we send. If they ask for our figures, say they are the cited public indices."
+)
 BREAKDOWN_Q = "Could you share a cost breakdown for this part - material, conversion, overhead?"
 
 
@@ -670,7 +675,7 @@ class DualAgent:
         )
         t0, reply, parsed, error = time.monotonic(), None, None, None
         try:
-            reply = self.complete(writing.SYSTEM + f"\n\nWording style for this e-mail ({t.name}): {t.style}", user)
+            reply = self.complete(WRITER_SYSTEM + f"\n\nWording style for this e-mail ({t.name}): {t.style}", user)
             parsed = writing.parse(reply)
         except Exception as e:
             error = f"{type(e).__name__}: {e}"
@@ -732,8 +737,8 @@ class DualAgent:
         company = self._company(sid, events)
         material = self._material(case, events)
         clauses = " ".join(r.get("text", "") for r in self.dossiers.get(sid, {}).get("clauses", []))
-        picked = self._pick_claims(parts, move)
         analysis, position = self._code_sentences(case, move)
+        picked = [c for c in self._pick_claims(parts, move) if not (analysis and c.key == "summary:indices")]
         numbers = writing.allowed(
             material, clauses, *(a.sentence for a in move["args"]), *(t for _, t in labelled), *analysis, *position
         )
