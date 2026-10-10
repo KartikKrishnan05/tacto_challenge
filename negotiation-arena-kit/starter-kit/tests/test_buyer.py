@@ -319,3 +319,20 @@ def test_the_anchor_comes_from_the_should_cost_and_stays_credible():
     assert strategy.anchor_price(case, {}, low, 32.20) == round(32.20 * (1 - strategy.MAX_ANCHOR_CUT), 2)
     near = strategy.Estimate(30.0, source="should-cost, low end", point=31.5)
     assert strategy.anchor_price(case, {}, near, 32.20) == round(30.0 * 1.01, 2)  # never under its cost
+
+
+def test_no_sheet_goes_more_than_the_max_cut_under_their_price():
+    """P18: a give priced 28 % under their quote drew no move at all - every sheet stays within 25 %."""
+    cut = 6.10 * (1 - strategy.MAX_ANCHOR_CUT)
+    assert strategy.sheet_floor(strategy.Estimate(None), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(5.55, source=strategy.OPENING_GUESS), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(3.0, source="should-cost, low end"), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(5.0, source="should-cost, low end"), 6.10) == 5.0 * 0.97
+    case = CASES["case:S01"]
+    their = {"unit_price": 17.50, "payment_days": 60}
+    est = strategy.Estimate(None)
+    target = total_cost(case, {**their, "unit_price": 10.0}, {})  # a target far under the cut
+    floor = strategy.sheet_floor(est, 17.50)
+    for asks in ({}, {"payment_days": 14}):
+        out = strategy.sheets(case, {}, est, their, target, ["payment_days"], floor, asks)
+        assert all(t["unit_price"] >= floor - 0.01 for _, t in out)

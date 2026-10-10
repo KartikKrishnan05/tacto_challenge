@@ -219,7 +219,8 @@ def test_after_360s_a_repeat_only_when_nothing_is_acceptable():
         return {"from": f"sales@{sid[4:]}", "status": "open", "body": "Offer.", "attachments": [],
                 "term_sheets": [{"term_sheet_id": f"offer:{sid[4:]}-{n}", "terms": terms}]}  # fmt: skip
 
-    dear = case["buyer"]["alternative"]["terms"]["unit_price"] * 1.5  # loses to the alternative
+    # loses to the alternative, yet within MAX_ANCHOR_CUT of it (deeper, no sheet could beat the alternative)
+    dear = case["buyer"]["alternative"]["terms"]["unit_price"] * 1.2
     first = agent.decide_all(case, {sid: [quote(dear, 0)]})[0]
     events = [quote(dear, 0), {**first["message"], "from": "buyer"}, quote(dear * 0.98, 1)]
     clock.now += NO_NEW_COUNTER_AT + 1

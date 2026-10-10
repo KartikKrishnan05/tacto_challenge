@@ -255,6 +255,15 @@ def anchor_price(case, terms, est, their_price, combo=None, std=None):
     return round(min(p, their_price), 2)
 
 
+def sheet_floor(est, their_price):
+    """The lowest price any sheet may carry: never under the supplier's cost floor, never more than
+    MAX_ANCHOR_CUT under its price (P18, 10 Oct: a give at 28 % under read as not credible, no move)."""
+    cut = their_price * (1 - MAX_ANCHOR_CUT)
+    if est and est.full_cost and est.source != OPENING_GUESS:
+        return max(est.full_cost * 0.97, cut)
+    return cut
+
+
 def reference_combo(case, combo, std, est, price):
     """`combo` with every field the supplier pulled beyond our reference (the buyer's plan: payment
     days, volume, contract length, lead time, no index clause) put back where that saves us money.

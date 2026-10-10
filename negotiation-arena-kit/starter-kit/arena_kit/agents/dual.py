@@ -567,7 +567,7 @@ class DualAgent:
         sid, plan, profile = st["sid"], self.plans[st["sid"]], self.profiles.get(st["sid"], {})
         levers = list(dict.fromkeys(profile.get("levers", []) + strategy.TYPE_LEVERS.get(case.get("type"), [])))
         est, price = st["est"], st["terms"]["unit_price"]
-        floor = est.full_cost * 0.97 if est.full_cost and est.source != strategy.OPENING_GUESS else price * 0.6
+        floor = strategy.sheet_floor(est, price)
         held = st.get("our_step") is not None and st["our_step"] <= 0
         # Holding keeps our C, not our sheets: new trades on their new terms at the same C (P04, 10 Oct:
         # the same three sheets again read as "no adjustments" and drew a final offer).

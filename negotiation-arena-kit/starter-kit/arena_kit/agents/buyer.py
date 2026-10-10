@@ -333,7 +333,7 @@ class BuyerAgent:
         profile = self.profiles.get(st["sid"], {})
         levers = list(dict.fromkeys(profile.get("levers", []) + strategy.TYPE_LEVERS.get(case.get("type"), [])))
         est, price = st["est"], st["terms"]["unit_price"]
-        floor = est.full_cost * 0.97 if est.full_cost and est.source != strategy.OPENING_GUESS else price * 0.6
+        floor = strategy.sheet_floor(est, price)
         asks = strategy.supplier_asks(case, st["terms"], st["std"], est)
         sheets = strategy.sheets(case, st["std"], est, st["terms"], st["target"], levers, floor, asks)
         if not sheets:  # the target is out of reach (their floor): a small step on their terms
