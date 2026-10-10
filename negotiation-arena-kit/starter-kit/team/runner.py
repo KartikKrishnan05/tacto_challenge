@@ -65,7 +65,11 @@ def play_case(table, case_id, agent, deadline=None):
                 return close(d["supplier_id"], d["message"])
             if hasattr(agent, "deadline"):
                 agent.deadline = c
-            d = agent.decide(case, view, sid)  # works on its own copy of the threads
+            try:
+                d = agent.decide(case, view, sid)  # works on its own copy of the threads
+            except Exception:  # a bug must not end the thread: wait for the next reply or the cap
+                log.exception("%s %s: decide failed", case_id, sid)
+                return
             if (took := time.monotonic() - t0) > MOVE_LIMIT_S * 0.75:
                 log.warning("%s: decision took %.1fs", case_id, took)
             if d.get("idle"):

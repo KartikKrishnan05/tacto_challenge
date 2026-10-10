@@ -31,7 +31,8 @@ log = logging.getLogger("arena")
 LLM_TIMEOUT_S = float(os.environ.get("TEAM_LLM_TIMEOUT", "28"))
 ROUND_BUDGET = int(os.environ.get("TEAM_ROUNDS", "6"))  # aim to close within this many of our messages
 SECONDS_PER_ROUND = 75  # our move + the supplier's reply (up to about a minute)
-ANCHOR = {"leverage": 0.09, "routine": 0.07, "quality_first": 0.05, "stabilise": 0.05, "secure_supply": 0.04}
+ANCHOR = {"leverage": 0.14, "routine": 0.10, "quality_first": 0.07, "stabilise": 0.06, "secure_supply": 0.05}
+RFQ_EXTRA = 0.04  # competition: open lower
 
 SYSTEM = """You are a senior procurement negotiator for Hollerau Pumpenwerke, a German pump maker,
 negotiating by e-mail with a supplier's sales team (real people with feelings, bosses and cash needs).
@@ -51,7 +52,8 @@ HOW TO NEGOTIATE
   Several sheets show what it values. Concede in small, decreasing steps and always ask for something back.
 - Be warm, respectful and specific; acknowledge their situation; never threaten, never reveal urgency,
   a budget or that we lack alternatives. Ask questions (cost breakdown, cheaper variants, earliest date).
-- Status final_offer means its last word: push at most once, gently, with a small move of our own.
+- Suppliers walk away when pushed too long: move towards a deal every round. A final_offer is accepted
+  automatically, so before it comes, make sure the big levers are already in the term sheets.
 - Never accept an offer that breaks a must-have or costs more than our alternative.
 
 Reply with ONE JSON object only:
@@ -135,7 +137,7 @@ def make():
 class TeamAgent:
     def __init__(self, complete, package=None):
         self.complete, self.package = complete, package
-        self.case_id, self.brief, self.supplier_est = None, None, {}
+        self.case_id, self.brief, self.supplier_est, self.confirmed = None, None, {}, set()
         self.deadline = None  # set by the runner in the Live Final (time.time() of the wave's cap)
         self.log = []  # (sid, round, source, why) for the evaluation
 
@@ -147,7 +149,7 @@ class TeamAgent:
         except Exception as e:  # data trouble must not cost the case
             log.warning("briefing failed: %s", e)
             self.brief = Briefing(case, None)
-        self.supplier_est = {}
+        self.supplier_est, self.confirmed = {}, set()
         for sid in case["suppliers"]:
             text = " ".join(s for s in self.brief.sections if sid in s)
             self.supplier_est[sid] = {"cash_short": bool(CASH_WORDS.search(text))}
@@ -158,7 +160,13 @@ class TeamAgent:
         if case["buyer"].get("category_goal") not in RELATIONSHIP_GOALS or not self.should_cost or not std:
             return None
         rate = 0.14 if self.supplier_est.get(sid, {}).get("cash_short") else 0.08
-        return {"standard": std, "interest_rate": rate, "usual_rate": 0.08, "full_cost": self.should_cost}
+        b, fixed = case["buyer"], case.get("fixed_terms", {})
+        full_std = {  # the quote PDF may leave fields out: fill them as the buyer would assume
+            "payment_days": b["reference_payment_days"],
+            "incoterm": fixed.get("incoterm") or min(b["freight_eur_per_unit"], key=b["freight_eur_per_unit"].get),
+            **{k: v for k, v in std.items() if v is not None},
+        }
+        return {"standard": full_std, "interest_rate": rate, "usual_rate": 0.08, "full_cost": self.should_cost}
 
     def cost(self, case, terms, std, sup):
         try:
@@ -171,7 +179,7 @@ class TeamAgent:
         return total_cost(case, alt["terms"]) if alt.get("terms", {}).get("unit_price") else math.inf
 
     # ---- the planner -----------------------------------------------------------------------------
-    def plan(self, case, events, sid):
+    def plan(self, case, events, sid, threads=None):
         """2-3 term sheets on the concession path, the price floor and the C of each."""
         _, theirs = standing(events)
         std = standard_terms(events)
@@ -192,12 +200,17 @@ class TeamAgent:
         levers = {f: row["option"] for f, row in best.items()}
         # price floor: below it C rises again (relationship charge), or the should-cost minus a bit
         floor = self.price_floor(case, {**theirs, **levers}, std, sup, their_price)
-        opening = next((ts["terms"]["unit_price"] for m in events if m.get("from") != "buyer"
-                        for ts in (m.get("term_sheets") or []) if ts["terms"].get("unit_price")), their_price)
+        # the lowest price anyone has put on the table (all threads), our reference for the anchor
+        seen = [ts["terms"]["unit_price"] for ev in (threads or {sid: events}).values() for m in ev
+                if m.get("from") != "buyer" for ts in (m.get("term_sheets") or []) if ts["terms"].get("unit_price")]
+        reference = min(seen + [their_price])
         if case.get("type") == "price_increase" and case["buyer"].get("current_unit_price"):
             anchor = case["buyer"]["current_unit_price"]
         else:
-            anchor = opening * (1 - ANCHOR.get(goal, 0.07))
+            cut = ANCHOR.get(goal, 0.08) + (RFQ_EXTRA if len(case["suppliers"]) > 1 else 0)
+            anchor = reference * (1 - cut)
+            if self.should_cost and goal not in RELATIONSHIP_GOALS:  # a fair margin over its cost
+                anchor = min(anchor, self.should_cost * 1.04)
         anchor = max(anchor, floor)
         frac = min(1.0, (r / max(budget, 1)) ** 1.6)  # small steps first, bigger towards the end
         target = anchor + (their_price - anchor) * frac * 0.85
@@ -261,10 +274,17 @@ class TeamAgent:
         if sid is not None and sid not in live_threads(threads):
             return {"supplier_id": sid, "idle": True}
         live = live_threads(threads)
+        for s in live:  # a reply asking for faster payment marks a supplier short of cash
+            if any(CASH_WORDS.search(str(m.get("body", ""))) for m in threads[s] if m.get("from") != "buyer"):
+                self.supplier_est.setdefault(s, {})["cash_short"] = True
         if sid is None:  # the kit's sequential loop: talk to the supplier whose offer costs least
             sid = min(live, key=lambda s: self.standing_cost(case, threads, s))
         events = threads[sid]
-        plan = self.plan(case, events, sid)
+        try:
+            plan = self.plan(case, events, sid, threads)
+        except Exception as e:  # never let a planning bug cost the case
+            log.exception("plan failed: %s", e)
+            plan = {"sheets": [], "floor": None, "target": None, "std": standard_terms(events), "sup": None}
         rule = self.close_rule(case, threads, sid, plan)
         if rule:
             self.log.append((sid, plan.get("round"), "rule", rule[1]))
@@ -300,15 +320,19 @@ class TeamAgent:
         """Hard rules before the LLM: (decision, reason) or None."""
         events = threads[sid]
         status = latest(events).get("status")
-        finals = sum(m.get("status") == "final_offer" for m in events if m.get("from") != "buyer")
         left = moves_left(case, events)
         best = self.best_thread(case, threads)
         accept = lambda s: {"supplier_id": s, "message": {"action": {"type": "accept",  # noqa: E731
                                                                      "term_sheet_id": standing(threads[s])[0]}}}
         if status == "agreed" and self.acceptable(case, events, sid) and best == sid:
             return accept(sid), "agreed to our terms"
-        if finals >= 2 and best:
-            return accept(best), "second final offer"
+        if status == "final_offer" and best:  # its last word: pushing on makes it walk away
+            confirm = self.confirm_final(case, events, sid, plan)
+            if confirm and best == sid:
+                return confirm, "accept its price, confirm our terms"
+            return accept(best), "final offer"
+        if self.stalled(case, threads, sid) and best == sid:
+            return accept(sid), "no more movement"
         spent = plan.get("round") or 0
         if (left <= 0 or spent >= plan.get("budget", ROUND_BUDGET)) and best:
             if best == sid or len(live_threads(threads)) == 1:
@@ -319,6 +343,37 @@ class TeamAgent:
             if not best:
                 return {"supplier_id": sid, "message": {"action": {"type": "walk_away"}}}, "nothing acceptable"
         return None
+
+    def confirm_final(self, case, events, sid, plan):
+        """A final offer that leaves fields out closes them on its standard terms. Once per thread:
+        take its price and ask it to confirm our terms for the rest - if that saves at least 0.5 %."""
+        missing = latest(events).get("missing_fields") or []
+        _, theirs = standing(events)
+        if not missing or sid in self.confirmed or moves_left(case, events) <= 0 or not theirs.get("unit_price"):
+            return None
+        levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in missing}
+        if not levers:
+            return None
+        sheet = complete_offer(case, {**theirs, **levers})
+        std, sup = plan.get("std"), plan.get("sup")
+        if self.cost(case, sheet, std, sup) > 0.995 * self.cost(case, theirs, std, sup):
+            return None
+        self.confirmed.add(sid)
+        body = (f"Thank you - we accept your price of EUR {theirs['unit_price']:.2f}. To complete the agreement, "
+                "please confirm it on the terms in the attached term sheet; that is all we need to sign.\n\n"
+                "Best regards\nHollerau Pumpenwerke, Purchasing")
+        return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
+                                                 "term_sheets": [{"terms": sheet}]}}
+
+    def stalled(self, case, threads, sid):
+        """Its offer has not got cheaper for us over its last two replies, after 3+ of our messages."""
+        events = threads[sid]
+        replies = [m for m in events if m.get("from") != "buyer" and m.get("term_sheets")]
+        if sum(m.get("from") == "buyer" for m in events) < 3 or len(replies) < 3:
+            return False
+        std = standard_terms(events)
+        cs = [self.cost(case, m["term_sheets"][0]["terms"], std, None) for m in replies[-3:]]
+        return cs[-1] >= cs[0] - max(1.0, 0.001 * cs[0])
 
     def planned_move(self, case, events, sid, plan):
         if not plan["sheets"]:
