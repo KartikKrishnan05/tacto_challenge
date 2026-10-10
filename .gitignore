@@ -1,7 +1,4 @@
-negotiation-arena-kit/
-
 # Secrets
 .env
 .env.*
 !.env.example
-
