@@ -1,0 +1,5 @@
+please pull the new main and rebase this branch on top of main ... the main should have a updated database now and a function to get more information from there. any questions?
+
+---
+
+please also always prefer this branch over the other branch regarding the agents email communication
