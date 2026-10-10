@@ -19,7 +19,7 @@ import time
 import httpx
 
 from arena_kit.agents.llm import ID_RE, parse
-from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, must_haves_ok, total_cost
+from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, cost_breakdown, must_haves_ok, total_cost
 from arena_kit.docs import standard_terms
 from arena_kit.play import latest, live_threads, moves_left, standing
 
@@ -33,6 +33,8 @@ ROUND_BUDGET = int(os.environ.get("TEAM_ROUNDS", "6"))  # aim to close within th
 SECONDS_PER_ROUND = 75  # our move + the supplier's reply (up to about a minute)
 ANCHOR = {"leverage": 0.14, "routine": 0.10, "quality_first": 0.07, "stabilise": 0.06, "secure_supply": 0.05}
 RFQ_EXTRA = 0.04  # competition: open lower
+MIN_LEVER_SHARE = 0.003  # ask only for levers worth at least 0.3 % of C
+COVERAGE = {"contract_months", "volume_per_year"}  # covering the need always counts
 
 SYSTEM = """You are a senior procurement negotiator for Hollerau Pumpenwerke, a German pump maker,
 negotiating by e-mail with a supplier's sales team (real people with feelings, bosses and cash needs).
@@ -48,8 +50,9 @@ HOW TO NEGOTIATE
 - Lead with the biggest levers from the LEVERS table, not only the price.
 - Arguments: use the ready-made sentences from ARGUMENTS THAT CHECK OUT, copied with their IDs
   (max 3 per e-mail, never an ID we already used). Never invent figures or IDs.
-- Offer the PLANNED term sheets (you may adjust them, but stay at or above the price floor shown).
-  Several sheets show what it values. Concede in small, decreasing steps and always ask for something back.
+- Offer the PLANNED term sheets. You may re-mix their terms, but code caps every sheet at the planned C
+  (a sheet that costs us more gets a lower price), so concede only via the plan. Do not write our offered
+  prices in the body - refer to "the attached term sheets". Always ask for something back.
 - Be warm, respectful and specific; acknowledge their situation; never threaten, never reveal urgency,
   a budget or that we lack alternatives. Ask questions (cost breakdown, cheaper variants, earliest date).
 - Suppliers walk away when pushed too long: move towards a deal every round. A final_offer is accepted
@@ -192,9 +195,11 @@ class TeamAgent:
         r = sum(m.get("from") == "buyer" for m in events)  # our messages so far
         budget = self.rounds_budget(case, events)
         # the best value of every non-price lever, from their standing offer
-        best = {}
+        best, base_c = {}, self.cost(case, theirs, std, sup)
         for row in lever_table(case, theirs, std, sup):
-            if row["field"] != "unit_price" and row["must_haves_ok"] and row["delta_eur"] < 0:
+            # small levers are not worth asking for: the supplier prices every demand into the price
+            big = -row["delta_eur"] >= MIN_LEVER_SHARE * base_c or row["field"] in COVERAGE
+            if row["field"] != "unit_price" and row["must_haves_ok"] and row["delta_eur"] < 0 and big:
                 if row["field"] not in best or row["delta_eur"] < best[row["field"]]["delta_eur"]:
                     best[row["field"]] = row
         levers = {f: row["option"] for f, row in best.items()}
@@ -220,20 +225,40 @@ class TeamAgent:
         a = complete_offer(case, {**theirs, **levers, "unit_price": target})
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
-        # B: their own non-price terms, price lowered so it costs us the same as A
-        b = self.iso_price(case, complete_offer(case, {**theirs, "unit_price": target}), c_a, std, sup, floor)
-        # C: pay faster (cash for them, little cost for us), price lowered to the same C
-        pay = case.get("term_options", {}).get("payment_days")
-        if "payment_days" in case["negotiable"] and pay:
-            fast = min(pay, key=lambda d: abs(d - 30))
-            c = self.iso_price(case, complete_offer(case, {**a, "payment_days": fast}), c_a, std, sup, floor)
-        else:
-            c = None
-        for s in (b, c):
-            if s and s not in sheets and must_haves_ok(case, s, std):
-                sheets.append(s)
+        # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
+        # the same value back in price - we do not care which it picks, its pick shows what it values.
+        for v in self.menu(case, a, theirs, std, sup, floor, c_a)[:2]:
+            if v not in sheets:
+                sheets.append(v)
         return {"sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup, "levers": best,
                 "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r}
+
+    def menu(self, case, a, theirs, std, sup, floor, c_a):
+        """Equal-cost variants of sheet A, the cheapest gives first: [sheet]."""
+        neg, options = case["negotiable"], case.get("term_options", {})
+        full = complete_offer(case, {**{k: v for k, v in (std or {}).items() if k in neg}, **theirs})
+        variants = []
+        for f in neg:
+            if f != "unit_price" and full.get(f) is not None and full.get(f) != a.get(f):
+                variants.append(complete_offer(case, {**a, f: full[f]}))
+        if "index_clause" in neg and full.get("index_clause") and not a.get("index_clause"):
+            # it wants an index clause: offer its series with the deadband that costs us least
+            series = full["index_clause"]["series"]
+            same = [o for o in options.get("index_clause", []) if o and o.get("series") == series]
+            if same:
+                best = min(same, key=lambda o: self.cost(case, {**a, "index_clause": o}, std, sup))
+                variants.append(complete_offer(case, {**a, "index_clause": best}))
+        if "payment_days" in neg and options.get("payment_days"):  # paying faster: cash for it, cheap for us
+            fast = min(options["payment_days"], key=lambda d: abs(d - 30))
+            if fast != a.get("payment_days"):
+                variants.append(complete_offer(case, {**a, "payment_days": fast}))
+        out = []
+        for v in variants:
+            v = self.iso_price(case, v, c_a, std, sup, floor)
+            # a give worth more than the price room (e.g. half the need uncovered) is no offer
+            if v and self.cost(case, v, std, sup) <= c_a * 1.002 and must_haves_ok(case, v, std) and v not in out:
+                out.append(v)
+        return sorted(out, key=lambda v: a["unit_price"] - v["unit_price"])
 
     def price_floor(self, case, terms, std, sup, their_price):
         """The price below which C does not fall any more (relationship), never below 80 % of theirs."""
@@ -332,6 +357,9 @@ class TeamAgent:
                 return confirm, "accept its price, confirm our terms"
             return accept(best), "final offer"
         if self.stalled(case, threads, sid) and best == sid:
+            earlier = self.better_earlier(case, events, sid, plan)
+            if earlier:
+                return earlier, "back to its own earlier, cheaper offer"
             return accept(sid), "no more movement"
         spent = plan.get("round") or 0
         if (left <= 0 or spent >= plan.get("budget", ROUND_BUDGET)) and best:
@@ -349,18 +377,51 @@ class TeamAgent:
         take its price and ask it to confirm our terms for the rest - if that saves at least 0.5 %."""
         missing = latest(events).get("missing_fields") or []
         _, theirs = standing(events)
-        if not missing or sid in self.confirmed or moves_left(case, events) <= 0 or not theirs.get("unit_price"):
+        if sid in self.confirmed or moves_left(case, events) <= 0 or not theirs.get("unit_price"):
             return None
-        levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in missing}
+        # fields it left out, and the coverage of our need (an uncovered need is bought at the fallback price)
+        wanted = set(missing) | {"contract_months", "volume_per_year"}
+        levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in wanted}
         if not levers:
             return None
-        sheet = complete_offer(case, {**theirs, **levers})
         std, sup = plan.get("std"), plan.get("sup")
-        if self.cost(case, sheet, std, sup) > 0.995 * self.cost(case, theirs, std, sup):
+        sheet = complete_offer(case, {**theirs, **levers})
+        sheets = [sheet]
+        if "index_clause" in case["negotiable"] and not sheet.get("index_clause"):  # longer only with a clause?
+            clauses = [o for o in case.get("term_options", {}).get("index_clause", []) if o]
+            if clauses:
+                best = min(clauses, key=lambda o: self.cost(case, {**sheet, "index_clause": o}, std, sup))
+                sheets.append(complete_offer(case, {**sheet, "index_clause": best}))
+        c_now = self.cost(case, theirs, std, sup)
+        sheets = [s for s in sheets if self.cost(case, s, std, sup) <= 0.995 * c_now]
+        if not sheets:
             return None
         self.confirmed.add(sid)
-        body = (f"Thank you - we accept your price of EUR {theirs['unit_price']:.2f}. To complete the agreement, "
-                "please confirm it on the terms in the attached term sheet; that is all we need to sign.\n\n"
+        body = (f"Thank you - we accept your price of EUR {theirs['unit_price']:.2f}. To complete the agreement and "
+                "cover our full requirement, please confirm it on one of the attached term sheets; that is all we "
+                "need to sign.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
+        return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
+                                                 "term_sheets": [{"terms": s} for s in sheets]}}
+
+    def better_earlier(self, case, events, sid, plan):
+        """Once per thread: if one of its earlier offers cost us 0.3 % less than the standing one, offer
+        exactly those terms back - it has said yes to them before."""
+        if ("earlier", sid) in self.confirmed or moves_left(case, events) <= 0:
+            return None
+        std, sup = plan.get("std"), plan.get("sup")
+        offers = [(ts["term_sheet_id"], ts["terms"]) for m in events if m.get("from") != "buyer"
+                  for ts in (m.get("term_sheets") or []) if ts["terms"].get("unit_price") is not None]
+        if len(offers) < 2:
+            return None
+        oid, terms = min(offers[:-1], key=lambda o: self.cost(case, o[1], std, sup))
+        if self.cost(case, terms, std, sup) > 0.997 * self.cost(case, offers[-1][1], std, sup):
+            return None
+        sheet = complete_offer(case, terms)
+        if not must_haves_ok(case, sheet, std):
+            return None
+        self.confirmed.add(("earlier", sid))
+        body = (f"Thank you. We have reviewed everything again and are ready to sign on your own earlier offer "
+                f"{oid} - the attached term sheet repeats exactly those terms. Can you confirm?\n\n"
                 "Best regards\nHollerau Pumpenwerke, Purchasing")
         return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
                                                  "term_sheets": [{"terms": sheet}]}}
@@ -425,6 +486,15 @@ class TeamAgent:
                    f"{plan.get('round')}, planned total {plan.get('budget')}, messages left {moves_left(case, events)}")
         out.append(f"THEIR STANDING OFFER {sheet_id}: {json.dumps(terms, default=str)} -> C = "
                    + (f"{c_now:,.0f}" if math.isfinite(c_now) else "-"))
+        if terms.get("unit_price") is not None:
+            try:
+                gap = cost_breakdown(case, terms, plan.get("std"))["uncovered_need"]
+            except Exception:
+                gap = 0
+            if gap > 0:
+                out.append(f"WARNING: their offer leaves need uncovered, costing us {gap:,.0f} EUR at the fallback "
+                           "price. Covering the full need (contract_months / volume_per_year) comes first - it is "
+                           "worth more than any price cut; trade other terms for it.")
         if plan.get("std"):
             out.append("THEIR STANDARD TERMS (apply to anything not in a term sheet): " + json.dumps(plan["std"]))
         if plan.get("levers"):
@@ -480,8 +550,15 @@ class TeamAgent:
                 t["unit_price"] = round(max(t["unit_price"], floor), 2)
                 if theirs.get("unit_price"):
                     t["unit_price"] = round(min(t["unit_price"], theirs["unit_price"]), 2)
-            if must_haves_ok(case, t, plan.get("std")) and t not in sheets:
+            if plan["sheets"] and t.get("unit_price") is not None:
+                # the concession path is ours: a sheet that costs more than the planned one gets a lower price
+                c_plan = plan["costs"][0]
+                if self.cost(case, t, plan.get("std"), plan.get("sup")) > c_plan * 1.002:
+                    t = self.iso_price(case, t, c_plan, plan.get("std"), plan.get("sup"), floor)
+            if t and must_haves_ok(case, t, plan.get("std")) and t not in sheets:
                 sheets.append(t)
+        if plan["sheets"] and plan["sheets"][0] not in sheets and len(sheets) < 3:
+            sheets.append(plan["sheets"][0])  # always offer the planned package too
         if not sheets and plan["sheets"]:
             sheets = plan["sheets"]
         offers = {standing(ev)[0] for ev in threads.values()}

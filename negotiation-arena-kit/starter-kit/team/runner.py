@@ -43,12 +43,26 @@ def play_case(table, case_id, agent, deadline=None):
         with close_lock:
             if done.is_set():
                 return
-            try:
-                log.info("%s %s %s", case_id, sid, msg["action"])
-                out["result"] = table.close(sid, msg)
-            except ArenaError as e:
-                log.warning("%s: close failed: %s", case_id, e.detail)
-                out["result"] = table.result()
+            for attempt in range(3):
+                try:
+                    log.info("%s %s %s", case_id, sid, msg["action"])
+                    out["result"] = table.close(sid, msg)
+                    break
+                except ArenaError as e:
+                    # a timeout on this thread while our call waited (calls on one session queue up) moves
+                    # the standing offer to a new ID: accept that one - same terms, the offer stands
+                    if msg["action"].get("type") == "accept" and attempt < 2 and e.status in (409, 422):
+                        try:
+                            t = table.client.thread(table.session_id, sid)
+                        except ArenaError:
+                            t = {}
+                        if t.get("offer_id") and not t.get("closed"):
+                            log.warning("%s: accept retried with %s (%s)", case_id, t["offer_id"], e.detail)
+                            msg = {"action": {"type": "accept", "term_sheet_id": t["offer_id"]}}
+                            continue
+                    log.warning("%s: close failed: %s", case_id, e.detail)
+                    out["result"] = table.result()
+                    break
             done.set()
 
     def worker(sid):
