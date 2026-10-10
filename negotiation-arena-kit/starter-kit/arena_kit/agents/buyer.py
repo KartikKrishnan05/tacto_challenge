@@ -248,8 +248,10 @@ class BuyerAgent:
                 # In an RFQ every bidder is anchored to the best quote, not to its own (D02: anchored
                 # to its own 17.10, the dearer bidder agreed to 15.09 at once; about 13 was reachable).
                 rivals = [o["terms"]["unit_price"] for o2, o in quoting.items() if o2 != s and rfq]
-                p = strategy.anchor_price(case, st["terms"], st["est"], min([price, *rivals]))
-                plan.anchor = min(strategy.cost(case, {**ref, "unit_price": p}, st["std"], st["est"]), c_ref)
+                # Priced on our reference terms: what the supplier asks beyond them is not given away free.
+                combo = strategy.reference_combo(case, ref, st["std"], st["est"], price)
+                p = strategy.anchor_price(case, st["terms"], st["est"], min([price, *rivals]), combo, st["std"])
+                plan.anchor = min(strategy.cost(case, {**combo, "unit_price": p}, st["std"], st["est"]), c_ref)
             k = len(plan.targets)
             target = plan.anchor + strategy.concession(k, horizon) * (c_ref - plan.anchor)
             # How far they came toward us since our last e-mail, in C. Still conceding (P01: 2.25 EUR
@@ -331,8 +333,9 @@ class BuyerAgent:
         profile = self.profiles.get(st["sid"], {})
         levers = list(dict.fromkeys(profile.get("levers", []) + strategy.TYPE_LEVERS.get(case.get("type"), [])))
         est, price = st["est"], st["terms"]["unit_price"]
-        floor = est.full_cost * 0.97 if est.full_cost and est.source != strategy.OPENING_GUESS else price * 0.6
-        sheets = strategy.sheets(case, st["std"], est, st["terms"], st["target"], levers, floor)
+        floor = strategy.sheet_floor(est, price)
+        asks = strategy.supplier_asks(case, st["terms"], st["std"], est)
+        sheets = strategy.sheets(case, st["std"], est, st["terms"], st["target"], levers, floor, asks)
         if not sheets:  # the target is out of reach (their floor): a small step on their terms
             t = strategy.complete_offer(
                 case,

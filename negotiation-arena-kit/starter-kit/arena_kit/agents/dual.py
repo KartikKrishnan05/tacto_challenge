@@ -321,7 +321,13 @@ class DualAgent:
             key=lambda c: (not must_haves_ok(case, c[1], std), strategy.cost(case, c[1], std, est)),
             default=(None, {}),
         )
+        # What it asks beyond our reference terms (its sheet or its e-mail): we say yes, for a price.
+        asks = strategy.supplier_asks(case, terms, std, est, intel.lever_hints if intel else ()) if sheet_id else {}
+        if "payment_days" in asks and not self.profiles.get(sid, {}).get("cash_short"):
+            self.profiles.setdefault(sid, {})["cash_short"] = True  # asking for faster payment is a cash signal
+            est = strategy.estimate(case, sid, self.package, events, opening, cash_short=True)
         return {
+            "asks": asks,
             "sid": sid,
             "events": events,
             "sheet_id": sheet_id,
@@ -407,8 +413,11 @@ class DualAgent:
             plan.replies = replies
         if plan.anchor is None:
             rivals = [o["terms"]["unit_price"] for s2, o in quoting.items() if s2 != sid and rfq]
-            p = strategy.anchor_price(case, st["terms"], st["est"], min([price, *rivals]))
-            plan.anchor = min(strategy.cost(case, {**ref, "unit_price": p}, st["std"], st["est"]), c_ref)
+            # Priced on our reference terms: what the supplier asks beyond them (P01: payment in 14
+            # days) is not absorbed into the target, so a sheet granting it carries a lower price.
+            combo = strategy.reference_combo(case, ref, st["std"], st["est"], price)
+            p = strategy.anchor_price(case, st["terms"], st["est"], min([price, *rivals]), combo, st["std"])
+            plan.anchor = min(strategy.cost(case, {**combo, "unit_price": p}, st["std"], st["est"]), c_ref)
         k = len(plan.targets)
         horizon = 5 if rfq else strategy.ROUND_HORIZON
         proposed = plan.anchor + strategy.concession(k, horizon) * (c_ref - plan.anchor)
@@ -558,12 +567,12 @@ class DualAgent:
         sid, plan, profile = st["sid"], self.plans[st["sid"]], self.profiles.get(st["sid"], {})
         levers = list(dict.fromkeys(profile.get("levers", []) + strategy.TYPE_LEVERS.get(case.get("type"), [])))
         est, price = st["est"], st["terms"]["unit_price"]
-        floor = est.full_cost * 0.97 if est.full_cost and est.source != strategy.OPENING_GUESS else price * 0.6
+        floor = strategy.sheet_floor(est, price)
         held = st.get("our_step") is not None and st["our_step"] <= 0
         # Holding keeps our C, not our sheets: new trades on their new terms at the same C (P04, 10 Oct:
         # the same three sheets again read as "no adjustments" and drew a final offer).
         theirs = repair(case, st["terms"], st["std"])  # their terms, with any broken must-have put right
-        sheets = strategy.sheets(case, st["std"], est, theirs, st["target"], levers, floor)
+        sheets = strategy.sheets(case, st["std"], est, theirs, st["target"], levers, floor, st.get("asks"))
         sheets = self._guard_sheets(case, st, sheets)
         if not sheets:
             combo = strategy.base_combo(case, theirs, st["std"])
@@ -700,6 +709,11 @@ class DualAgent:
         )
         if move.get("lock") and any(label == "their prose offer" for label, _ in move["sheets"]):
             stance += " One option takes up the offer they stated in their own e-mail; name it as theirs."
+        if (ask := self._ask_text(case, move)) is not None:
+            stance += (
+                f" Option A says YES to what they asked for ({ask}); Option B keeps our standard terms. "
+                "Agree to their request warmly and make clear that granting it is reflected in Option A's lower price."
+            )
         user = "\n\n".join(
             x
             for x in [
@@ -750,10 +764,16 @@ class DualAgent:
             )
             days = [(n, t.get("payment_days", ref)) for n, (_, t) in enumerate(move["sheets"])]
             fast = [(n, d) for n, d in days if d < ref]
-            if fast and len(move["sheets"]) > 1:
+            if fast and len(move["sheets"]) > 1 and self._ask_text(case, move) is None:
                 n, d = min(fast, key=lambda x: x[1])
                 position.append(f"If quick payment matters to you, Option {'ABC'[n]} pays in {d} days.")
             said.add("pay")
+        if (ask := self._ask_text(case, move)) is not None and "ask" not in said:
+            position.append(
+                f"You asked for {ask}: we can agree to that - Option A grants it, and its price reflects what "
+                "it is worth to you; Option B keeps our standard terms."
+            )
+            said.add("ask")
         if move["hold"]:
             position.append("We keep our offer as it stands.")
         elif move.get("lock") and any(label == "their prose offer" for label, _ in move["sheets"]):
@@ -762,6 +782,17 @@ class DualAgent:
                 + " the offer you described in your e-mail."
             )
         return analysis, position
+
+    @staticmethod
+    def _ask_text(case, move):
+        """What the supplier asked for, in words, when Option A grants it - else None."""
+        sheets = move.get("sheets") or []
+        asks = move["st"].get("asks") or {}
+        if not sheets or sheets[0][0] != "their ask" or not asks:
+            return None
+        return strategy.summarise_terms(
+            {**case, "negotiable": [f for f in case["negotiable"] if f in asks]}, sheets[0][1]
+        )
 
     def _pick_claims(self, parts, move):
         by_key = {a.key: a for a in move["args"]}

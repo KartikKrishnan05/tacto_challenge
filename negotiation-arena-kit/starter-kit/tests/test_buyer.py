@@ -278,3 +278,61 @@ def test_a_concession_is_answered_visibly_with_a_smaller_step():
     second = agent.decide_all(case, {sid: events})[0]
     ours = min(_prices(second)) - min(_prices(first))
     assert 0.003 * 17.0 <= ours < 0.50  # a visible step, smaller than theirs
+
+
+def test_an_ask_is_granted_for_a_lower_price_not_for_free():
+    """P01, 10 Oct: the supplier quoted payment in 14 days and our 14-day sheet carried the same price
+    as a 30-day one - the target was priced on its terms. Now: yes to the ask at a skonto, or our
+    reference terms at the target, and no decoy that takes the ask back."""
+    from arena_kit.agents import DualAgent
+
+    case, sid = CASES["case:S01"], "sup:70270"
+    quote = {**_quote(sid, 17.50, "offer:70270-0"), "term_sheets": [
+        {"term_sheet_id": "offer:70270-0", "terms": {"unit_price": 17.50, "payment_days": 14}}]}  # fmt: skip
+    agent = DualAgent(None, None)
+    agent.prime(case)
+    sheets = [t["terms"] for t in agent.decide_all(case, {sid: [quote]})[0]["message"]["term_sheets"]]
+    assert [t["payment_days"] for t in sheets] == [14, 60]
+    ask, ref = sheets
+    # worth more to the supplier than the reference (its cash rate, cash-short: 8 % + 6 %) ...
+    rate = case["buyer"]["interest_rate"] + strategy.CASH_SHORT_PREMIUM
+    assert ask["unit_price"] > ref["unit_price"] * (1 - rate * 46 / 360)
+    # ... and cheaper for us: both sides gain from the trade
+    assert total_cost(case, ask) < total_cost(case, ref)
+
+
+def test_an_ask_in_prose_is_read_and_snapped_to_the_options():
+    case = CASES["case:S01"]
+    their = {"unit_price": 17.50, "payment_days": 60}
+    hints = [{"field": "payment_days", "hint": "they need payment within 15 days for liquidity"}]
+    assert strategy.supplier_asks(case, their, {}, strategy.Estimate(None), hints) == {"payment_days": 14}
+    assert strategy.supplier_asks(case, their, {}, strategy.Estimate(None)) == {}  # 60 days is our reference
+
+
+def test_the_anchor_comes_from_the_should_cost_and_stays_credible():
+    case = {**CASES["case:S01"], "type": "renewal"}
+    goal = case["buyer"]["category_goal"]
+    est = strategy.Estimate(22.36, source="should-cost, low end", point=24.31)
+    fair = round(24.31 / (1 - strategy.FAIR_MARGIN[goal]), 2)
+    assert strategy.anchor_price(case, {}, est, 32.20) == fair  # deeper than the goal's fixed cut
+    low = strategy.Estimate(9.5, source="should-cost, low end", point=10.0)
+    assert strategy.anchor_price(case, {}, low, 32.20) == round(32.20 * (1 - strategy.MAX_ANCHOR_CUT), 2)
+    near = strategy.Estimate(30.0, source="should-cost, low end", point=31.5)
+    assert strategy.anchor_price(case, {}, near, 32.20) == round(30.0 * 1.01, 2)  # never under its cost
+
+
+def test_no_sheet_goes_more_than_the_max_cut_under_their_price():
+    """P18: a give priced 28 % under their quote drew no move at all - every sheet stays within 25 %."""
+    cut = 6.10 * (1 - strategy.MAX_ANCHOR_CUT)
+    assert strategy.sheet_floor(strategy.Estimate(None), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(5.55, source=strategy.OPENING_GUESS), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(3.0, source="should-cost, low end"), 6.10) == cut
+    assert strategy.sheet_floor(strategy.Estimate(5.0, source="should-cost, low end"), 6.10) == 5.0 * 0.97
+    case = CASES["case:S01"]
+    their = {"unit_price": 17.50, "payment_days": 60}
+    est = strategy.Estimate(None)
+    target = total_cost(case, {**their, "unit_price": 10.0}, {})  # a target far under the cut
+    floor = strategy.sheet_floor(est, 17.50)
+    for asks in ({}, {"payment_days": 14}):
+        out = strategy.sheets(case, {}, est, their, target, ["payment_days"], floor, asks)
+        assert all(t["unit_price"] >= floor - 0.01 for _, t in out)
