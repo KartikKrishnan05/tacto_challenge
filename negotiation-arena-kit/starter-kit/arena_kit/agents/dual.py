@@ -27,7 +27,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from .. import claims as cl
 from .. import dossier, runlog, strategy, tactics, writing
-from ..cost import closing_terms, complete_offer, must_haves_ok, total_cost
+from ..cost import OPS, closing_terms, complete_offer, must_haves_ok, total_cost
 from ..docs import standard_terms
 from ..intel import Analyst
 from ..play import closing_move, latest, live_threads, moves_left, offers
@@ -104,6 +104,23 @@ def concession_guard(prev, proposed, their_step, scale):
     # 10 Oct: holding after their steps of 12.8k and 8.2k in C drew a final offer both times).
     ours = min(max(proposed - prev, visible), allowed)
     return prev + ours, ours
+
+
+def repair(case, terms, std):
+    """`terms` with each broken must-have moved to the nearest allowed value that keeps it (P05: a
+    quote with 52 days lead time against "<= 42" left us no sheet to send)."""
+    out = dict(terms)
+    for m in case["buyer"].get("must_haves", []):
+        if must_haves_ok(case, out, std) or m["field"] not in case["negotiable"]:
+            continue
+        current = {**std, **out}.get(m["field"])
+        allowed = [
+            o for o in case.get("term_options", {}).get(m["field"]) or [m["value"]] if OPS[m["op"]](o, m["value"])
+        ]
+        if allowed:
+            near = isinstance(current, int | float) and all(isinstance(o, int | float) for o in allowed)
+            out[m["field"]] = min(allowed, key=lambda o: abs(o - current)) if near else allowed[0]
+    return out
 
 
 def weighted_sentence(intel):
@@ -290,6 +307,7 @@ class DualAgent:
             "c_now": strategy.cost(case, terms, std, est) if sheet_id else math.inf,
             "status": latest(events).get("status"),
             "left": moves_left(case, events),
+            "ok": bool(sheet_id) and self._acceptable(case, terms, std, est),
             "intel": intel,
         }
 
@@ -377,7 +395,8 @@ class DualAgent:
         if rfq and others:
             target = max(plan.anchor, min(target, min(others) * 0.99))  # beat the best rival
         target = min(target, strategy.c_alternative(case) * 0.995)
-        st["meets"] = st["c_now"] <= target * 1.002 or (k and st["c_now"] <= plan.targets[-1] * 1.001)
+        # never before our first counter: the first offer is not taken (P05: no room under the floor estimate)
+        st["meets"] = bool(k) and (st["c_now"] <= target * 1.002 or st["c_now"] <= plan.targets[-1] * 1.001)
         if st["meets"] and st["moving"] and st["left"] > 3:
             st["meets"] = False  # still conceding: their offer is not their last word - ask once more
             target = min(target, st["c_now"] - 0.5 * step)
@@ -407,10 +426,15 @@ class DualAgent:
     def _close_reason(self, case, quoting, rfq, elapsed):
         if elapsed >= FORCE_CLOSE_AT:
             return f"force close: {elapsed:.0f}s since case open"
-        best_sid = min(quoting, key=lambda s: quoting[s]["c_now"])
+        # The thread a close would take: the best acceptable offer (P05, 10 Oct: a cheaper quote that
+        # broke a must-have triggered the close, and the accept went to a dearer opening quote).
+        ok = [s for s, st in quoting.items() if st["ok"]]
+        best_sid = min(ok or quoting, key=lambda s: quoting[s]["c_now"])
 
-        def fires(pred):  # single thread: that thread; an RFQ: the best thread, or every thread
-            return pred(quoting[best_sid]) or (rfq and all(pred(st) for st in quoting.values()))
+        def fires(pred):  # single thread: that thread; an RFQ: the best acceptable thread, or every thread
+            return (bool(ok) and pred(quoting[best_sid])) or (
+                (rfq or not ok) and all(pred(st) for st in quoting.values())
+            )
 
         if fires(lambda st: st["status"] == "agreed"):
             return "the supplier agreed to our terms"
@@ -512,14 +536,13 @@ class DualAgent:
         est, price = st["est"], st["terms"]["unit_price"]
         floor = est.full_cost * 0.97 if est.full_cost and est.source != strategy.OPENING_GUESS else price * 0.6
         held = st.get("our_step") is not None and st["our_step"] <= 0
-        sheets = []
-        if held and self.last_sheets.get(sid):
-            sheets = list(self.last_sheets[sid])  # we hold: the same offer again, word for word
-        else:
-            sheets = strategy.sheets(case, st["std"], est, st["terms"], st["target"], levers, floor)
+        # Holding keeps our C, not our sheets: new trades on their new terms at the same C (P04, 10 Oct:
+        # the same three sheets again read as "no adjustments" and drew a final offer).
+        theirs = repair(case, st["terms"], st["std"])  # their terms, with any broken must-have put right
+        sheets = strategy.sheets(case, st["std"], est, theirs, st["target"], levers, floor)
         sheets = self._guard_sheets(case, st, sheets)
         if not sheets:
-            combo = strategy.base_combo(case, st["terms"], st["std"])
+            combo = strategy.base_combo(case, theirs, st["std"])
             p = strategy.price_at(case, combo, st["std"], est, st["target"], max(0.01, floor), price)
             t = complete_offer(case, {**combo, "unit_price": p}) if p else None
             sheets = self._guard_sheets(case, st, [("their terms", t)] if t else [])

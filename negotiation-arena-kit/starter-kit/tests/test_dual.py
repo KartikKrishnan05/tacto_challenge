@@ -292,3 +292,28 @@ def test_the_dual_agent_closes_every_sim_case(sim, case_id):
         for m in sent
         for ts in m.get("term_sheets") or []
     )
+
+
+# --- regressions from the practice replays, 10 Oct ------------------------------------------------
+def test_the_first_offer_is_never_taken():
+    """P05: the floor estimate left no room under one quote, so it 'met our target' before we had
+    countered once - and the case closed on an opening quote."""
+    d = DualAgent(None, None).decide_all(CASES["case:S01"], {SID: [_mail(9.00, "offer:70270-0")]})[0]
+    assert "action" not in d["message"] and d["message"]["term_sheets"]
+
+
+def test_a_quote_that_breaks_a_must_have_neither_closes_the_case_nor_goes_unanswered():
+    """P05: the cheapest quote broke the lead-time must-have; it triggered the close and the accept
+    went to a dearer opening quote. Now it gets a counter that keeps the must-have."""
+    base = CASES["case:S02"]
+    case = {**base, "buyer": {**base["buyer"], "must_haves": [{"field": "lead_time_days", "op": "<=", "value": 35}]}}
+    a, b = case["suppliers"]
+    slow = {"from": f"sales@{a[4:]}", "status": "open", "body": "Offer.", "attachments": [],
+            "term_sheets": [{"term_sheet_id": f"offer:{a[4:]}-0",
+                             "terms": {"unit_price": 12.0, "payment_days": 30, "lead_time_days": 56}}]}  # fmt: skip
+    fast = {"from": f"sales@{b[4:]}", "status": "open", "body": "Offer.", "attachments": [],
+            "term_sheets": [{"term_sheet_id": f"offer:{b[4:]}-0",
+                             "terms": {"unit_price": 20.0, "payment_days": 30, "lead_time_days": 35}}]}  # fmt: skip
+    moves = {d["supplier_id"]: d["message"] for d in DualAgent(None, None).decide_all(case, {a: [slow], b: [fast]})}
+    assert not any(m.get("action") for m in moves.values())
+    assert moves[a]["term_sheets"] and all(t["terms"]["lead_time_days"] <= 35 for t in moves[a]["term_sheets"])
