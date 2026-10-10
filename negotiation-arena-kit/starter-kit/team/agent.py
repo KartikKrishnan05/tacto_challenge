@@ -38,6 +38,8 @@ ANCHOR = {"leverage": 0.14, "routine": 0.10, "quality_first": 0.07, "stabilise":
 RFQ_EXTRA = 0.04  # competition: open lower
 MIN_LEVER_SHARE = 0.003  # ask only for levers worth at least 0.3 % of C
 COVERAGE = {"contract_months", "volume_per_year"}  # covering the need always counts
+STEPS = (0.0, 0.15, 0.3, 0.45, 0.6)  # share of the C gap we give by our 1st, 2nd, ... message (steps of 15 %+
+MIN_STEP = 0.15  # of the gap left: zero steps drew a final offer 37 % of the time, steps >= 15 % of the gap 17 %)
 
 SYSTEM = """You are a senior procurement negotiator for Hollerau Pumpenwerke, a German pump maker,
 negotiating by e-mail with a supplier's sales team (real people with feelings, bosses and cash needs).
@@ -143,6 +145,13 @@ def numeric(v):
     return v
 
 
+def same(a, b):
+    """Two term sheets equal up to a cent."""
+    if a.keys() != b.keys():
+        return False
+    return all(abs(a[k] - b[k]) <= 0.005 if isinstance(a[k], float) else a[k] == b[k] for k in a)
+
+
 def distance(a, b):
     """How far an option is from a value: numbers by difference, anything else 0 if equal else 1."""
     if isinstance(a, int | float) and isinstance(b, int | float) and not isinstance(a, bool):
@@ -168,6 +177,7 @@ class TeamAgent:
     def __init__(self, complete, package=None):
         self.complete, self.package = complete, package
         self.case_id, self.brief, self.supplier_est, self.confirmed, self.slopes = None, None, {}, set(), {}
+        self.anchor = {}  # sid -> our fixed anchor price
         self.deadline = None  # set by the runner in the Live Final (time.time() of the wave's cap)
         self.log = []  # (sid, round, source, why) for the evaluation
 
@@ -179,7 +189,7 @@ class TeamAgent:
         except Exception as e:  # data trouble must not cost the case
             log.warning("briefing failed: %s", e)
             self.brief = Briefing(case, None)
-        self.supplier_est, self.confirmed, self.slopes = {}, set(), {}
+        self.supplier_est, self.confirmed, self.slopes, self.anchor = {}, set(), {}, {}
         for sid in case["suppliers"]:
             text = getattr(self.brief, "supplier_text", {}).get(sid, "")
             self.supplier_est[sid] = {"cash_short": bool(CASH.search(text))}
@@ -233,8 +243,8 @@ class TeamAgent:
             return {"sheets": [], "floor": None, "target": None, "std": std, "sup": sup}
         their_price = theirs["unit_price"]
         goal = case["buyer"].get("category_goal")
-        mine = [ts["terms"] for m in events if m.get("from") == "buyer" for ts in (m.get("term_sheets") or [])]
-        r = sum(m.get("from") == "buyer" for m in events)  # our messages so far
+        delivered = [m for m in events if m.get("from") == "buyer" and not m.get("undelivered")]
+        r = len(delivered)  # our messages that reached it
         budget = self.rounds_budget(case, events)
         # the best value of every non-price lever, first at their price (for floor and anchor)
         base = self.keep_must_haves(case, complete_offer(case, theirs), std)  # levers from a valid sheet
@@ -253,16 +263,27 @@ class TeamAgent:
             anchor = reference * (1 - cut)
             if self.should_cost and goal not in RELATIONSHIP_GOALS:  # a fair margin over its cost
                 anchor = min(anchor, self.should_cost * 1.04)
-        anchor = max(anchor, floor)
-        frac = min(1.0, (r / max(budget, 1)) ** 1.6)  # small steps first, bigger towards the end
-        target = anchor + (their_price - anchor) * frac * 0.85
-        if mine:  # never step back from a price we offered
-            target = max(target, max(t.get("unit_price") or 0 for t in mine))
-        target = round(min(max(target, floor), their_price), 2)
-        # then at OUR price: whether covering the whole need pays depends on the price we get for it
-        best = self.best_levers(case, {**base, "unit_price": target}, std, sup, slopes)
+        # the anchor is fixed per thread (a moving anchor froze our steps); in an RFQ it may only fall
+        anchor = min(anchor, self.anchor[sid]) if sid in self.anchor and len(case["suppliers"]) > 1 \
+            else self.anchor.get(sid, anchor)
+        self.anchor[sid] = anchor
+        anchor = round(max(anchor, floor), 2)
+        # at OUR price: whether covering the whole need pays depends on the price we get for it
+        best = self.best_levers(case, {**base, "unit_price": anchor}, std, sup, slopes)
         levers = {f: row["option"] for f, row in best.items()}
-        a = self.keep_must_haves(case, complete_offer(case, {**base, **levers, "unit_price": target}), std)
+        struct = self.keep_must_haves(case, complete_offer(case, {**base, **levers, "unit_price": anchor}), std)
+        # real steps in C along STEPS of the gap between our anchor and its cheapest sheet, and at least
+        # MIN_STEP of what was left after our last message - suppliers mirror steps, not words
+        c_anchor, c_their = self.cost(case, struct, std, sup), self.cost(case, theirs, std, sup)
+        target_c = c_anchor + (c_their - c_anchor) * STEPS[min(r, len(STEPS) - 1)]
+        if delivered and (last := (delivered[-1].get("term_sheets") or [{}])[0].get("terms")):
+            c_last = self.cost(case, complete_offer(case, last), std, sup)
+            if math.isfinite(c_last):
+                target_c = max(target_c, c_last + MIN_STEP * (c_their - c_last))
+        target_c = min(target_c, 0.997 * c_their)
+        a = self.iso_price(case, struct, target_c, std, sup, floor) or struct
+        a = {**a, "unit_price": round(min(max(a["unit_price"], floor), their_price), 2)}
+        target = a["unit_price"]
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
@@ -272,9 +293,12 @@ class TeamAgent:
                 sheets.append(v)
         # coverage lock: once sheet A covers the need, no sheet we send covers less
         cover = {f: a[f] for f in COVERAGE if f in case["negotiable"] and a.get(f) is not None}
-        return {"sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup, "levers": best,
-                "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget, "round": r,
-                "cover": cover, "their_price": their_price}
+        last_sheets = (delivered[-1].get("term_sheets") or []) if delivered else []
+        sent = [complete_offer(case, ts["terms"]) for ts in last_sheets]
+        repeat = bool(sent) and all(any(same(s, t) for t in sent) for s in sheets[:3])
+        return {"repeat": repeat, "sheets": sheets[:3], "floor": floor, "target": target, "std": std, "sup": sup,
+                "levers": best, "costs": [self.cost(case, s, std, sup) for s in sheets[:3]], "budget": budget,
+                "round": r, "cover": cover, "their_price": their_price}
 
     def best_levers(self, case, terms, std, sup, slopes=None):
         """{field: lever row} - the best option per non-price field that saves at least MIN_LEVER_SHARE of C
@@ -487,6 +511,8 @@ class TeamAgent:
             if earlier:
                 return earlier, "its earlier offer was cheaper than the agreed sheet"
             return accept, "agreed to our terms"
+        if plan.get("repeat") and accept and left > 0:  # we would only repeat ourselves: no more room
+            return accept, "no more room"
         if status == "final_offer":  # its last word: any further message makes it walk away (8/8 recorded)
             if accept:
                 return accept, "final offer"
@@ -717,8 +743,12 @@ class TeamAgent:
                     t = self.iso_price(case, t, c_plan, plan.get("std"), plan.get("sup"), floor)
             if t and must_haves_ok(case, t, plan.get("std")) and t not in sheets:
                 sheets.append(t)
-        if plan["sheets"] and plan["sheets"][0] not in sheets and len(sheets) < 3:
-            sheets.append(plan["sheets"][0])  # always offer the planned package too
+        if plan["sheets"]:  # equal-cost menus only: the supplier picks the sheet that is dearest for us
+            c_plan = plan["costs"][0]
+            sheets = [t for t in sheets
+                      if 0.998 * c_plan <= self.cost(case, t, plan.get("std"), plan.get("sup")) <= 1.002 * c_plan]
+            if plan["sheets"][0] not in sheets and len(sheets) < 3:
+                sheets.insert(0, plan["sheets"][0])  # the planned package always goes out
         if not sheets and plan["sheets"]:
             sheets = plan["sheets"]
         sheets, instead = self.no_regress(case, threads, sid, plan, sheets)
@@ -735,6 +765,7 @@ class TeamAgent:
             return ""
 
         body = re.sub(r"\s*\(\s*[,;\s]*\)", "", ID_RE.sub(known, str(d.get("body", "")))).strip()[:8000]
+        body = self.drop_repeated_claims(threads, sid, body)
         if not body:
             return None
         message = {"subject": str(d.get("subject") or f"Re: {case['title']}")[:300], "body": body,
@@ -742,6 +773,20 @@ class TeamAgent:
         if att := self.data_attachment(threads, body):
             message["attachments"] = [att]
         return {"supplier_id": sid, "message": message}
+
+    def drop_repeated_claims(self, threads, sid, body):
+        """Each data ID counts once per case (a repeat comes back 'duplicate', 18 % of our claims did): drop
+        sentences whose IDs were all cited before. A rival's offer or quote may be cited once per supplier."""
+        used = {i for m in threads[sid] if m.get("from") == "buyer" for i in ID_RE.findall(str(m.get("body", "")))}
+        used |= {i for ev in threads.values() for m in ev if m.get("from") == "buyer"
+                 for i in ID_RE.findall(str(m.get("body", ""))) if not i.startswith(("offer:", "quote:"))}
+        parts = re.split(r"(\n+|(?<=[.!?]) +)", body)  # sentences and lines, with what follows them (keeps paragraphs)
+        keep = []
+        for sentence, sep in zip(parts[::2], [*parts[1::2], ""], strict=False):
+            ids = ID_RE.findall(sentence)
+            if not ids or not all(i in used for i in ids):
+                keep.append(sentence + sep)
+        return "".join(keep).strip()
 
     def data_attachment(self, threads, body):
         """When a supplier asks for our figures, attach them: every fact we cite, with its ID and the

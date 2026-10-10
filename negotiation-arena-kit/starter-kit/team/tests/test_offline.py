@@ -186,3 +186,11 @@ def test_no_stricter_ask_than_needed():
                 if stricter and s["lead_time_days"] in stricter:
                     assert a.cost(case, {**s, "lead_time_days": min(o for o in options if o >= need)},
                                   plan["std"], plan["sup"]) > a.cost(case, s, plan["std"], plan["sup"]) + 1, path
+
+
+def test_repeated_claims_are_dropped_keeping_paragraphs():
+    a = TeamAgent(stub, None)
+    threads = {"sup:1": [{"from": "buyer", "body": "Index fell (idx:A@2025-08, idx:A@2026-08)."}]}
+    body = "Dear team,\n\nIndex fell (idx:A@2025-08, idx:A@2026-08). Your OTD was 80% (sc:1@2026Q3).\n\nRegards"
+    out = a.drop_repeated_claims(threads, "sup:1", body)
+    assert "idx:A" not in out and "sc:1@2026Q3" in out and out.startswith("Dear team,\n\n")

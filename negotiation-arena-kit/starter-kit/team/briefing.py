@@ -169,13 +169,8 @@ class Briefing:
             pos = _q(p, "SELECT id, order_date, price FROM po_lines WHERE supplier_id = ? AND part_id = ? "
                         "ORDER BY order_date DESC LIMIT 3", sid, part)
             ok = [r for r in pos if r["id"] in self.facts]
-            if len(ok) >= 2:
+            if len(ok) >= 2:  # context only: price history 'holds, but does not change our calculation' (41/46)
                 out.append("- recent orders: " + ", ".join(f"{r['order_date']} {r['price']}" for r in ok))
-                self.claims.append({
-                    "kind": "orders", "ids": [r["id"] for r in ok], "value": None, "supplier": sid, "helps": "buyer",
-                    "sentence": f"Our recent orders were at EUR {ok[-1]['price']} to {ok[0]['price']} "
-                                f"({', '.join(r['id'] for r in ok)}).",
-                })
         for n in _q(p, "SELECT id, date, topic, headline FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 3",
                     sid):
             out.append(f"- news {n['id']} {n['date']}: {n['headline']} ({n['topic']})")
