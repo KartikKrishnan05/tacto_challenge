@@ -1,1 +1,15 @@
 can you show me the cheatsheet
+
+---
+
+The cheathheet is way to hardcoded please make it more general so that for the current cases it doesn't overfit
+
+---
+
+<task-notification>
+<task-id>b02rebs8b</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/6ce51226-f055-48a1-8343-6f3041fdde03/tasks/b02rebs8b.output</output-file>
+<status>failed</status>
+<summary>Background command "Run all practice cases with the dual agent" failed with exit code 143</summary>
+</task-notification>
