@@ -42,6 +42,7 @@ WALK_RISK_CLOSE = 0.7
 ANALYST_GRACE_S = 12.0  # how long the negotiator waits for the analyst's model layer
 WRITE_TIMEOUT_S = 25.0  # the writer model's share of the 60 seconds
 DEFAULT_REPLY_S = 45.0  # a supplier round trip before we have measured one
+TOKEN_STEP = 0.001  # a supplier move under 0.1 % of C is no move: we do not answer it
 MAX_REPLY_S = 90.0  # a reply takes up to about a minute; longer waits are not the supplier's pace
 ROUND_MARGIN_S = 10.0
 PROFILE_TIMEOUT_S = 90.0
@@ -90,11 +91,13 @@ def llms_from_env():
 
 def concession_guard(prev, proposed, their_step, scale):
     """(target, our step) in C: never further toward them than RECIPROCITY × their last step, never
-    back from what we offered, and no token steps (below MIN_STEP of `scale` we hold)."""
-    allowed = strategy.RECIPROCITY * max(their_step, 0.0)
-    ours = min(max(proposed - prev, 0.0), allowed)
-    if ours < strategy.MIN_STEP * scale:
-        ours = 0.0
+    back from what we offered; a real step of theirs (TOKEN_STEP of `scale`) is answered visibly."""
+    allowed, visible = strategy.RECIPROCITY * max(their_step, 0.0), strategy.MIN_STEP * scale
+    if their_step < TOKEN_STEP * scale:
+        return prev, 0.0  # no real move from them: we hold
+    # A real move gets an answer: at least a visible step, never more than the guard allows (P01,
+    # 10 Oct: holding after their steps of 12.8k and 8.2k in C drew a final offer both times).
+    ours = min(max(proposed - prev, visible), allowed)
     return prev + ours, ours
 
 

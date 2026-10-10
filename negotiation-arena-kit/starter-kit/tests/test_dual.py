@@ -4,7 +4,7 @@ import random
 import pytest
 
 from arena_kit import ArenaClient, RemoteTable, play, strategy, tactics
-from arena_kit.agents import DualAgent
+from arena_kit.agents import DualAgent, dual
 from arena_kit.agents.dual import FORCE_CLOSE_AT, NO_NEW_COUNTER_AT, concession_guard, weighted_sentence
 from arena_kit.cost import total_cost
 from arena_kit.intel import Analyst, Mail, walk_risk, weighted_impact
@@ -154,7 +154,10 @@ def test_the_concession_guard_never_exceeds_reciprocity():
         target, ours = concession_guard(prev, proposed, their, scale)
         assert ours >= 0 and target == prev + ours
         assert ours <= strategy.RECIPROCITY * max(their, 0) + 1e-9
-        assert ours == 0 or ours >= strategy.MIN_STEP * scale  # no token steps
+        if their < dual.TOKEN_STEP * scale:
+            assert ours == 0  # no real move from them: we hold
+        else:  # a real move is answered - visibly, unless half their step is less
+            assert ours >= min(strategy.MIN_STEP * scale, strategy.RECIPROCITY * their) - 1e-9
 
 
 def test_every_counter_moves_at_most_half_their_step():
@@ -262,8 +265,6 @@ def test_tactics_change_words_only_and_never_invent_a_rival():
 
 def test_a_slow_writer_falls_back_to_code_within_the_clock(monkeypatch):
     import time as _time
-
-    from arena_kit.agents import dual
 
     monkeypatch.setattr(dual, "WRITE_TIMEOUT_S", 0.2)
 
