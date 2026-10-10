@@ -797,6 +797,7 @@ class DualAgent:
         record["seconds"] = round(self.clock() - self.t_open - record["elapsed_s"], 2)
         if close_reason:
             record["closing"] = getattr(self, "_closing", None)
+            self.closed = {"reason": close_reason, "elapsed_s": record["elapsed_s"], **(record["closing"] or {})}
             log.info("%s: close (%s) -> %s", self.case_id, close_reason, decisions[0]["message"]["action"])
         record["moves"] = [
             {
@@ -822,5 +823,5 @@ class DualAgent:
         return decisions
 
     def summary(self):
-        """Tactic sequence per thread, for reports."""
-        return dict(self.tactic_log)
+        """Tactic sequence per thread and how the case closed, for reports."""
+        return {"tactics": dict(self.tactic_log), "closed": getattr(self, "closed", None)}
