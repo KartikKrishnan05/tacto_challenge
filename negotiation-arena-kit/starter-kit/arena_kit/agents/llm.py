@@ -14,9 +14,11 @@ import logging
 import math
 import os
 import re
+import time
 
 import httpx
 
+from .. import runlog
 from ..cost import complete_offer, must_haves_ok, total_cost
 from ..docs import standard_terms
 from ..play import latest, live_threads, moves_left, standing
@@ -63,23 +65,36 @@ Reply with ONE JSON object and nothing else:
   120 words, no placeholders."""
 
 
-def llm_from_env():
-    """LLM_PROVIDER=anthropic (Anthropic SDK) or openai (any OpenAI-compatible endpoint)."""
-    provider, model = os.environ.get("LLM_PROVIDER", "openai"), os.environ["LLM_MODEL"]
+# Models that take the server-side refusal fallback ("default" form, Claude API only).
+FALLBACK_MODELS = ("claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5", "claude-fable-5-1")
+
+
+def llm_from_env(model=None, timeout=45.0, provider=None, retries=None):
+    """LLM_PROVIDER=anthropic (Anthropic SDK) or openai (any OpenAI-compatible endpoint). `model`
+    overrides LLM_MODEL, e.g. a stronger model for preparing before the clock runs; `provider`
+    overrides LLM_PROVIDER; `retries` caps the SDK's retries (a timeout is retried, so wall clock
+    can reach timeout × (retries + 1))."""
+    provider = provider or os.environ.get("LLM_PROVIDER", "openai")
+    model = model or os.environ["LLM_MODEL"]
     if provider == "anthropic":
         import anthropic
 
-        client = anthropic.Anthropic(timeout=45.0)
+        client = anthropic.Anthropic(timeout=timeout, **({} if retries is None else {"max_retries": retries}))
         extra = {"output_config": {"effort": e}} if (e := os.environ.get("LLM_EFFORT")) else {}
+        if model in FALLBACK_MODELS:  # a safety decline is re-run on a fallback model in the same call
+            extra |= {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}
+        create = client.beta.messages.create if "betas" in extra else client.messages.create
 
         def complete(system, user):
-            r = client.messages.create(
+            r = create(
                 model=model,
                 max_tokens=16000,
                 system=system,
                 messages=[{"role": "user", "content": user}],
                 **extra,
             )
+            if r.stop_reason == "refusal":
+                raise RuntimeError("the model declined the request")
             return "".join(b.text for b in r.content if b.type == "text")
 
         return complete
@@ -91,7 +106,7 @@ def llm_from_env():
             "model": model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         }
-        r = httpx.post(f"{base}/chat/completions", json=body, headers=headers, timeout=45.0)
+        r = httpx.post(f"{base}/chat/completions", json=body, headers=headers, timeout=timeout)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"]
 
@@ -105,15 +120,35 @@ class LLMAgent:
         self.case_id, self.brief, self.dossier = None, "", {}
 
     def decide(self, case, threads):
+        rec = runlog.current()
         if case["case_id"] != self.case_id:
             self.case_id, self.brief = case["case_id"], self.prepare(case)
+            if rec:
+                rec.llm(kind="system", system=SYSTEM)
+        prompt = reply = parsed = error = None
+        t0 = time.monotonic()
         try:
-            reply = self.complete(SYSTEM, self.render(case, threads))
-            checked = self.guard(case, threads, parse(reply))
+            prompt = self.render(case, threads)
+            reply = self.complete(SYSTEM, prompt)
+            parsed = parse(reply)
+            checked = self.guard(case, threads, parsed)
         except Exception as e:  # a slow or broken LLM must not cost the case
             log.warning("LLM failed (%s) - falling back to the naive move", e)
-            checked = None
-        return checked or self.fallback.decide(case, threads)
+            checked, error = None, f"{type(e).__name__}: {e}"
+        out = checked or self.fallback.decide(case, threads)
+        if rec:
+            rec.flag = "fell back to naive" if checked is None else None
+            rec.llm(
+                kind="decide",
+                seconds=round(time.monotonic() - t0, 2),
+                prompt=prompt,
+                reply=reply,
+                parsed=parsed,
+                error=error,
+                fallback=checked is None,  # the guard refused the model's move, or the model failed
+                sent=out,
+            )
+        return out
 
     def prepare(self, case):
         """Prepare supplier, product and internal company context once before negotiation."""

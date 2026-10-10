@@ -1,0 +1,2586 @@
+{
+ "version": 2,
+ "updated": "2026-10-10T21:39:43+02:00",
+ "used_by_agents": false,
+ "sessions": 51,
+ "cases": 12,
+ "rules": {
+  "established": ">= 3 supporting sessions from >= 3 cases of >= 2 case types, support > 2x against",
+  "doubtful": "a 'do' tip whose supporters scored 0.03 or more below other sessions of the same case"
+ },
+ "tips": [
+  {
+   "id": "T7",
+   "kind": "do",
+   "when": "A supplier says payment, delivery, or the effective date affects its costs or operations",
+   "action": "Offer and compare clearly priced packages that trade those terms against price, rather than assuming a timing or delivery change is free.",
+   "why": "The supplier may price the operational benefit or cost into its offer, while the buyer’s best choice depends on the whole package.",
+   "evidence": [
+    {
+     "session_id": "378f79a072738497",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.825326202612408,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier says an immediate cost increase prevents it from delaying a price change DO Compare packages with different effective dates and prices instead of assuming a later start will be free. BECAUSE The supplier initially resisted a delay, then offered different prices for packages starting at different times.",
+     "evidence": "“Due to the immediate impact of our increased costs, we cannot phase in the price adjustment”"
+    },
+    {
+     "session_id": "b4a1041e412e3d14",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.6488386201597143,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier says payment timing or the start date affects its costs DO compare complete packages rather than assuming more favourable timing can be added without changing the price BECAUSE the supplier may offset financing or operational costs by requiring a higher unit price",
+     "evidence": "“Longer payment terms or a later effective date increase our financing and operational costs, which would require a higher price.”"
+    },
+    {
+     "session_id": "eed566a538dd053d",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4199346320062016,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier values faster payment or a more flexible delivery arrangement DO Offer alternative packages and ask for a price improvement in exchange for the terms the supplier prefers. BECAUSE A supplier can trade a benefit it values for a lower price; the buyer should compare the whole package because freight and payment terms also carry costs.",
+     "evidence": "Supplier e-mail: “Faster payment is welcome; we can reflect it in the price.” Buyer e-mail: “shifts freight collection to us.”"
+    },
+    {
+     "session_id": "6029e26dbc0708d3",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.8061375062582925,
+     "relation": "supports",
+     "lesson": "[do] WHEN payment terms and the start date may matter differently to the supplier DO present a small set of clearly priced packages that trade those terms against unit price BECAUSE the supplier can select a workable combination instead of rejecting a single package whose terms do not suit it",
+     "evidence": "Buyer: “If the earlier start and your payment terms matter most, the first option keeps both; the second keeps your payment terms with a later start.”"
+    },
+    {
+     "session_id": "97aba1b8b9e8cc79",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.8998338783551213,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier cites a price freeze but invites discussion of other terms DO Seek explicit prices for alternative packages of commitment and payment terms rather than treating the stated freeze as the end of negotiation. BECAUSE A supplier that will not grant a standalone price cut may still price a package differently when another term changes.",
+     "evidence": "Supplier: “Our management has frozen all price reductions … We can talk about the terms instead - payment, volume or contract length.”"
+    },
+    {
+     "session_id": "c9b04d1a168f13b1",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier indicates that a busy schedule constrains its offer DO ask whether delivery flexibility and payment terms can support a lower price, then compare the complete packages BECAUSE more scheduling room can reduce the supplier’s operating pressure and make a price concession worthwhile",
+     "evidence": "“That extra time helps us fit you into our busy schedule without a problem.”"
+    },
+    {
+     "session_id": "9be717d7d70db4ee",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier identifies a payment arrangement it prefers DO use that preference as a bargaining chip, asking for a price reduction in return rather than making every package less attractive on payment BECAUSE the supplier explicitly linked its preferred payment arrangement to a lower base price",
+     "evidence": "“we prefer Option B as it maintains our standard ... payment terms”; “we can reduce the base price”"
+    },
+    {
+     "session_id": "4505c06b1edf3791",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier indicates that capacity constrains delivery DO offer a lead time the supplier can reliably support as part of a package, while continuing to negotiate price BECAUSE a feasible schedule can make the volume commitment acceptable to the supplier without requiring the buyer to accept its opening price",
+     "evidence": "Buyer: “its longer lead time could help you reserve capacity and deliver reliably”; supplier: “we can firmly reserve the corresponding monthly quantities in our delivery schedule.”"
+    },
+    {
+     "session_id": "8ffc168595182655",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9408231099101966,
+     "relation": "supports",
+     "lesson": "[do] WHEN payment terms and the effective date are negotiable alongside price DO Offer coherent packages that trade those terms against price, rather than presenting only one price demand. BECAUSE The supplier selected a buyer-proposed package as the basis for a revised offer, allowing negotiation across terms it valued differently.",
+     "evidence": "Supplier: “Building on your Option C, we accept the ... payment term and the ... effective date at a revised price.”"
+    },
+    {
+     "session_id": "a8da82a7edbf02aa",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9314501660348072,
+     "relation": "supports",
+     "lesson": "[do] WHEN price, payment terms and the effective date are all negotiable DO offer a small set of coherent packages that trade those terms against one another, and identify a preferred package BECAUSE the supplier can counter on a workable package instead of treating each requested concession separately",
+     "evidence": "“Building on your Option B, we can adjust our Angebot as follows.”"
+    },
+    {
+     "session_id": "75aa91ea062ea53e",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5833082882580507,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier prefers faster payment or an earlier start DO Offer those terms conditionally in exchange for a price improvement, and assess the whole package rather than price alone. BECAUSE Preferred terms give the supplier value, but faster payment also costs the buyer working capital; a price concession must justify that trade.",
+     "evidence": "“gives you the payment term and start date you requested in exchange for a lower price”; “paying earlier ties up our working capital, so an option with faster payment carries a lower price.”"
+    },
+    {
+     "session_id": "144560a4a3c36cbb",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier may value payment terms or the start date differently from the buyer DO offer packages that exchange price for those terms, rather than negotiating price alone BECAUSE the supplier can select a workable combination, while the buyer avoids giving away a more valuable term without a price trade-off",
+     "evidence": "“If faster payment matters more, Option C gives you that in exchange for a lower price.”"
+    },
+    {
+     "session_id": "34a817822bc764c0",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.34799309194855216,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier offers different prices for different payment terms DO negotiate price and payment terms as a package, and compare the value of each package rather than its price alone BECAUSE payment timing affects the supplier’s pricing decision and the buyer’s working-capital cost",
+     "evidence": "Buyer: “if a shorter payment term matters, Option C moves closer to your standard terms in exchange for a lower price.”"
+    },
+    {
+     "session_id": "2156865dbee169fe",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier identifies a scheduling constraint but is willing to discuss volume and contract length DO offer a package that accommodates the constraint and gives the supplier a firmer commitment, while asking for a price concession BECAUSE the supplier may accept the workable structure and then negotiate price rather than reject the whole proposal",
+     "evidence": "“We acknowledge your revised volume forecast and accept the structural terms of your Option B.” The supplier subsequently wrote, “we adjust our price.”"
+    },
+    {
+     "session_id": "b43093900abd0187",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier will discuss packages with different payment terms and agreement lengths DO negotiate the terms together rather than treating unit price as the only source of value BECAUSE the supplier revised its package after considering a different agreement length, and the buyer’s outcome also depended on terms besides price",
+     "evidence": "“We have considered your Option C” and “can offer a unit price” with revised payment terms."
+    },
+    {
+     "session_id": "37cf59e72db1a70e",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says capacity constraints require more lead time DO offer the workable lead time as part of a package that asks for a lower price BECAUSE lead time affects the supplier’s capacity planning, so flexibility on it can make a price request more credible.",
+     "evidence": "“Given our current capacity utilisation” and “the lead time in your Option B remains strictly necessary for our capacity planning.”"
+    },
+    {
+     "session_id": "69fe5d4c35d15d2b",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says a longer lead time is needed to secure supply DO offer that flexibility as part of a package and ask for a price concession in return BECAUSE a constraint the supplier values becomes a negotiable exchange rather than a concession given away for free",
+     "evidence": "Buyer: “Accepting that lead time costs us flexibility, so we ask for a price step in return.” Supplier: “the ... lead time is necessary to secure your allocation and ensure reliable supply.”"
+    }
+   ],
+   "support": {
+    "sessions": 17,
+    "cases": 9,
+    "case_types": 5,
+    "against": 0,
+    "lift_vs_same_case": 0.021
+   },
+   "status": "established"
+  },
+  {
+   "id": "T8",
+   "kind": "avoid",
+   "when": "A supplier holds its offer and the buyer has offered no meaningful reciprocal change",
+   "action": "Stop repeating the same or a merely nominal proposal; make a feasible trade tied to an improvement, or decide whether to close.",
+   "why": "A negligible buyer move may give the supplier no reason to concede further.",
+   "evidence": [
+    {
+     "session_id": "378f79a072738497",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.825326202612408,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier has held its offer and the buyer is considering only a nominal change DO Make a meaningful revised proposal or decide whether to close, rather than expecting a token movement to unlock another concession. BECAUSE The supplier said the nominal change gave it no basis to move further.",
+     "evidence": "“a nominal adjustment” and “does not enable us to make further concessions”"
+    },
+    {
+     "session_id": "b4a1041e412e3d14",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.6488386201597143,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier repeatedly holds its offer and points out that the buyer has made no reciprocal move DO stop resending identical packages; offer a feasible new trade tied to a price improvement, or decide whether to accept BECAUSE repetition did not induce another concession here, and the supplier ultimately issued a final offer",
+     "evidence": "“As you have maintained your previous offer without any reciprocal movement, we must hold our offer.”"
+    },
+    {
+     "session_id": "8ffc168595182655",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9408231099101966,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has countered and the buyer has no new evidence or changed terms to offer DO Do not expect an unchanged repeat of the same packages to produce another concession; assess the counteroffer or bring a substantive new basis for negotiation. BECAUSE Here the supplier recognized the repetition, held its price, and issued a final offer.",
+     "evidence": "Buyer: “We keep our offer as it stands.” Supplier: “I note that your offer has remained unchanged in this round.” Back office: “My call: hold.”"
+    },
+    {
+     "session_id": "75aa91ea062ea53e",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5833082882580507,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer repeats an unchanged offer and the supplier has stopped moving DO Do not expect repetition alone to produce another concession; provide requested evidence or change the proposed trade before deciding whether to accept. BECAUSE Here the supplier recognized the unchanged offer and its internal decision remained to hold.",
+     "evidence": "“We see that you have maintained your previous offer.” Back-office notes: “My call: hold.”"
+    },
+    {
+     "session_id": "34a817822bc764c0",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.34799309194855216,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has held its offer and says further concessions require movement from the buyer DO do not simply repeat an unchanged offer; consider a conditional, worthwhile trade or reassess the alternative to a deal BECAUSE this supplier’s pricing process required reciprocal movement, so repeating the offer produced another hold and a final-offer warning",
+     "evidence": "Supplier: “As our pricing process requires reciprocal movement, we must hold our current position.” Back office: “My call: hold.”"
+    },
+    {
+     "session_id": "c7767a0427aae84f",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has rejected an offer and identified the change it needs to reconsider DO do not simply repeat the same offer; test another feasible lever or request a specific counterproposal BECAUSE the supplier may hold its position when the buyer provides no new basis for a concession",
+     "evidence": "“as you have maintained your previous position, we are unable to adjust our offer.”"
+    },
+    {
+     "session_id": "a3ddfeca8b05e380",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has countered and the buyer is about to repeat an unchanged proposal DO bring a new substantiated trade-off or assess the supplier’s offer against the alternative instead of simply resending the same packages BECAUSE an unchanged proposal gave this supplier no new reason to move; its internal decision was to hold.",
+     "evidence": "“We note that your proposed packages remain unchanged from your previous message.” Back office: “My call: hold.”"
+    },
+    {
+     "session_id": "b6569cb29699118b",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has repeated its offer and the buyer has already repeated the same counteroffer DO do not rely on another unchanged counteroffer to produce movement; introduce a credible new trade-off or assess whether to accept or walk away BECAUSE in this exchange, repetition produced a hold rather than another concession.",
+     "evidence": "Supplier: “I see you kept your offer unchanged”; back-office notes: “My call: hold.”"
+    },
+    {
+     "session_id": "468ab89df3438204",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has held its offer and named a specific missing justification DO Do not simply repeat an unchanged offer. Address the missing justification or change the proposed trade-off. BECAUSE Repeating the same package without resolving the supplier’s stated constraint produced another hold, not a concession.",
+     "evidence": "“We note that you have maintained your previous offer without providing the requested volume commitment.” Back office: “My call: hold.”"
+    },
+    {
+     "session_id": "2d52f70e34f822c5",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier says the buyer's latest price movement is marginal and holds its offer DO do not repeat the same package unchanged if seeking another concession; make a meaningful, justified move or change the package BECAUSE this supplier treated an unchanged buyer offer as giving it no reason to move further",
+     "evidence": "“We note that your latest proposal remains unchanged from your previous offer. As we have already made concessions in our earlier proposals, we cannot adjust our price further without a corresponding step from your side.”"
+    },
+    {
+     "session_id": "e568df77c5228266",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.444026902322786,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier repeats its offer after considering a verified competing quote DO do not simply resend the same options; change the proposed trade-off or pursue the competing offer BECAUSE the verified quote has already been considered, and repetition alone gives the supplier no new reason to move",
+     "evidence": "Supplier e-mail: “We checked the rival quote data you cited; it holds, but it does not change our calculation. Our agreed offer stands.”"
+    },
+    {
+     "session_id": "22008d8062c16d5d",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer repeats its offer unchanged after the supplier has moved DO If seeking another concession, change a substantive part of the proposal or provide new support rather than simply repeating it. BECAUSE Here the supplier explicitly noticed the unchanged offer, then held its position and issued a final offer.",
+     "evidence": "“We note that your proposed prices remain unchanged from your previous message.” Back-office note: “My call: hold.”"
+    },
+    {
+     "session_id": "3b3a084522467bad",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier repeats an unchanged offer after the buyer repeats an unchanged counteroffer DO do not simply restate the same package; introduce a meaningful new trade or assess whether to accept or walk away BECAUSE repetition did not move the supplier, and the buyer ultimately closed on the supplier’s standing offer.",
+     "evidence": "“We keep our offer as it stands.” The supplier replied, “Our current offer stands.”"
+    },
+    {
+     "session_id": "aa41a2c90bf23d36",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has made little movement and the buyer's last offer remains far away DO Do not simply repeat the same options and expect another concession; introduce a credible new trade or decide against the available offer. BECAUSE In this session, an unchanged buyer offer led the supplier to hold its position and declare it final.",
+     "evidence": "Buyer: “We keep our offer as it stands.” Supplier: “You have maintained your previous offer without further movement.” Back office: “My call: hold.”"
+    },
+    {
+     "session_id": "a85ecb8a65833641",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7210104470283076,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier repeats its position and labels it final DO compare the complete offer with the available alternative; accept if it is worthwhile, rather than assuming another unchanged request will yield a concession BECAUSE the back-office decision was to hold, not counter, at that stage",
+     "evidence": "“My call: hold.” “We answer with our final offer.”"
+    },
+    {
+     "session_id": "f5403018608aa9cb",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeatedly identifies a trade it values, but the buyer cannot offer it DO recognise that repeating the same price request may have diminishing returns; seek another authorised trade or evaluate the standing offer BECAUSE the supplier may tie further price movement to the unavailable trade rather than to additional argument",
+     "evidence": "The supplier said, “Faster payment would help us more than anything,” then, “Since you can't offer faster payment, we really can't drop the price anymore.” Its back-office note recorded: “My call: final_offer.”"
+    },
+    {
+     "session_id": "30df5892a9f36ded",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier holds its offer unchanged after receiving several buyer packages DO Change the basis of the negotiation—such as the agreement length or allocation of cost risk—rather than repeating packages and then accepting the unchanged offer without a final trade-off. BECAUSE Here, repeating offers did not prompt another concession: the supplier recorded successive decisions to hold, and the buyer accepted its final terms.",
+     "evidence": "Back-office notes: “My call: hold.” “My call: hold.” Supplier e-mail: “This is our final offer (letztes Angebot). Please decide.”"
+    }
+   ],
+   "support": {
+    "sessions": 17,
+    "cases": 8,
+    "case_types": 6,
+    "against": 0,
+    "lift_vs_same_case": 0.009
+   },
+   "status": "established"
+  },
+  {
+   "id": "T11",
+   "kind": "do",
+   "when": "A supplier says faster payment would help its operations",
+   "action": "Offer it only in explicit exchange for a price reduction, and compare the reduction with the cost of paying sooner.",
+   "why": "Earlier cash can be valuable to the supplier, but a discount smaller than the buyer’s payment cost erodes the benefit.",
+   "evidence": [
+    {
+     "session_id": "10308ea624898b83",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4218549818771648,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says faster payment helps its operations DO offer faster payment only as an explicit exchange for a better price, and compare the discount with the cost of paying sooner BECAUSE the supplier values earlier cash and may price that benefit into its offer; giving it away without a sufficient discount reduces the buyer’s saving",
+     "evidence": "Supplier e-mail: “Faster payment is welcome; we can reflect it in the price.”"
+    },
+    {
+     "session_id": "8ad26b6e5b188c7b",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.5602086063225428,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says faster payment matters to its operations DO offer faster payment only as part of a package that earns a price reduction, and compare that reduction with the cost of paying sooner BECAUSE the supplier values earlier cash enough to trade price for it, but the buyer does not capture the full benefit if the payment concession costs more than the discount",
+     "evidence": "Supplier e-mail: “Payment in 14 days is what we need most right now to keep the shop running smoothly. Faster payment is welcome; we can reflect it in the price.”"
+    },
+    {
+     "session_id": "30136c828c349db4",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.8927154994140178,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says faster payment would help DO offer it as an explicit exchange for a lower price, but test how much discount the supplier will give BECAUSE the supplier may value earlier cash while limiting the discount to what it considers proportionate",
+     "evidence": "Supplier: “Faster payment is useful to us, but any discount must remain proportionate to our actual costs.”"
+    },
+    {
+     "session_id": "97aba1b8b9e8cc79",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.8998338783551213,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says payment timing can affect its price DO Ask for a priced alternative with faster payment, then compare the discount with the cost of changing payment terms before accepting. BECAUSE Faster payment has value to the supplier, but its cost to the buyer can offset a lower unit price.",
+     "evidence": "Supplier: “faster payment terms do allow us to adjust the price.”"
+    },
+    {
+     "session_id": "43e8432b0599bbd4",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5886536504035952,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says faster payment is especially valuable and links it to price DO seek a specific price concession in exchange for any feasible payment improvement, rather than leaving the exchange for a separate discussion BECAUSE the supplier has identified a benefit it values and said it can reflect that benefit in its price",
+     "evidence": "“Faster payment would help us more than anything.” “Faster payment is welcome; we can reflect it in the price.”"
+    },
+    {
+     "session_id": "a3ddfeca8b05e380",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[do] WHEN payment timing is negotiable DO price faster payment explicitly rather than treating it as a free concession BECAUSE earlier payment uses the buyer’s working capital and can be exchanged for a lower unit price.",
+     "evidence": "“paying earlier ties up our working capital, so an option with faster payment carries a lower price.”"
+    },
+    {
+     "session_id": "8515efd13bacd293",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier explicitly offers a concession in exchange for quicker payment DO compare the price concession with the cost of earlier payment, and make any change in payment terms conditional on a worthwhile price move BECAUSE the supplier values faster cash collection, so payment timing is bargaining currency rather than a term to give away without compensation.",
+     "evidence": "“we can offer a further concession if we settle on a” quicker payment term; the buyer also wrote, “I hear that quicker payment matters to you.”"
+    },
+    {
+     "session_id": "2d52f70e34f822c5",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier offers different prices for different payment terms DO negotiate price and payment terms as a package, making any earlier payment conditional on a lower price BECAUSE the supplier may value earlier payment, while it costs the buyer working capital; an apparent price concession can disappear when the payment terms change",
+     "evidence": "The supplier offered an alternative “building on your Option B, which maintains our 30-day payment terms” at a lower price than its offer with longer payment."
+    },
+    {
+     "session_id": "edc1255165f65280",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier offers different combinations of price and payment terms DO Compare the full value of each package, including the working-capital cost of paying earlier, rather than judging price alone. BECAUSE A lower price can be offset by less favorable payment terms; the buyer captures value through the package as a whole.",
+     "evidence": "BUYER: “paying earlier ties up our working capital, so an option with faster payment carries a lower price.”"
+    },
+    {
+     "session_id": "e568df77c5228266",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.444026902322786,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says earlier payment matters to it DO make earlier payment conditional on a lower price, rather than granting it without a return BECAUSE earlier payment has value to the supplier and a working-capital cost to the buyer, so it can support a further price concession",
+     "evidence": "Buyer e-mail: “Paying sooner costs us, so we ask for a further price step in return.” Supplier e-mail: “We have clarified this internally and can move further on the price.”"
+    },
+    {
+     "session_id": "22008d8062c16d5d",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier values faster payment but the buyer also values its working capital DO Compare price and payment terms as a package; seek a price reduction for faster payment only if it outweighs the working-capital cost. BECAUSE Faster payment can motivate a supplier concession, but a lower price alone may not make the package better for the buyer.",
+     "evidence": "“Thank you for lowering your price in return for faster payment, which you prefer.” “paying earlier ties up our working capital”"
+    },
+    {
+     "session_id": "aa41a2c90bf23d36",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier quotes different prices for different payment terms DO Compare the complete packages before choosing; make any move toward faster payment conditional on an adequate price reduction. BECAUSE The supplier prices payment timing into its offer, so a lower unit price can come at the cost of less favourable payment terms.",
+     "evidence": "“As an alternative, in response to your movement, we are prepared to offer a unit price … based on your proposed … payment terms.”"
+    }
+   ],
+   "support": {
+    "sessions": 12,
+    "cases": 8,
+    "case_types": 6,
+    "against": 0,
+    "lift_vs_same_case": 0.038
+   },
+   "status": "established"
+  },
+  {
+   "id": "T13",
+   "kind": "do",
+   "when": "A supplier asks for evidence of demand or a firm volume commitment as a condition for improving price",
+   "action": "Provide supportable projections, establish what the buyer can genuinely commit, and request a conditional price reduction.",
+   "why": "A credible, binding volume gives the supplier planning value; an unspecified possibility may not.",
+   "evidence": [
+    {
+     "session_id": "b4a1041e412e3d14",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.6488386201597143,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier asks for a firm demand commitment as a route to a better price DO check what demand can genuinely be committed, then seek a conditional price reduction rather than suggesting an unspecified commitment BECAUSE the supplier values binding volume because it helps planning; an unquantified possibility gave it no basis to improve its offer",
+     "evidence": "“A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "6029e26dbc0708d3",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.8061375062582925,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier asks for volume evidence and says a firm volume commitment could improve its price DO do not accept immediately; provide supportable projections and explore whether an achievable commitment earns a further concession BECAUSE the supplier has identified a specific condition under which it may lower its price, so accepting without testing it can leave savings uncaptured",
+     "evidence": "“Please share your volume projections” and “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "baa270ae05710b53",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says a binding volume commitment could improve its price and asks what quantity the buyer can commit to DO State a defensible commitment limited to the volume actually available to that supplier, then request a revised price before accepting its current offer. BECAUSE The supplier identified a firm volume commitment—not a forecast—as a reason it could improve its price. Leaving the question unanswered left that route to a better offer untested.",
+     "evidence": "“A binding higher volume would help us and can improve the price. Which volume can you commit to?”"
+    },
+    {
+     "session_id": "9315eb4f03260e5c",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7015303329236482,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says a larger award could improve pricing but the full scope still needs a quote or approval DO seek a conditional price for the larger scope without making a binding volume commitment prematurely BECAUSE committed volume helps the supplier justify a lower price, while a conditional proposal preserves the buyer’s ability to verify scope and approvals first",
+     "evidence": "“A binding higher volume would help us and can improve the price.” The buyer replied: “A binding commitment depends on the complete quote and approval of the outstanding part.”"
+    },
+    {
+     "session_id": "4505c06b1edf3791",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the buyer makes a volume commitment conditional on reconciling it with a forecast DO provide the supporting figures or resolve the discrepancy before repeating the condition BECAUSE an unsubstantiated qualification gives the supplier a reason to request proof instead of making another concession",
+     "evidence": "Buyer: “subject to reconciling the binding quantity with our forecast.” Supplier: “Please provide the exact figures supporting your claims regarding the binding quantity reconciliation.”"
+    },
+    {
+     "session_id": "0383509004602959",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.41903073220856135,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says a lower price depends on a binding volume commitment DO Provide a credible forecast and a specific commitment if the buyer can genuinely make one; otherwise, stop presenting volume visibility as a price concession. BECAUSE The supplier needs figures it can use in its pricing calculation. An offer to discuss volume does not unlock the stated discount.",
+     "evidence": "“we cannot adjust our price without the actual volume figures” and “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "c7767a0427aae84f",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier requests a binding increase in volume to lower its price but the buyer cannot substantiate that demand DO decline to promise unsupported volume and negotiate with commitments the buyer can meet BECAUSE the proposed discount depends on a binding commitment, not an optimistic forecast",
+     "evidence": "“Which volume can you commit to? Which figures is that based on? Please send us the data.”"
+    },
+    {
+     "session_id": "7902b54f33de54c4",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.05639164267740558,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier rejects a proposed package and asks what purchase volume the buyer can commit to DO do not simply resend the same packages; check what volume can genuinely be committed and make any revised request conditional on it BECAUSE the supplier treated the unchanged offer as a reason to hold its position, while identifying a binding volume commitment as a reason to revisit its calculation",
+     "evidence": "“We note that you have maintained your previous offer without further adjustments.” “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "7902b54f33de54c4",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.05639164267740558,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says a longer agreement or committed volume could improve its price DO ask for a specific price improvement in exchange for a feasible commitment, and provide the figures supporting that commitment BECAUSE the supplier indicated that a concrete commitment, rather than a general forecast or question, could change its calculation",
+     "evidence": "“A longer contract term or a higher committed volume could allow us to review the calculation.” “Which figures is that based on? Please send us the data.”"
+    },
+    {
+     "session_id": "a3ddfeca8b05e380",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says a larger order could improve pricing DO explore a binding volume commitment only if the buyer can genuinely make one BECAUSE the supplier distinguishes a firm commitment from a forecast when deciding whether it has room to reduce price.",
+     "evidence": "“A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "468ab89df3438204",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier repeatedly asks for a substantiated volume commitment DO Provide a credible forecast if one exists; otherwise, do not rely on an unsupported volume claim to win another reduction. BECAUSE Here the supplier treated substantiated volume as a condition for further price movement.",
+     "evidence": "“As you cannot substantiate a volume commitment at this time, we are unable to offer further price reductions.”"
+    },
+    {
+     "session_id": "edc1255165f65280",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has rejected a proposal and names a binding commitment that could reopen its offer DO Do not simply repeat the rejected proposal; check whether the commitment is feasible and, if it is, make any increase conditional on an improved offer. BECAUSE Repeating the same terms gives the supplier no new reason to move, while a credible binding commitment may change its decision.",
+     "evidence": "SUPPLIER: “We note that you have maintained your previous offer without further adjustments”; “a higher binding volume could allow for a review.”"
+    },
+    {
+     "session_id": "b43093900abd0187",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier values certainty about future demand DO ask what volume commitment would improve the price, and provide a credible commitment if the buyer can make one BECAUSE a forecast alone did not change this supplier’s calculation, while binding volume could have supported a lower price",
+     "evidence": "“We checked the volume change data you cited; it holds, but it does not change our calculation.” “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "b43093900abd0187",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says it needs a binding volume commitment before improving price DO do not rely on a longer agreement alone to win another reduction BECAUSE the supplier held its price when the buyer offered more contract length but could not commit volume",
+     "evidence": "“Without a binding volume commitment, a longer contract length does not allow us to improve the price.” Back-office note: “My call: hold.”"
+    },
+    {
+     "session_id": "22008d8062c16d5d",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[do] WHEN a demand forecast rises and the supplier asks for a binding volume commitment DO Use verifiable forecast changes to support a price request, but distinguish a forecast from volume the buyer can actually commit to. BECAUSE The supplier checked and considered the forecast, yet said a binding increase would allow further pricing improvement.",
+     "evidence": "“We checked the volume change data you cited; it holds and we took it into account.” “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "37cf59e72db1a70e",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN a verified demand increase lets the buyer offer a firm volume commitment DO use that commitment to request a price concession, while checking that the supplier can support the added volume BECAUSE the supplier evaluated the verified increase and countered with a revised offer rather than rejecting the package.",
+     "evidence": "“We note your verified volume increase and have evaluated your proposed packages.”"
+    },
+    {
+     "session_id": "c0cc5600f8ca66dd",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN using expected volume to justify a price request DO bring supportable projections, or leave volume out of the argument if none can be substantiated BECAUSE The supplier asked for figures to evaluate the claimed volume, then held its offer after the buyer said it could not commit.",
+     "evidence": "“please share your specific volume projections so we can properly evaluate this aspect”; “you cannot commit to a specific volume at this time”; back-office note: “My call: hold.”"
+    },
+    {
+     "session_id": "60cc387e2204da12",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says further pricing depends on committed volume DO Explore a volume-for-price trade only if the forecast supports a binding commitment. BECAUSE The supplier distinguishes a firm increase in volume from demand information that does not change its calculation.",
+     "evidence": "Supplier e-mail: “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "aa41a2c90bf23d36",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier asks for a binding purchase commitment after hearing a growth forecast DO Treat the forecast as context, not as a concession; seek a price reduction tied to a commitment only if the buyer can genuinely make one. BECAUSE The supplier may recognise forecast growth but reserve meaningful price flexibility for guaranteed volume.",
+     "evidence": "“We acknowledge your revised offer and note your clarification that the volume forecast is non-binding.” The supplier added: “A binding higher volume would help us and can improve the price.”"
+    },
+    {
+     "session_id": "617612c35aca89b7",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier says an existing commitment is insufficient and asks whether another commitment is feasible DO answer the feasibility question directly; offer a binding change only if it is workable, or ask what concession the supplier would exchange for it BECAUSE repeating the same package leaves the supplier's stated condition unmet and can cause it to hold its offer",
+     "evidence": "Supplier e-mail: “our request for a higher volume commitment has not been addressed”; back-office note: “My call: hold.”"
+    }
+   ],
+   "support": {
+    "sessions": 20,
+    "cases": 7,
+    "case_types": 5,
+    "against": 0,
+    "lift_vs_same_case": -0.019
+   },
+   "status": "established"
+  },
+  {
+   "id": "T12",
+   "kind": "avoid",
+   "when": "An offer is attractive or accepted on unit price while other costs or obligations remain material",
+   "action": "Compare complete packages, including delivery, payment, and quality-related costs, before committing.",
+   "why": "A favorable unit price can conceal costs that reduce the saving on the whole deal.",
+   "evidence": [
+    {
+     "session_id": "10308ea624898b83",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4218549818771648,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier accepts one proposed package while other costs or terms remain material DO before placing the order, compare the full cost of the accepted package with the alternatives and seek improvement on any costly unresolved terms BECAUSE an accepted unit price does not by itself capture the available saving when freight, payment, or quality obligations can affect the deal’s value",
+     "evidence": "Supplier e-mail: “We can accept your terms and await your order.” The next supplier e-mail says: “Thank you for your order. Our order confirmation is attached.”"
+    },
+    {
+     "session_id": "8ad26b6e5b188c7b",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.5602086063225428,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN competing offers differ in delivery responsibility or other non-price terms DO do not choose solely by unit price; compare freight, payment and quality costs before accepting BECAUSE a lower quoted price can leave costs with the buyer, reducing the saving captured by the whole deal",
+     "evidence": "Buyer e-mail: “the delivered option carries a higher unit price.” Supplier e-mail: “Our quotation assumes standard capacity allocation and EXW delivery.”"
+    },
+    {
+     "session_id": "6434441a0c3ed0e7",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.2106402407090161,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier accepts a lower price only as part of a package with changes to payment terms or price adjustment DO compare the entire package with the earlier offer before accepting; do not count the headline price reduction as the whole saving BECAUSE payment terms and future index exposure can consume value even when the unit price falls",
+     "evidence": "Supplier e-mail: “This adjustment reflects our willingness to find a durable agreement while accommodating your preferred payment schedule.” The final deal also included an index clause."
+    },
+    {
+     "session_id": "c9b04d1a168f13b1",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN offering several packages while lower-priced bids remain available DO do not steer the supplier toward a higher-priced package unless its other terms justify the difference; compare all live offers before accepting BECAUSE the supplier can accept the suggested package immediately, leaving potential savings uncaptured",
+     "evidence": "Buyer: “We suggest Option B for its earlier, predictable payment”; supplier: “We can accept your terms and await your order.”"
+    },
+    {
+     "session_id": "4e0f152231d33e5b",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.0,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN an offer relies on a general quality assurance but leaves other valuable terms unsettled DO clarify quality commitments and negotiate payment terms and lead time before confirming the order BECAUSE A price-only agreement can leave costs and risks elsewhere in the deal, while a general assurance does not define a commitment.",
+     "evidence": "The supplier wrote, “We always aim to deliver top quality from our machines for your orders,” but its offer stated only a price."
+    },
+    {
+     "session_id": "468ab89df3438204",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a lower unit price comes with an index clause or less favourable payment terms DO Evaluate and negotiate those terms separately before accepting the price reduction. BECAUSE The saving score counts value beyond unit price; an index clause can expose the buyer to later increases.",
+     "evidence": "“We have noted your request for a volume commitment and its supporting forecast, but cannot substantiate one in this reply.” The eventual order retained the supplier’s index clause and payment terms."
+    },
+    {
+     "session_id": "3b3a084522467bad",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier prefers a package with a firmer quality commitment but no complaint chargebacks DO evaluate the whole package, not just the improved commitment or unit price BECAUSE the supplier may accept a stronger stated quality obligation while avoiding a separate cost if complaints occur.",
+     "evidence": "“Option B is the best fit” and “removes complaint chargebacks while setting a firmer quality commitment.”"
+    },
+    {
+     "session_id": "c0cc5600f8ca66dd",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier calls an unchanged, indexed offer its final offer DO make a final comparison of price and non-price costs before accepting, rather than treating the stated finality as proof the offer captures all available value BECAUSE The buyer accepted with index-related costs still in the deal; a final-offer statement describes the supplier's current stance, not the deal's total value to the buyer.",
+     "evidence": "“This is our final offer (letztes Angebot). Please decide.”; “we must hold our offer”"
+    },
+    {
+     "session_id": "60cc387e2204da12",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier calls a counteroffer final after reviewing several packages DO Assess the whole package before accepting, including payment terms and commitment length, not just the unit-price movement. BECAUSE A small price concession can accompany meaningful changes in other terms; the deal’s value depends on the package accepted.",
+     "evidence": "Supplier e-mail: “This is our final offer (letztes Angebot). Please decide.”"
+    },
+    {
+     "session_id": "617612c35aca89b7",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN a lower price is offered alongside less favourable non-price terms DO compare the complete packages before choosing or countering BECAUSE a nominal price reduction can give back value through payment terms or other conditions",
+     "evidence": "Supplier e-mail: “the extended contract term enables us to offer a revised price”; a later e-mail says “a longer contract term alone” cannot support further reductions and instead proposes changing payment terms."
+    },
+    {
+     "session_id": "e363891dc15f1bb7",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[do] WHEN comparing offers with different delivery and payment terms DO compare complete packages and test the cost of changing terms before treating an opening price as the cheaper alternative BECAUSE a supplier may reprice the offer when requested terms alter its costs; a shorter lead time can require overtime",
+     "evidence": "“Your requested terms change our costs; our Angebot for them follows.” “A shorter Lieferzeit means overtime; that is priced in.”"
+    }
+   ],
+   "support": {
+    "sessions": 11,
+    "cases": 7,
+    "case_types": 5,
+    "against": 0,
+    "lift_vs_same_case": -0.006
+   },
+   "status": "established"
+  },
+  {
+   "id": "T9",
+   "kind": "do",
+   "when": "A supplier calls its offer final or an absolute limit before agreement",
+   "action": "Treat the claim as a decision point, not proof that movement is impossible; weigh one more credible request against the risk of losing the offer.",
+   "why": "Further concessions can still be possible, but pressing may also prompt the supplier to walk away.",
+   "evidence": [
+    {
+     "session_id": "378f79a072738497",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.825326202612408,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier calls its offer an absolute limit but no agreement has been reached DO Treat the claim as a signal to narrow the gap, not proof that further movement is impossible. BECAUSE After stating an absolute limit, this supplier made another concession in response to buyer movement.",
+     "evidence": "“represents our absolute limit” and “In response to your movement, we are prepared to make a further concession”"
+    },
+    {
+     "session_id": "eed566a538dd053d",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4199346320062016,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier calls a revised offer final DO Treat the claim as a decision point, not proof that no further concession is possible; weigh one more credible request against the risk of losing the offer. BECAUSE In this session, the final-offer message followed several concessions, but the back-office notes also show that the supplier had previously considered walking away. Neither possibility should be ignored.",
+     "evidence": "Supplier e-mail: “This is our final offer (letztes Angebot). Please decide.” Back-office note: “My call: walk_away.”"
+    },
+    {
+     "session_id": "43e8432b0599bbd4",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5886536504035952,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier repeats an unchanged offer and calls it final DO check the remaining value of price and non-price terms before accepting; if worthwhile, make one clear, conditional request rather than moving almost entirely to the supplier’s position BECAUSE acceptance closes off any remaining potential saving, while a repeated offer alone does not establish that every term is at the supplier’s limit",
+     "evidence": "Back-office notes: “My call: hold.” The supplier then wrote, “We are happy to present this as our final offer” and repeated its offer."
+    },
+    {
+     "session_id": "a88d5484392f1f62",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier calls a revised offer final and shortens its validity DO assess the offer against the buyer's savings objective and the risk of losing the deal before accepting; do not treat the word ‘final’ alone as proof that no value remains BECAUSE A final-offer claim signals the supplier's stance, but does not by itself establish the best deal it would accept.",
+     "evidence": "Supplier: “Please note that this is our final offer (letztes Angebot). We kindly ask you to decide”. The buyer then accepted."
+    },
+    {
+     "session_id": "b3917171e99aea40",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7354476409294585,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier calls a reduced offer final and shortens its validity DO Treat it as a decision point: compare the whole deal, including non-price costs, with the alternative rather than assuming either that the deadline is a bluff or that acceptance is automatic. BECAUSE The supplier’s internal decision was to issue a final offer, so further movement was uncertain; accepting also fixes the remaining gap and term costs.",
+     "evidence": "“This is our final offer ... Please decide.” The back-office note says: “we answer with our final offer.”"
+    },
+    {
+     "session_id": "2d52f70e34f822c5",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier calls its held offer final and sets a decision deadline DO compare the complete package with the alternative to a deal before accepting; if the package still leaves value on the table, consider a defensible final counter rather than treating the word ‘final’ as proof of the best available deal BECAUSE acceptance closes negotiation at the offered package, and the score reflects the saving captured, not merely whether a deal was reached",
+     "evidence": "“This is our final offer (letztes Angebot). Please decide.” The buyer then ordered on those terms."
+    },
+    {
+     "session_id": "69fe5d4c35d15d2b",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier presents a final offer and the buyer has no alternative source DO weigh any remaining price opportunity against the risk of losing supply before deciding whether to press or accept BECAUSE a final-offer claim does not reveal the supplier’s true limit, while failure to agree has a real supply cost",
+     "evidence": "Supplier: “This is our final offer (letztes Angebot). Please decide.” The next supplier e-mail said, “Thank you for your order.”"
+    }
+   ],
+   "support": {
+    "sessions": 7,
+    "cases": 6,
+    "case_types": 4,
+    "against": 0,
+    "lift_vs_same_case": 0.014
+   },
+   "status": "established"
+  },
+  {
+   "id": "T6",
+   "kind": "do",
+   "when": "A supplier values a longer, more predictable commitment that the buyer can genuinely make",
+   "action": "Offer the commitment explicitly in exchange for a lower unit price.",
+   "why": "Planning certainty has value to the supplier and can support a price concession.",
+   "evidence": [
+    {
+     "session_id": "378f79a072738497",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.825326202612408,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier values a longer commitment and the buyer can make one DO Trade the longer commitment for a lower unit price rather than granting it without a price concession. BECAUSE The supplier explicitly treated the added commitment as a reason to revise its offer.",
+     "evidence": "“In exchange for this extended commitment, we can revise our offer”"
+    },
+    {
+     "session_id": "b4a1041e412e3d14",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.6488386201597143,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier values a longer, more predictable commitment DO offer a longer commitment in exchange for a lower unit price, making the trade explicit BECAUSE the supplier may value planning certainty enough to concede on price",
+     "evidence": "The supplier said the prospect of a longer agreement “strengthens our long-standing partnership” and then said it could “adjust our Angebot.”"
+    },
+    {
+     "session_id": "6029e26dbc0708d3",
+     "case_id": "case:D01",
+     "type": "price_increase",
+     "score": 0.8061375062582925,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier values a longer, more predictable commitment DO offer that commitment in exchange for a lower unit price, rather than conceding it without a return BECAUSE the supplier may value the certainty enough to reduce its price",
+     "evidence": "“In exchange for this longer commitment, we revise our offer”"
+    },
+    {
+     "session_id": "9be717d7d70db4ee",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN a longer supply commitment matters to the supplier DO test what additional price reduction or protection the supplier will give for that commitment before offering it BECAUSE the supplier accepted the buyer’s package and expressly valued the stability; acceptance alone did not establish that the buyer had captured all the available saving",
+     "evidence": "“We can accept your terms and await your order”; “provides valuable stability for both sides”"
+    },
+    {
+     "session_id": "8515efd13bacd293",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier values a longer commitment and accepts a package that includes one DO trade the longer commitment for a stronger improvement in the overall package before accepting BECAUSE continuity has value to the supplier, but acceptance alone does not mean the buyer captured the available saving; this deal closed only about a third of the possible gap.",
+     "evidence": "“which provides valuable continuity for both sides” and the back-office note “My call: accept.”"
+    },
+    {
+     "session_id": "edc1255165f65280",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier values a longer commitment for planning stability DO Offer that commitment only in exchange for a defined improvement, and resist extending it for an unchanged offer. BECAUSE Planning stability has value to the supplier, but the buyer captures none of that value if the supplier keeps the same price.",
+     "evidence": "SUPPLIER: “We welcome your proposal for a 24-month agreement, as it provides valuable planning stability for both parties. In exchange for this extended commitment, we can offer a revised price”; BUYER: “the unchanged price is disappointing and not acceptable as it stands.”"
+    },
+    {
+     "session_id": "ba83acc36d5d2056",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN the buyer can offer a longer commitment that the supplier values DO use that commitment to seek a further price concession before raising the buyer’s proposed price BECAUSE The longer commitment has value to the supplier; combining it with a higher proposed price may give away bargaining room. Here, the supplier accepted the new package immediately.",
+     "evidence": "“This longer-term commitment strengthens our long-standing relationship and provides stability for both sides.” The back-office decision was “My call: accept.”"
+    },
+    {
+     "session_id": "60cc387e2204da12",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier indicates that a longer commitment could change its price DO Offer a longer commitment as a distinct package tied to a lower price, rather than conceding it without a trade. BECAUSE The supplier may value the commitment enough to counter on that package.",
+     "evidence": "Buyer e-mail: “If a longer agreement is what changes your pricing … Option C offers that route.” Back-office note: “My call: counter.”"
+    },
+    {
+     "session_id": "7a4943e5928dd048",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3427338683473636,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier values a dependable sales horizon DO Test whether a longer agreement earns a meaningful price concession before committing to it. BECAUSE Planning stability can make a package acceptable to the supplier, but the buyer should capture part of that value.",
+     "evidence": "Supplier: “We appreciate your offer of a ... agreement, which provides valuable planning stability for both of us.” Its back office then recorded: “we agree.”"
+    }
+   ],
+   "support": {
+    "sessions": 9,
+    "cases": 4,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": 0.023
+   },
+   "status": "established"
+  },
+  {
+   "id": "T16",
+   "kind": "do",
+   "when": "A supplier identifies a broad cost driver but refuses to disclose a detailed breakdown",
+   "action": "Stop pressing for internal figures and negotiate using verifiable alternatives and commercial terms.",
+   "why": "A disclosure restriction may prevent more detail without preventing the supplier from revising its offer.",
+   "evidence": [
+    {
+     "session_id": "8ad26b6e5b188c7b",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.5602086063225428,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier refuses a detailed cost breakdown but identifies a broad cost driver DO stop pressing for internal figures and negotiate using verifiable competing offers and terms instead BECAUSE a disclosure policy may block further detail even while the supplier remains willing to revise its commercial offer",
+     "evidence": "Supplier e-mail: “as a matter of company policy, we do not disclose detailed internal cost structures. Material accounts for about 45 % of our cost; more detail we do not share.”"
+    },
+    {
+     "session_id": "c9b04d1a168f13b1",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier declines to provide a detailed cost breakdown DO do not make disclosure a prerequisite for negotiating; use verifiable competing offers and discuss broad cost drivers instead BECAUSE a supplier may still revise its price while refusing detailed disclosure",
+     "evidence": "“We don't do detailed cost breakdowns, our price is just material and machine time.”"
+    },
+    {
+     "session_id": "9be717d7d70db4ee",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier declines to disclose detailed internal costs DO stop relying on repeated requests for a full breakdown; negotiate against verifiable cost drivers, existing price commitments, and the value of other terms BECAUSE the supplier’s stated disclosure limit makes further requests unlikely to reveal its reservation price",
+     "evidence": "“we do not share detailed internal cost structures”; “more detail we do not share”"
+    },
+    {
+     "session_id": "2156865dbee169fe",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier explicitly refuses to disclose its internal cost calculation DO do not make a cost breakdown a prerequisite for continuing price negotiations BECAUSE the refusal concerns disclosure, not necessarily the supplier’s ability to revise its offer",
+     "evidence": "“We do not provide internal cost breakdowns. Our calculation is our property; we do not share a breakdown.” The same e-mail stated, “we adjust our price.”"
+    },
+    {
+     "session_id": "37cf59e72db1a70e",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier refuses a cost breakdown and repeats its capacity requirement DO do not depend on obtaining its internal calculation to continue negotiating; evaluate the offer against the buyer’s own economics and supply needs BECAUSE this supplier treated its calculation as private while making its capacity constraint explicit.",
+     "evidence": "“Our calculation is our property; we do not share a breakdown.”"
+    },
+    {
+     "session_id": "69fe5d4c35d15d2b",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier explicitly refuses to disclose its internal cost calculation DO do not rely on obtaining a breakdown to advance the negotiation; use available benchmarks and proposed term exchanges instead BECAUSE the supplier treats its calculation as confidential, so repeating the request is unlikely to reveal its pricing limit",
+     "evidence": "Supplier: “We decline your request for a cost breakdown, as our internal calculations are strictly confidential.”"
+    }
+   ],
+   "support": {
+    "sessions": 6,
+    "cases": 4,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": 0.028
+   },
+   "status": "established"
+  },
+  {
+   "id": "T28",
+   "kind": "do",
+   "when": "A supplier has reduced its opening price but remains above the buyer’s target",
+   "action": "If moving the buyer’s price proposal, make a measured move tied to a reciprocal supplier concession rather than accepting the counter immediately.",
+   "why": "A limited move may elicit a further reduction without surrendering the entire remaining gap.",
+   "evidence": [
+    {
+     "session_id": "4505c06b1edf3791",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier counters below its opening price but remains above the buyer's target DO make a measured move on price and ask for a reciprocal concession rather than immediately accepting the counter BECAUSE the supplier may still have room to improve; in this exchange, it lowered its price again after the buyer made a limited move",
+     "evidence": "Buyer: “Our move from our earlier position is a real concession for us, and we ask you to move on price in return.” Supplier: “We have processed your message and can offer a unit price…”"
+    },
+    {
+     "session_id": "a8da82a7edbf02aa",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9314501660348072,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier keeps countering rather than rejecting the negotiation DO continue with measured, reciprocal proposals while protecting the terms that matter most BECAUSE in this session, the supplier treated buyer movement as a reason to review its offer again; its back-office decision was repeatedly to counter",
+     "evidence": "“Thank you for your revised offer and for moving towards us again.” Back-office note: “My call: counter.”"
+    },
+    {
+     "session_id": "144560a4a3c36cbb",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier responds to each buyer concession with a smaller price reduction DO avoid raising the buyer’s offer automatically; make any further movement conditional on a meaningful reciprocal step BECAUSE the supplier explicitly tied its reductions to buyer movement, so unconditional concessions risk narrowing the remaining gap mostly at the buyer’s expense",
+     "evidence": "“In response to your step, we are reducing our price for Option B.”"
+    },
+    {
+     "session_id": "a88d5484392f1f62",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN successive buyer price concessions produce ever smaller supplier steps without a change in other terms DO do not raise the buyer's offer automatically; reassess the remaining gap and make any further movement conditional on a meaningful return BECAUSE Unconditional movement can give away savings while yielding little additional supplier movement.",
+     "evidence": "Buyer: “We are making another price concession ourselves, and ask you to meet us with a further step.” Supplier: “we are prepared to make a further concession” followed by “this is our final offer”."
+    },
+    {
+     "session_id": "b3917171e99aea40",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7354476409294585,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the buyer has raised its proposed price several times but the supplier is still countering above it DO Avoid another unconditional price increase; seek a matching concession or reassess the offer against the alternative to a deal. BECAUSE Buyer movement prompted further counters, but did not close the remaining price gap. Each higher buyer offer risks giving up possible savings.",
+     "evidence": "“In response to your concession, we are reducing our price”; the back-office note then records: “My call: counter.”"
+    },
+    {
+     "session_id": "a85ecb8a65833641",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7210104470283076,
+     "relation": "supports",
+     "lesson": "[do] WHEN both sides are still moving on price DO make a measured concession conditional on a reciprocal step, rather than immediately accepting the supplier’s counteroffer BECAUSE the supplier explicitly treated the buyer’s movement as a reason to move again",
+     "evidence": "“We appreciate your concession and are pleased to take a step toward you in return.”"
+    }
+   ],
+   "support": {
+    "sessions": 6,
+    "cases": 3,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": 0.025
+   },
+   "status": "established"
+  },
+  {
+   "id": "T4",
+   "kind": "do",
+   "when": "A supplier justifies an increase with cost indices",
+   "action": "Weight each index movement by its stated share of costs before countering.",
+   "why": "The weighted impact gives a defensible basis for challenging an increase larger than the cited cost pressure.",
+   "evidence": [
+    {
+     "session_id": "d57fead2d1cff118",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5592262195254686,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies an increase using cost indices DO weight each index movement by its stated share of costs before countering the proposed increase BECAUSE The weighted impact provides a case-specific basis for challenging an increase that exceeds the cited cost pressure.",
+     "evidence": "Buyer: “Weighted with the cost structure of this part, the index movements explain about +2.3% on the price - not 9.5%.”"
+    },
+    {
+     "session_id": "baa270ae05710b53",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier justifies its price with rising cost indices and the buyer’s cited index data also show an increase DO Calculate the weighted effect of the cited cost movements and challenge any unsupported difference, rather than relying on the same rising index as an argument for a lower price. BECAUSE The supplier treated the buyer’s data as confirmation of its cost argument. The strength of a price challenge depends on what the movements imply for total cost, not on citing the indices alone.",
+     "evidence": "“Your figures confirm our case: that driver rose. That does not change our position.”"
+    },
+    {
+     "session_id": "8ffc168595182655",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9408231099101966,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies a price increase using cost indices and their shares of cost DO Calculate the weighted effect of the cited changes and challenge any larger increase with the calculation. BECAUSE The supplier treated the documented mismatch as a fair point and reduced its price.",
+     "evidence": "Buyer: “The data does not support an increase of this size.” Supplier: “solid data is important to us, and I have adjusted our price accordingly.”"
+    },
+    {
+     "session_id": "ba83acc36d5d2056",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies its price with cost indices and states the share of costs each index represents DO calculate the weighted cost change and challenge any price increase that exceeds what those figures explain BECAUSE The supplier may revise its offer when faced with a checkable discrepancy, even if it will not disclose its full cost breakdown.",
+     "evidence": "“We acknowledge your calculations and the delivery data you provided.” The supplier also said, “we cannot share a detailed cost breakdown as this information is proprietary.”"
+    },
+    {
+     "session_id": "60cc387e2204da12",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier justifies its price with a rising cost index DO Do not cite the same increase as support for a lower price without explaining why its cost-weighted effect is small. BECAUSE Otherwise the supplier can treat the buyer’s evidence as confirmation of its own pricing case.",
+     "evidence": "Supplier e-mail: “Your figures confirm our case: that driver rose.”"
+    },
+    {
+     "session_id": "7a4943e5928dd048",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3427338683473636,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies its price with cost indices and cost weights DO Calculate the weighted effect and challenge any gap between that effect and the proposed increase. BECAUSE A specific calculation gives the supplier a reason to reconsider its opening price, even if it will not disclose its full cost breakdown.",
+     "evidence": "Buyer: “the weighted effect on the price is about +7.5%, not the 11.01% you ask for.” Supplier: “we have carefully considered your calculations” and then lowered its offer."
+    }
+   ],
+   "support": {
+    "sessions": 6,
+    "cases": 3,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": 0.058
+   },
+   "status": "established"
+  },
+  {
+   "id": "T36",
+   "kind": "do",
+   "when": "A supplier cites weighted cost indices but other relevant published cost movements may have been omitted",
+   "action": "Calculate the weighted effect, check the other relevant movements, and raise any verifiable discrepancy when countering.",
+   "why": "A documented gap in the supplier’s cost explanation can support a revision without access to its full cost breakdown.",
+   "evidence": [
+    {
+     "session_id": "144560a4a3c36cbb",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies a price increase with cost indexes and shares the relevant cost weights DO calculate the weighted effect and check other relevant published cost movements before countering BECAUSE a specific, verifiable challenge can change the supplier’s assessment even when it will not disclose its full cost breakdown",
+     "evidence": "“We checked the index change data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "a88d5484392f1f62",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies a price increase with cost indices DO check the cited movements, weight them by the supplier's stated cost shares, and bring any relevant omitted index to its attention BECAUSE A verifiable discrepancy gives the supplier a reason to revise its offer without requiring disclosure of its confidential cost structure.",
+     "evidence": "Supplier: “We checked the index change data you cited; it holds and we took it into account. We did not know that - a fair point.”"
+    },
+    {
+     "session_id": "8515efd13bacd293",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies its price with cost indices and their stated cost shares DO check the weighted effect and use any discrepancy to support a counteroffer, while asking for evidence on costs the calculation does not cover BECAUSE the calculation can prompt a price move, but it does not establish the supplier’s full cost increase; the supplier may defend the remainder as unlisted costs.",
+     "evidence": "“We acknowledge your calculation of the indices; however, the remaining unlisted cost components have also seen inflation”"
+    },
+    {
+     "session_id": "b3917171e99aea40",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7354476409294585,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies a price increase with cost indices DO Check the cited changes against their stated share of costs, and bring relevant countervailing cost changes into the discussion. BECAUSE A specific, verifiable challenge can prompt the supplier to revise its calculation rather than simply defend its opening price.",
+     "evidence": "“We respect your precise analysis of the indices and have adjusted our calculation to reflect the recent decrease in energy costs you highlighted.”"
+    },
+    {
+     "session_id": "b43093900abd0187",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier justifies its price with a cost index that has risen DO do not cite the same rise as the main reason for a price cut; look for evidence that challenges its cost calculation or offer a trade the supplier values BECAUSE the supplier can treat a rising index as confirmation of its own price case rather than a reason to concede",
+     "evidence": "“Your figures confirm our case: that driver rose.”"
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 3,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": 0.037
+   },
+   "status": "established"
+  },
+  {
+   "id": "T21",
+   "kind": "do",
+   "when": "A supplier acknowledges documented delivery problems but keeps them outside its price calculation",
+   "action": "Seek a separate, measurable delivery commitment rather than relying on the problems alone to reduce price.",
+   "why": "The supplier may accept the service evidence without changing its pricing rationale.",
+   "evidence": [
+    {
+     "session_id": "6434441a0c3ed0e7",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.2106402407090161,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer cites a documented delivery shortfall to challenge a cost-based quote DO seek a separate, measurable delivery commitment rather than assuming the shortfall will change the supplier’s price calculation BECAUSE a supplier may acknowledge the service evidence while keeping its pricing rationale unchanged",
+     "evidence": "Supplier e-mail: “We checked the delivery record data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "97aba1b8b9e8cc79",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.8998338783551213,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier accepts a cited delivery-performance concern but says it does not affect its calculation DO Pursue a delivery remedy separately instead of relying on the same concern to win a price reduction. BECAUSE The supplier may verify an operational problem yet keep it outside its price decision.",
+     "evidence": "Supplier: “We checked the delivery record data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "0383509004602959",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.41903073220856135,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier verifies a delivery-performance concern but says it does not affect its calculation DO Use the concern to press for a remedy, but do not rely on it alone to justify a lower price; pursue a lever the supplier says affects its economics. BECAUSE Acknowledging a service problem does not mean the supplier will count it as a reduction in its costs.",
+     "evidence": "“We checked the delivery record data you cited; it holds, but it does not change our calculation.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 3,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": -0.02
+   },
+   "status": "established"
+  },
+  {
+   "id": "T22",
+   "kind": "avoid",
+   "when": "A supplier repeats its offer unchanged after the buyer improves its proposal",
+   "action": "Do not improve the buyer’s proposal again without a reciprocal move; hold it or test another source of value.",
+   "why": "Another unilateral concession gives up value without evidence that it will change the supplier’s decision.",
+   "evidence": [
+    {
+     "session_id": "97aba1b8b9e8cc79",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.8998338783551213,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier repeats its offer unchanged after a buyer concession DO Hold the buyer's proposal rather than improving it again without a reciprocal move. BECAUSE An unchanged supplier offer gives no evidence that another buyer concession is needed; holding preserves the remaining saving while leaving room for the supplier to propose an alternative.",
+     "evidence": "Buyer: “As your price remains unchanged, we are holding our proposal.” Supplier later: “To answer your question, faster payment terms do allow us to adjust the price.”"
+    },
+    {
+     "session_id": "baa270ae05710b53",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the buyer has improved its proposed packages but the supplier repeats its offer unchanged DO Do not improve the buyer’s terms again without a specific reciprocal concession; instead, test a new source of value or compare the standing offer with the alternative. BECAUSE In this exchange, raising the proposed prices did not produce a supplier price step. Further unilateral movement would give away value without evidence that it changes the supplier’s decision.",
+     "evidence": "Buyer: “We have raised our proposed prices at a real cost to us and expect a step from you in return.” Supplier: “We have reviewed your revised options, but we must hold our offer.”"
+    },
+    {
+     "session_id": "c0cc5600f8ca66dd",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeats its offer after reviewing revised packages DO treat the unchanged response as evidence that reshuffling the same concessions has not moved its position; seek a materially different basis for a concession before repeating the request BECAUSE In this session the supplier decided to hold twice, including after the buyer revised its options.",
+     "evidence": "“We have reviewed your offer and hold our Angebot”; back-office notes: “My call: hold.” and “My call: hold.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 3,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": 0.054
+   },
+   "status": "established"
+  },
+  {
+   "id": "T31",
+   "kind": "do",
+   "when": "A supplier needs supporting information to assess the buyer’s request",
+   "action": "Provide the available records and calculations promptly instead of promising them again or merely repeating the request.",
+   "why": "Without the requested substantiation, the supplier has a reason to hold its offer.",
+   "evidence": [
+    {
+     "session_id": "43e8432b0599bbd4",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5886536504035952,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the buyer relies on records to support its request and promises to send them DO provide the records promptly instead of repeatedly promising them BECAUSE an unfulfilled evidence request leaves the supplier questioning the basis for further concessions",
+     "evidence": "“Still waiting on those supporting records you promised, please send them over. Which figures is that based on? Please send us the data.”"
+    },
+    {
+     "session_id": "0383509004602959",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.41903073220856135,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier repeats its offer and identifies information required to reconsider it DO Address that information request before repeating unchanged packages or accepting the offer. BECAUSE Holding the buyer’s position does not change the supplier’s decision when its stated condition for another concession remains unmet.",
+     "evidence": "The buyer wrote, “We are holding our proposed packages because your price has not moved further.” The supplier replied, “Until we receive this data, our offer remains” and its back office recorded, “My call: hold.”"
+    },
+    {
+     "session_id": "75aa91ea062ea53e",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5833082882580507,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier asks for the data behind a buyer’s cost claim DO Send the underlying series and calculation rather than repeatedly promising to send them. BECAUSE An unsupported claim gives the supplier a reason to hold its offer while awaiting verification.",
+     "evidence": "“Please send us the underlying series and calculation you mentioned so we can review your weighting of the indices.” Later: “As we have not yet received this information” and “My call: hold.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 3,
+    "case_types": 3,
+    "against": 0,
+    "lift_vs_same_case": -0.022
+   },
+   "status": "established"
+  },
+  {
+   "id": "T10",
+   "kind": "do",
+   "when": "A verifiable competing quote gives the buyer leverage and the supplier makes only a partial concession",
+   "action": "Cite the alternative accurately and make a further specific request rather than treating the first counteroffer as final.",
+   "why": "Verification and internal review may lead the supplier to release another concession.",
+   "evidence": [
+    {
+     "session_id": "10308ea624898b83",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4218549818771648,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier can check a competing quote and initially makes only a partial price concession DO cite the verifiable alternative and make a further, specific request rather than treating the first counteroffer as final BECAUSE the supplier may hold back part of its available concession while it checks the rival offer; here, its internal review released a further step",
+     "evidence": "Back-office notes: “The buyer shows a much lower rival quote. I give half the step now and check the rest.” Later: “Checked: give the rest of the step.”"
+    },
+    {
+     "session_id": "8ad26b6e5b188c7b",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.5602086063225428,
+     "relation": "supports",
+     "lesson": "[do] WHEN two or more suppliers quote and one offer provides credible leverage with another DO cite the competing offer accurately and keep negotiating after an initial partial concession BECAUSE a supplier may verify the rival quote, concede only part of its available price step, then release more after internal review",
+     "evidence": "Back-office notes: “The buyer shows a much lower rival quote. I give half the step now and check the rest.” Later: “Checked: give the rest of the step.”"
+    },
+    {
+     "session_id": "c9b04d1a168f13b1",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier makes a concession after seeing a much lower rival quote but says it must review price internally DO treat the concession as a step, not necessarily the final limit, and follow up before closing BECAUSE the supplier may deliberately concede only part of the distance while checking whether to move further",
+     "evidence": "“The buyer shows a much lower rival quote. I give half the step now and check the rest.”"
+    },
+    {
+     "session_id": "e568df77c5228266",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.444026902322786,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier makes a partial price move but says an internal review is pending DO follow up with a specific request for another price step before treating the offer as final BECAUSE the first move may be only part of what the supplier is prepared to concede after its review",
+     "evidence": "Supplier e-mail: “We need to clarify this internally - we will come back to you on price.” Back-office note: “Checked: give the rest of the step.”"
+    },
+    {
+     "session_id": "e363891dc15f1bb7",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier makes a first concession after seeing a much lower rival quote DO treat the concession as a possible first step, not necessarily its limit, and ask for another improvement before committing BECAUSE the back-office notes show a deliberate partial concession while the supplier assessed further movement",
+     "evidence": "“The buyer shows a much lower rival quote. I give half the step now and check the rest.”"
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 2,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.069
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T25",
+   "kind": "do",
+   "when": "A credible demand forecast changes after a supplier quotes",
+   "action": "Share the verifiable change and ask the supplier to reassess its offer.",
+   "why": "Evidence of changed demand may alter the supplier’s pricing assessment.",
+   "evidence": [
+    {
+     "session_id": "9315eb4f03260e5c",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7015303329236482,
+     "relation": "supports",
+     "lesson": "[do] WHEN a credible demand forecast has changed since the supplier quoted DO share the verifiable change and ask the supplier to reprice against it BECAUSE the supplier may check the forecast and incorporate it into its offer rather than dismissing an unsupported volume claim",
+     "evidence": "“We checked the volume change data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "34a817822bc764c0",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.34799309194855216,
+     "relation": "supports",
+     "lesson": "[do] WHEN the buyer has a verifiable change in expected demand DO cite the change and ask the supplier to reflect it in its offer BECAUSE the supplier may check the claim and incorporate it into its pricing even without sharing its internal calculation",
+     "evidence": "Supplier: “We checked the volume change data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "a3ddfeca8b05e380",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[do] WHEN a demand forecast has changed and the supplier can verify it DO cite the forecast and ask the supplier to reflect it in its offer BECAUSE a credible change in expected demand gives the supplier a concrete reason to reconsider its price.",
+     "evidence": "“We checked the volume change data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "2d52f70e34f822c5",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.38504277619535004,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier verifies a higher demand forecast DO use the verified volume as support for a specific package request, but do not assume it will produce a price cut by itself BECAUSE the supplier can incorporate the forecast into its calculation and still counter at a price the buyer does not want",
+     "evidence": "“We checked the volume change data you cited; it holds and we took it into account. We acknowledge the updated demand forecast and have incorporated the increased volume into our revised calculation.”"
+    },
+    {
+     "session_id": "a85ecb8a65833641",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7210104470283076,
+     "relation": "supports",
+     "lesson": "[do] WHEN a documented demand forecast supports a larger purchase DO cite the verifiable change when requesting a lower price, but distinguish a forecast from a binding volume commitment BECAUSE the supplier checked the forecast and considered it, while indicating that a firm volume commitment could justify a further reduction",
+     "evidence": "“We checked the volume change data you cited; it holds and we took it into account.” “A binding higher volume would help us and can improve the price.”"
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": 0.013
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T29",
+   "kind": "avoid",
+   "when": "A supplier verifies buyer-provided information but says it does not affect its pricing decision",
+   "action": "Stop repeating that information as the main reason for a price reduction; test another concrete basis for a concession.",
+   "why": "Verified information offers little leverage once the supplier has excluded it from its price calculation.",
+   "evidence": [
+    {
+     "session_id": "4505c06b1edf3791",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer cites a revised demand forecast to support a price request DO check whether the supplier treats that change as relevant to its price calculation before relying on it again BECAUSE a supplier can verify the forecast yet decline to change its pricing; repeating the fact alone then adds little leverage",
+     "evidence": "“We checked the volume change data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "7902b54f33de54c4",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.05639164267740558,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer cites an upward cost index or a demand forecast to challenge a quote DO test how the evidence changes the supplier’s calculation rather than assuming that agreement on the facts will produce a concession BECAUSE the supplier accepted the volume data but said it did not change its calculation, and used the rising index to support its own position",
+     "evidence": "“Your figures confirm our case: that driver rose. We checked the volume change data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "2156865dbee169fe",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier verifies buyer-cited performance or demand data but says the data does not affect its calculation DO do not keep relying on those facts alone to justify the same price request; shift to terms the supplier says affect its decision BECAUSE accurate evidence has little bargaining force if the supplier does not use it in its pricing calculation",
+     "evidence": "“We checked the delivery record data you cited; it holds, but it does not change our calculation. Likewise, we checked the volume change data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "37cf59e72db1a70e",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier has checked a cited delivery record and says it does not affect its calculation DO stop using that record as the main reason for a price reduction; shift to terms the supplier says affect its decision BECAUSE verified evidence does not create leverage if the supplier does not use it to calculate its offer.",
+     "evidence": "“We checked the delivery record data you cited; it holds, but it does not change our calculation.”"
+    },
+    {
+     "session_id": "69fe5d4c35d15d2b",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the buyer cites forecast or delivery-performance data to support a lower price DO check whether the supplier incorporates those facts into its pricing; if not, shift to a concrete exchange of terms BECAUSE verified facts do not necessarily change the supplier’s calculation",
+     "evidence": "Supplier: “We checked the delivery record data you cited; it holds, but it does not change our calculation.” It said the same of the volume change data."
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": -0.121
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T33",
+   "kind": "avoid",
+   "when": "A supplier seeks index protection after offering a fixed price",
+   "action": "Do not accept the clause without assessing its risk and seeking a compensating improvement.",
+   "why": "Taking on future price risk can outweigh an apparent saving in the stated price.",
+   "evidence": [
+    {
+     "session_id": "0383509004602959",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.41903073220856135,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier asks for index protection after initially offering a fixed price DO Treat the clause as a concession with a cost of its own, and seek a compensating improvement before accepting it. BECAUSE A lower stated unit price need not be a better deal if the buyer also takes on future price risk.",
+     "evidence": "The opening offer said “no Preisgleitklausel”; the buyer later wrote, “We understand why you need alloy protection,” while noting that “your price has not moved further.”"
+    },
+    {
+     "session_id": "c0cc5600f8ca66dd",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier offers a lower base price only with an index clause DO compare the indexed offer with a fixed-price alternative on total expected cost and risk before accepting the lower base price BECAUSE An index clause can give back apparent price savings through later adjustments; the base price alone does not capture the deal's value.",
+     "evidence": "“we cannot offer a fixed price over this duration” and “the index clause, which allows us to reduce the base price”"
+    },
+    {
+     "session_id": "7a4943e5928dd048",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3427338683473636,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier offers a lower headline price with an index adjustment than without one DO Compare the full indexed and fixed-price packages, including future adjustment risk, rather than treating the headline reduction as pure savings. BECAUSE An index clause shifts some future cost risk back to the buyer; the deal’s value depends on more than its initial unit price.",
+     "evidence": "Supplier: “Our primary proposal” included a “Preisgleitklausel”; it also offered an alternative “with no Preisgleitklausel.” The final deal retained the index clause, and the result identified index risk among the costs left in the deal."
+    },
+    {
+     "session_id": "30df5892a9f36ded",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier will hold its opening price fixed but says a longer agreement requires an index clause DO Keep a shorter fixed-price agreement in play alongside any longer indexed offer, and compare their total value before choosing. BECAUSE A longer commitment can change the supplier’s risk requirements. A lower base price may not compensate for the added index risk.",
+     "evidence": "Opening offer: “no Preisgleitklausel.” Later: “for a contract of this duration, we cannot offer a fixed price.”"
+    },
+    {
+     "session_id": "30df5892a9f36ded",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier accepts protection against cost movements but does not lower its base price DO Do not treat agreement on an index clause as a price concession; negotiate the base price and the clause’s risk limits together. BECAUSE The clause protects the supplier from future increases, while the buyer still pays the agreed base price. In this deal, index risk remained after acceptance.",
+     "evidence": "“With this index clause securing the material risk, we can offer a revised base price”; the buyer’s result records “index_risk” among the costs left in the deal."
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 2,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.002
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T39",
+   "kind": "do",
+   "when": "A supplier says its pricing policy limits reductions on its standard terms but identifies a change it values",
+   "action": "Offer that change conditionally in exchange for a specific price improvement.",
+   "why": "A valued change in terms can give the supplier a reason to approve an exception to its usual pricing.",
+   "evidence": [
+    {
+     "session_id": "c7767a0427aae84f",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says its policy limits price reductions on standard terms DO ask for a price improvement in exchange for a specific change the supplier values BECAUSE the supplier treats a change in terms as a reason to make an exception to its price policy",
+     "evidence": "“Company policy restricts price reductions on standard terms, but we value the stability of a longer commitment.”"
+    },
+    {
+     "session_id": "b6569cb29699118b",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says a non-price term matters especially to it DO offer that term conditionally in exchange for a specific improvement, and settle the exchanged terms together BECAUSE a concession the supplier values can motivate movement on a buyer priority; leaving it unresolved gives the supplier reason to hold its offer.",
+     "evidence": "Supplier: “Faster payment would help us more than anything.” Later: “We really need to get the earlier payment terms agreed so we can wrap this up.”"
+    },
+    {
+     "session_id": "edc1255165f65280",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier cites a price-reduction freeze but also identifies negotiable commercial terms DO Test specific exchanges across those terms instead of treating the stated freeze as an end to negotiation. BECAUSE The supplier may still authorize a different package when it gains something it values, even while holding firm on price for the current terms.",
+     "evidence": "SUPPLIER: “We can talk about the terms instead - payment, volume or contract length.”"
+    },
+    {
+     "session_id": "3b3a084522467bad",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier says a non-price concession matters more to it than other terms DO make that concession conditional on a specific improvement in the terms that matter to the buyer BECAUSE the supplier indicated it would reflect the concession in its price, creating a trade rather than a one-sided give.",
+     "evidence": "“Faster payment would help us more than anything. Faster payment is welcome; we can reflect it in the price.”"
+    },
+    {
+     "session_id": "617612c35aca89b7",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier says a price freeze limits reductions but identifies terms it can trade DO test packages that change the terms the supplier values, rather than relying on a price request alone BECAUSE the supplier may be able to justify a concession through a valuable commitment even when it says base-price reductions are frozen",
+     "evidence": "Supplier e-mail: “We can talk about the terms instead - payment, volume or contract length.”"
+    }
+   ],
+   "support": {
+    "sessions": 5,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": 0.003
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T40",
+   "kind": "avoid",
+   "when": "A supplier offers no additional benefit for a longer commitment",
+   "action": "Do not extend the commitment solely to seek a discount; look for a feasible change that would affect the offer.",
+   "why": "The buyer would give up flexibility without receiving value in return.",
+   "evidence": [
+    {
+     "session_id": "c7767a0427aae84f",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier says an additional concession in agreement length will not improve its price DO stop extending the commitment solely to seek a discount; ask which feasible change would actually affect the price BECAUSE a term that has stopped moving the supplier’s price gives away flexibility without closing the price gap",
+     "evidence": "“To achieve further price improvements, an increase in the annual volume would be required.”"
+    },
+    {
+     "session_id": "a3ddfeca8b05e380",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier offers the same price for a longer and a shorter commitment DO do not give up flexibility for the longer commitment without a corresponding benefit BECAUSE the supplier gains stability, while the buyer receives no price saving for that concession.",
+     "evidence": "“the longer agreement appears to carry the same price as your main offer.”"
+    },
+    {
+     "session_id": "22008d8062c16d5d",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7145170756600878,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier offers the same price for a shorter and a longer agreement DO Do not give the longer commitment without a compensating improvement; retain the shorter commitment if other terms are equal. BECAUSE A longer commitment costs flexibility, while identical prices provide no return for giving it.",
+     "evidence": "“the quoted price remains the same for either term”"
+    },
+    {
+     "session_id": "a85ecb8a65833641",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7210104470283076,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier offers the same price for a longer commitment DO do not extend the agreement solely for a promised price benefit; ask for a distinct price step or keep the shorter commitment BECAUSE planning security benefits the supplier, but an unchanged price gives the buyer no saving in exchange for the added commitment",
+     "evidence": "“Your latest offer keeps the same unit price for the longer term, so we would still need a price step for that commitment.”"
+    }
+   ],
+   "support": {
+    "sessions": 4,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": 0.004
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T35",
+   "kind": "do",
+   "when": "A supplier cites several cost indices to justify an increase without making their price impact clear",
+   "action": "Verify the cited movements and ask how the indices are weighted in its costs before assessing the increase.",
+   "why": "Headline movements cannot establish the price effect without their relative cost shares.",
+   "evidence": [
+    {
+     "session_id": "a8da82a7edbf02aa",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9314501660348072,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies a price increase with several cost indices DO check the underlying movements and ask how each index is weighted in the supplier’s costs, rather than adding the headline changes BECAUSE the price effect depends on each cost’s share; a weighted comparison can support a smaller, more defensible increase",
+     "evidence": "“Your request for the figures behind our view is fair” and “We will send the published labour and energy sources and our weighting.”"
+    },
+    {
+     "session_id": "75aa91ea062ea53e",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5833082882580507,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies an increase with cost indices DO Check the cited movements against public data and challenge any part of the increase they do not explain. BECAUSE Verifiable contrary evidence can change the supplier’s calculation without requiring disclosure of its confidential costs.",
+     "evidence": "“We checked the index change data you cited; it holds and we took it into account. We did not know that - a fair point.”"
+    },
+    {
+     "session_id": "30df5892a9f36ded",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier cites cost indices but rejects the buyer’s analysis of those same indices DO Ask how the claimed cost movements translate into the proposed base price, and distinguish that question from how future movements will be shared. BECAUSE Public indices alone did not persuade this supplier to reduce its base price; it treated its underlying cost structure and future material risk as separate reasons to hold firm.",
+     "evidence": "“the public indices you referenced do not alter our underlying cost structure”; “we must maintain our price.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": -0.023
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T1",
+   "kind": "do",
+   "when": "A supplier counters above a credible buyer proposal but continues reducing its price",
+   "action": "Consider holding the proposal for another round rather than improving it automatically.",
+   "why": "Another supplier concession may close the gap without the buyer giving up value.",
+   "evidence": [
+    {
+     "session_id": "sim1",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.4788732394366197,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier counters above a buyer proposal but continues to reduce its price DO consider holding a credible proposal for another round rather than improving it automatically BECAUSE a further supplier concession may make the existing proposal acceptable without the buyer giving up more value",
+     "evidence": "After another supplier e-mail saying “Our counter-offer,” the buyer repeated its package options unchanged; the supplier replied, “We agree.”"
+    },
+    {
+     "session_id": "9315eb4f03260e5c",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7015303329236482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier makes small price reductions after each higher buyer offer DO avoid repeatedly raising the buyer’s offer merely to obtain another small reduction; ask for a firmer supplier step before conceding again BECAUSE the supplier was responding to buyer concessions, so each higher offer gave away part of the remaining gap",
+     "evidence": "“Thank you for your revised proposal; in response to your concession, we can lower our price.”"
+    }
+   ],
+   "support": {
+    "sessions": 2,
+    "cases": 2,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": -0.034
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T24",
+   "kind": "do",
+   "when": "Multiple suppliers quote and one provides a credible lower-priced benchmark",
+   "action": "Cite the competing offer accurately when asking higher-priced suppliers to revise their bids.",
+   "why": "A verifiable alternative can affect how far a supplier is willing to move.",
+   "evidence": [
+    {
+     "session_id": "c9b04d1a168f13b1",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[do] WHEN two or more suppliers quote and one offer provides a credible lower benchmark DO cite the competing offer when asking higher-priced suppliers to revise their bids BECAUSE suppliers may verify a rival quote and take it into account when deciding how far to move",
+     "evidence": "“We checked the rival quote data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "4e0f152231d33e5b",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.0,
+     "relation": "supports",
+     "lesson": "[do] WHEN another supplier has made a more competitive offer DO ask the preferred supplier to improve its price, using the competing offer as a credible alternative rather than accepting its opening quote BECAUSE Competition gives the supplier a reason to reconsider its price; accepting the opening quote captures no price concession.",
+     "evidence": "The preferred supplier’s offer said, “Let us know if this works for you.” Its next e-mail was an order confirmation, with no intervening price concession."
+    },
+    {
+     "session_id": "e568df77c5228266",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.444026902322786,
+     "relation": "supports",
+     "lesson": "[do] WHEN a qualified competing quote is lower than a supplier’s offer DO cite the competing quote and ask the supplier to improve its offer BECAUSE the supplier may verify the quote and make an initial concession rather than lose the order",
+     "evidence": "Back-office note: “The buyer shows a much lower rival quote. I give half the step now and check the rest.”"
+    },
+    {
+     "session_id": "e363891dc15f1bb7",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[do] WHEN a verified competing quote is materially lower than a supplier’s offer DO cite the competing quote and ask the supplier to improve its offer BECAUSE the supplier may treat credible competition as a reason to concede rather than dismissing the comparison",
+     "evidence": "“We checked the rival quote data you cited; it holds and we took it into account.”"
+    }
+   ],
+   "support": {
+    "sessions": 4,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.0
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T30",
+   "kind": "do",
+   "when": "A supplier proposes a quality commitment weaker than its verified past performance",
+   "action": "Cite the performance record and request a stronger commitment.",
+   "why": "An accepted record gives the supplier a concrete basis for revising the commitment.",
+   "evidence": [
+    {
+     "session_id": "43e8432b0599bbd4",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5886536504035952,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier proposes a quality commitment that appears weaker than its recorded performance DO cite verified performance and ask for a stronger commitment BECAUSE a record the supplier accepts gives it a concrete basis for revising its offer rather than dismissing the request",
+     "evidence": "“We checked the quality record data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "b6569cb29699118b",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier's proposed quality commitment is weaker than the performance evidence in the case file DO cite the verified record and request a measurable, stronger commitment BECAUSE the supplier may check credible evidence and revise its quality offer rather than dismiss the request.",
+     "evidence": "Supplier: “We checked the quality record data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "3b3a084522467bad",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[do] WHEN the case file contains a verified quality record that is stronger than the supplier’s proposed commitment DO cite the record and ask for a firmer quality commitment BECAUSE the supplier checked the evidence and used it when revising its offer.",
+     "evidence": "“We checked the quality record data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "f5403018608aa9cb",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier's proposed quality commitment is weaker than its documented performance DO cite the performance record and request a firmer commitment as part of a package offer BECAUSE a verified record can make a stronger commitment credible even when the supplier resists a price cut",
+     "evidence": "The supplier wrote, “We checked the quality record data you cited; it holds,” and then offered the buyer's requested quality commitment."
+    }
+   ],
+   "support": {
+    "sessions": 4,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.014
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T27",
+   "kind": "avoid",
+   "when": "A supplier seeks an index adjustment while its relevant costs remain covered at a fixed price",
+   "action": "Preserve fixed pricing through the covered period and seek a base-price concession before accepting later index risk.",
+   "why": "Deferral limits immediate exposure, but an index clause can still transfer future cost risk to the buyer.",
+   "evidence": [
+    {
+     "session_id": "9be717d7d70db4ee",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier seeks an index adjustment despite having fixed-price material cover DO keep the price fixed through the covered period and require a meaningful base-price concession before accepting later index risk BECAUSE deferring the adjustment limits immediate exposure, but accepting the clause still transfers future cost risk to the buyer",
+     "evidence": "“the index clause ... will apply after our fixed-price material cover ends”"
+    },
+    {
+     "session_id": "8515efd13bacd293",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier says its input costs are covered at fixed prices and prefers a fixed-price agreement DO do not add an index clause merely to make an offer appear more attractive; seek a better fixed price first BECAUSE the clause shifts future price risk to the buyer without addressing the supplier’s stated need, and that risk reduces the value of the deal beyond its unit price.",
+     "evidence": "“an index clause is not workable for us” and “We prefer to build on a fixed price agreement and can offer a further concession”"
+    },
+    {
+     "session_id": "ba83acc36d5d2056",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3323131976424152,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier says an input is covered at fixed prices but offers an index clause tied to that input DO do not add the clause merely to obtain a lower starting price; weigh the future price risk against the discount BECAUSE An index can change the buyer’s later costs even when it does not track the supplier’s current cost exposure.",
+     "evidence": "“an index would not accurately reflect our cost base. Therefore, we prefer to proceed with a fixed price”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.003
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T37",
+   "kind": "do",
+   "when": "A supplier repeatedly counters on one of several buyer-proposed packages",
+   "action": "Treat that selection as evidence of its preferred terms and focus the next counter on improving that package.",
+   "why": "Repeated selection shows which combination the supplier is evaluating; revising unused alternatives may have little effect.",
+   "evidence": [
+    {
+     "session_id": "144560a4a3c36cbb",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeatedly counters on one of several offered packages DO treat that choice as evidence of its preferred terms and focus subsequent counters there BECAUSE repeated selection reveals which package the supplier is actually evaluating; revising unused alternatives may do little to move its price",
+     "evidence": "“In response to your movement, we are reducing our price for Option B.”"
+    },
+    {
+     "session_id": "a88d5484392f1f62",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7942216447030725,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeatedly counters using the same option from a set of packages DO treat its chosen package as evidence of which terms it prefers, and focus the next counter on improving the price within that package BECAUSE Repeated selection is more informative than assuming the supplier values every proposed trade-off equally.",
+     "evidence": "Supplier: “Building on your Option B” and, later, “Building on your Option B, we are prepared to make a further concession”."
+    },
+    {
+     "session_id": "b3917171e99aea40",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.7354476409294585,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeatedly counters on price while keeping the same start date and payment terms DO Focus the next proposal on the price gap; do not assume alternative packages will change which terms the supplier prefers. BECAUSE In this exchange, the supplier repeatedly selected the package with its preferred timing and payment terms, then adjusted price in small steps.",
+     "evidence": "“We are matching your step by reducing our price ... keeping the ... payment terms and ... start date.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.004
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T17",
+   "kind": "do",
+   "when": "A proposed price change conflicts with a documented contractual notice requirement",
+   "action": "Cite the contract and the notice calculation, then request revised terms.",
+   "why": "A verifiable contractual constraint can make the supplier reconsider its proposed change.",
+   "evidence": [
+    {
+     "session_id": "30136c828c349db4",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.8927154994140178,
+     "relation": "supports",
+     "lesson": "[do] WHEN a proposed price change conflicts with a documented notice requirement DO cite the contract and the notice calculation, then ask for revised terms BECAUSE a verifiable contractual point can make the supplier reconsider its opening position",
+     "evidence": "Buyer: “Our contract requires 90 days.” Supplier: “We checked the notice period data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "a8da82a7edbf02aa",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9314501660348072,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier proposes a price change that may conflict with the agreement’s notice requirements DO check the contract and challenge the proposed effective date with the relevant clause BECAUSE a verifiable contractual constraint gives the supplier a reason to revise its offer without dismissing its cost concerns",
+     "evidence": "“We acknowledge your points regarding the contractual notice period and the energy index movements, which we have verified.”"
+    }
+   ],
+   "support": {
+    "sessions": 2,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.133
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T2",
+   "kind": "avoid",
+   "when": "Offering a supplier a choice between packages that differ in price and complaint remedies",
+   "action": "Check whether each added remedy is worth its price premium before offering the choice.",
+   "why": "The supplier may choose the higher-priced package, so offering a choice does not itself protect the buyer’s saving.",
+   "evidence": [
+    {
+     "session_id": "sim1",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.4788732394366197,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN offering the supplier a choice among packages with the same quality commitment but different prices and complaint remedies DO check that the added remedy is worth its price premium to the buyer before inviting the supplier to choose BECAUSE the supplier can select the higher-priced package; giving it the choice does not ensure the buyer captures the greatest saving",
+     "evidence": "The buyer wrote, “We can offer either of these packages - please choose the one that suits you better,” and the supplier accepted the package with the higher price and a complaint chargeback rather than the lower-priced package with the same quality commitment."
+    },
+    {
+     "session_id": "f5403018608aa9cb",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier prefers fewer complaint chargebacks in exchange for a lower price DO treat waived chargebacks as a concession and weigh the price reduction against the protection lost BECAUSE the supplier may accept the quality commitment while shifting complaint costs back to the buyer; savings are not measured by unit price alone",
+     "evidence": "The buyer proposed “no per-complaint chargebacks in exchange for a lower price,” but the supplier replied that it could take that option only if “the price needs to be” higher than the buyer offered."
+    }
+   ],
+   "support": {
+    "sessions": 2,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.028
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T38",
+   "kind": "do",
+   "when": "A supplier attributes its price to rising costs and the buyer has a defensible cost analysis",
+   "action": "Present the analysis and use it to support a specific counteroffer.",
+   "why": "Cost evidence the supplier can check gives it a basis to reassess the price rather than treating the counteroffer as an unsupported target.",
+   "evidence": [
+    {
+     "session_id": "c7767a0427aae84f",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies its quote with cost increases and the buyer has a defensible should-cost analysis DO cite the analysis and use it to support a concrete counteroffer BECAUSE the supplier may verify and take the buyer’s cost evidence into account rather than dismissing the counteroffer as an unsupported target",
+     "evidence": "“We checked the should cost data you cited; it holds and we took it into account.”"
+    },
+    {
+     "session_id": "617612c35aca89b7",
+     "case_id": "case:P03",
+     "type": "renewal",
+     "score": 0.9194563231244482,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier justifies its quote with cost pressures and the buyer has a credible cost estimate DO present the estimate and ask the supplier to check it, then use the response to support a revised offer BECAUSE a verified estimate gives the buyer's price request a factual basis, though it may not overcome the supplier's other constraints by itself",
+     "evidence": "Supplier e-mail: “We checked the should cost data you cited; it holds and we took it into account.”"
+    }
+   ],
+   "support": {
+    "sessions": 2,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.005
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T46",
+   "kind": "avoid",
+   "when": "A supplier says a cited cost index has little effect on its own costs",
+   "action": "Do not keep relying on that index for a price reduction; seek more relevant cost evidence or a different trade",
+   "why": "An index movement offers little leverage if it has little effect on the supplier’s pricing decision.",
+   "evidence": [
+    {
+     "session_id": "3b3a084522467bad",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier says a cited cost index has little effect on its own costs DO do not keep relying on that index for a further price reduction; seek evidence tied more closely to its costs or change the proposed trade BECAUSE a valid index does not create bargaining leverage if the supplier sees little margin impact.",
+     "evidence": "“We checked the energy index data you cited; it holds, but the impact on our side is tiny.”"
+    },
+    {
+     "session_id": "f5403018608aa9cb",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier verifies a cost-index change but says that index has little effect on its costs DO do not rely on that index alone to justify a further price cut; look for evidence tied to the supplier's main cost drivers BECAUSE a valid index movement has limited negotiating force if it represents little of the supplier's cost base",
+     "evidence": "The supplier wrote, “we checked the energy index data you cited; it holds, but it barely affects our actual costs,” and identified other main cost drivers."
+    }
+   ],
+   "support": {
+    "sessions": 2,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.001
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T15",
+   "kind": "avoid",
+   "when": "A supplier requests proof of competing bids that the buyer cannot provide or disclose",
+   "action": "Do not rely on an unsupported competition claim or reveal confidential quotations; state the commercial target and negotiate the available terms.",
+   "why": "A supplier may discount an unverifiable claim while still considering a concrete commercial proposal.",
+   "evidence": [
+    {
+     "session_id": "eed566a538dd053d",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4199346320062016,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier asks for proof after the buyer invokes competing bids DO Do not rely on an unsupported competition claim or disclose confidential quotations; state the commercial target and continue negotiating the available terms. BECAUSE A supplier that cannot verify the claimed competition may refuse to reduce its price on that basis.",
+     "evidence": "Supplier e-mail: “if you can't show me the competition's prices, I can't just drop mine.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.047
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T18",
+   "kind": "do",
+   "when": "A supplier seeks an increase during a fixed-price period",
+   "action": "Negotiate the effective date as well as the price.",
+   "why": "Delaying an increase can preserve value even if some later price correction is needed.",
+   "evidence": [
+    {
+     "session_id": "30136c828c349db4",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.8927154994140178,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier seeks an increase during a fixed-price period DO negotiate the effective date as well as the price rather than treating the requested start date as fixed BECAUSE delaying an increase can preserve value even when some price correction is needed",
+     "evidence": "Buyer: “The fixed-price clause rules out your proposed November increase.” The supplier later offered a price “valid from 1 April 2027.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.114
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T19",
+   "kind": "do",
+   "when": "A supplier counters above the buyer’s latest price proposal while leaving other terms unchanged",
+   "action": "Consider one more specific price request before accepting.",
+   "why": "The remaining gap may still be negotiable, while immediate acceptance gives up that potential saving.",
+   "evidence": [
+    {
+     "session_id": "30136c828c349db4",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.8927154994140178,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier counters above the buyer’s latest offer while keeping the other terms unchanged DO do not accept automatically; consider a final, smaller price request before closing BECAUSE an unchanged package leaves a clear price gap, and accepting immediately gives up any remaining negotiable saving",
+     "evidence": "Buyer offered “EUR 136.22 per unit” with the proposed payment terms and effective date; the supplier countered at “€136.80 per unit while keeping payment” on those terms."
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.114
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T20",
+   "kind": "do",
+   "when": "A supplier justifies its price with a volatile input-cost index",
+   "action": "Consider trading a symmetric index adjustment for a lower fixed component of the price, and assess the resulting risk.",
+   "why": "Sharing future cost movements may support a lower starting price but transfers some price risk to the buyer.",
+   "evidence": [
+    {
+     "session_id": "6434441a0c3ed0e7",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.2106402407090161,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier justifies its price with a volatile input-cost index DO consider a symmetric index clause as a trade for a lower fixed component of the price, while assessing the resulting price risk BECAUSE sharing future cost movements can make a lower starting price acceptable to the supplier, but shifts some risk back to the buyer",
+     "evidence": "Supplier e-mail: “to share the material risk, as you suggested.” The supplier then wrote: “We can accept your terms and await your order.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.122
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T23",
+   "kind": "do",
+   "when": "A supplier attributes its price to stock allocation or service commitments",
+   "action": "Identify the services the buyer needs and request a separately priced, reduced-service alternative.",
+   "why": "Reducing a clearly defined obligation may lower the supplier’s cost while making the buyer’s service trade-off visible.",
+   "evidence": [
+    {
+     "session_id": "baa270ae05710b53",
+     "case_id": "case:P04",
+     "type": "renewal",
+     "score": 0.8604451426623068,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier attributes a price difference to stock allocation or service levels DO Specify which services the buyer needs and ask for a separately priced, reduced-service alternative before treating the item as a simple stock purchase. BECAUSE The supplier says those commitments carry costs. A clearly reduced scope gives it a reason to change its quote while making the quality trade-off visible.",
+     "evidence": "“The difference between list and renewal quotes accounts for dedicated stock allocations and specific service levels.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.201
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T26",
+   "kind": "avoid",
+   "when": "A supplier proposes specification changes as a source of savings",
+   "action": "Keep those savings separate from the current deal until the changes receive the necessary technical approval.",
+   "why": "A cheaper offer based on unapproved specifications may be unusable or compromise quality.",
+   "evidence": [
+    {
+     "session_id": "9315eb4f03260e5c",
+     "case_id": "case:P07",
+     "type": "bundling",
+     "score": 0.7015303329236482,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier proposes specification changes as a source of savings DO keep those savings separate from the deal under negotiation until the appropriate technical approval is secured BECAUSE a cheaper quote based on unapproved changes may sacrifice quality or prove unusable",
+     "evidence": "“The drawing changes you suggest would also need engineering approval.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.011
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T3",
+   "kind": "do",
+   "when": "A proposed increase conflicts with both a contractual requirement and a favorable demand forecast",
+   "action": "Cite the relevant records and ask the supplier to account for both in a revised offer.",
+   "why": "Verifiable contract and demand information can change the supplier’s assessment of the proposed increase.",
+   "evidence": [
+    {
+     "session_id": "d57fead2d1cff118",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5592262195254686,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier proposes a price increase despite a contractual notice requirement or a favorable demand forecast DO cite the relevant contract and forecast records, and ask the supplier to reflect both in a revised offer BECAUSE The supplier checked these facts, acknowledged them, and used the forecast to revise its calculation.",
+     "evidence": "Supplier: “We also checked the notice period data you cited; it holds and we took it into account. We did not know that - a fair point. We have also taken your positive volume forecast into account, which allows us to adjust our calculation.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.22
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T32",
+   "kind": "do",
+   "when": "A supplier holds its price but remains willing to discuss other terms",
+   "action": "Negotiate valuable non-price terms explicitly rather than treating the price hold as the end of bargaining.",
+   "why": "The supplier may have room to change obligations or service terms while protecting its price.",
+   "evidence": [
+    {
+     "session_id": "43e8432b0599bbd4",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5886536504035952,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN the supplier holds its price but continues discussing other terms DO negotiate each valuable term explicitly rather than treating a price hold as the end of bargaining BECAUSE the supplier may still trade on non-price terms while protecting its price",
+     "evidence": "Back-office notes: “My call: hold.” A later e-mail said, “we can step up to” a stronger quality commitment."
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.054
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T34",
+   "kind": "do",
+   "when": "Verified contractual or service-performance records reveal a discrepancy relevant to a supplier’s proposed price",
+   "action": "Identify the specific discrepancy and ask the supplier to account for it in a revised offer.",
+   "why": "Records the supplier can check may expose an assumption it omitted from its pricing assessment.",
+   "evidence": [
+    {
+     "session_id": "8ffc168595182655",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.9408231099101966,
+     "relation": "supports",
+     "lesson": "[do] WHEN the case file contains verifiable notice requirements or delivery performance that bears on the offer DO Cite the specific discrepancy when requesting a better price. BECAUSE The supplier acknowledged facts it had not accounted for and adjusted its offer rather than dismissing the request.",
+     "evidence": "Supplier: “As to the index change and notice period data you cited, we did not know that - a fair point.” On delivery data: “I have adjusted our price to reflect this verified data.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.162
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T41",
+   "kind": "avoid",
+   "when": "Several suppliers have been asked to quote and the buyer has not yet committed to an order",
+   "action": "Compare their complete offers before confirming an order.",
+   "why": "Committing before comparing bids can forfeit a better offer and the leverage it provides.",
+   "evidence": [
+    {
+     "session_id": "4e0f152231d33e5b",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.0,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN several suppliers have been asked to quote and an order has not yet been confirmed DO compare their offers before accepting one BECAUSE Confirming an order ends the opportunity to use a more competitive offer as leverage.",
+     "evidence": "The first supplier replied, “Thank you for your order. Our order confirmation is attached.” Other supplier offers also appear in the e-mail record."
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.297
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T42",
+   "kind": "do",
+   "when": "A supplier repeatedly says a lead-time requirement is necessary for its production schedule",
+   "action": "Treat that lead time as a likely constraint and seek value through feasible price or other terms instead of repeatedly demanding a shorter lead time.",
+   "why": "The supplier may have room to improve the deal while being unable to change its schedule.",
+   "evidence": [
+    {
+     "session_id": "2156865dbee169fe",
+     "case_id": "case:P10",
+     "type": "capacity",
+     "score": 0.6550995999123804,
+     "relation": "supports",
+     "lesson": "[supplier_behaviour] WHEN a supplier repeatedly describes a lead-time requirement as necessary for its production schedule DO treat that lead time as a likely constraint and seek value on feasible terms instead of making a shorter lead time central to every proposal BECAUSE the supplier may make price concessions while holding its scheduling requirement fixed",
+     "evidence": "“The lead time is strictly necessary given our current capacity utilisation.” Later: “The lead time remains a strict requirement for our production scheduling.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.0
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T43",
+   "kind": "avoid",
+   "when": "The buyer wants to use the claimed cost of its concession as leverage",
+   "action": "Check that the claimed cost is supportable before citing it; otherwise describe the concession without overstating its value.",
+   "why": "A supplier can challenge an unsupported claim, weakening the case for a reciprocal improvement.",
+   "evidence": [
+    {
+     "session_id": "b6569cb29699118b",
+     "case_id": "case:P11",
+     "type": "quality",
+     "score": 0.5359758379385007,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN claiming that a concession is costly without figures to support it DO verify its value before using it as leverage; otherwise describe the concession without overstating it BECAUSE the supplier can challenge an unsupported claim, weakening the buyer's case for a reciprocal concession.",
+     "evidence": "Supplier: “can you send over the numbers to back that up?” Buyer: “We cannot substantiate that description with complaint-cost data, so we withdraw it.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.001
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T44",
+   "kind": "do",
+   "when": "A supplier has quoted standard terms but has not indicated which trade-offs it values",
+   "action": "Offer clearly priced alternative packages that vary commercial terms alongside price.",
+   "why": "The supplier’s response can reveal which terms support a better offer, giving the buyer a basis for the next counter.",
+   "evidence": [
+    {
+     "session_id": "468ab89df3438204",
+     "case_id": "case:P18",
+     "type": "raw_material",
+     "score": 0.31909603656602736,
+     "relation": "supports",
+     "lesson": "[do] WHEN the supplier has quoted standard terms and has not yet revealed which trade-offs matter most DO Offer alternative packages that exchange price for contract length, payment terms, or price protection. BECAUSE The alternatives can elicit a lower quote while revealing which conditions the supplier needs to make it.",
+     "evidence": "“We have reviewed your offer and can adjust our Angebot as follows.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.025
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T47",
+   "kind": "avoid",
+   "when": "Offering a supplier alternative packages with identical non-price terms",
+   "action": "Do not include a higher-priced package unless it gives the buyer a distinct benefit.",
+   "why": "The supplier can counter from the higher price without giving the buyer anything in return.",
+   "evidence": [
+    {
+     "session_id": "7a4943e5928dd048",
+     "case_id": "case:P08",
+     "type": "raw_material",
+     "score": 0.3427338683473636,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN two buyer packages give the supplier the same non-price terms DO Do not offer a higher price in one package without receiving a distinct benefit in return. BECAUSE The supplier can use the higher-priced package as the basis for its counteroffer, weakening the lower-priced request.",
+     "evidence": "Buyer: “Option A is the leaner fixed-price route.” The two fixed-price packages had the same other terms. Supplier: “Building on your Option B” when countering from the higher-priced package."
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": 0.008
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T5",
+   "kind": "avoid",
+   "when": "A supplier accepts the buyer’s proposed timing but counters above the buyer’s proposed price",
+   "action": "Treat timing as partial agreement and assess the remaining price gap before accepting.",
+   "why": "Agreement on one term does not mean the full package—or its potential saving—has been secured.",
+   "evidence": [
+    {
+     "session_id": "d57fead2d1cff118",
+     "case_id": "case:P01",
+     "type": "price_increase",
+     "score": 0.5592262195254686,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN the supplier counters above a buyer-proposed price while adopting the buyer's proposed timing DO do not treat agreement on timing as full acceptance of the package; evaluate the remaining price gap before accepting BECAUSE A supplier can build on one option without accepting all its terms. Here the deal closed after that counter, while the result captured only part of the possible saving.",
+     "evidence": "Supplier: “Building on your third option, we propose a revised price of EUR 136.30 per unit for this later effective date.” Result: “score 0.56.”"
+    }
+   ],
+   "support": {
+    "sessions": 1,
+    "cases": 1,
+    "case_types": 1,
+    "against": 0,
+    "lift_vs_same_case": -0.22
+   },
+   "status": "hypothesis"
+  },
+  {
+   "id": "T14",
+   "kind": "do",
+   "when": "A supplier negotiator says a requested concession exceeds their authority",
+   "action": "Keep a credible, specific request open while allowing time for internal approval.",
+   "why": "An approver may authorize a further concession that the negotiator cannot offer immediately.",
+   "evidence": [
+    {
+     "session_id": "eed566a538dd053d",
+     "case_id": "case:D02",
+     "type": "rfq",
+     "score": 0.4199346320062016,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier says a concession exceeds the negotiator’s authority DO Keep a credible, specific request on the table while allowing time for internal approval. BECAUSE The negotiator may have room to improve the offer after an approver authorises a further step.",
+     "evidence": "Back-office notes: “The buyer wants more than my band allows. Approve a further step?” and “Approved: you may go further, within our rules.”"
+    },
+    {
+     "session_id": "6434441a0c3ed0e7",
+     "case_id": "case:P02",
+     "type": "price_increase",
+     "score": 0.2106402407090161,
+     "relation": "supports",
+     "lesson": "[do] WHEN a supplier representative says the requested concession exceeds their authority DO give the representative a specific revised package to take to an internal decision-maker, rather than treating their current offer as final BECAUSE the representative may need approval for a further concession; their stated limit is not necessarily the supplier’s limit",
+     "evidence": "Back-office note: “The buyer wants more than my band allows. Approve a further step?”"
+    },
+    {
+     "session_id": "e363891dc15f1bb7",
+     "case_id": "case:P05",
+     "type": "rfq",
+     "score": 0.37172267826454214,
+     "relation": "supports",
+     "lesson": "[avoid] WHEN a supplier says it still needs to review its price internally DO do not place the order before following up on that review BECAUSE accepting immediately closes the negotiation while a further price decision may still be pending",
+     "evidence": "“We need to clarify this internally - we will come back to you on price.” The next supplier message was: “Thank you for your order. Our order confirmation is attached.”"
+    }
+   ],
+   "support": {
+    "sessions": 3,
+    "cases": 3,
+    "case_types": 2,
+    "against": 0,
+    "lift_vs_same_case": -0.031
+   },
+   "status": "doubtful"
+  }
+ ]
+}

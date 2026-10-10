@@ -1,0 +1,139 @@
+{
+ "updated": "2026-10-10T21:39:43+02:00",
+ "sessions": 51,
+ "results": {
+  "all": {
+   "all": {
+    "sessions": 51,
+    "cases": 12,
+    "deal_rate": 1.0,
+    "score_mean": 0.58,
+    "gap_closed_median": 0.58,
+    "winner_concession_pct_median": 2.92
+   }
+  },
+  "competition": {
+   "one supplier": {
+    "sessions": 44,
+    "cases": 10,
+    "deal_rate": 1.0,
+    "score_mean": 0.61,
+    "gap_closed_median": 0.66,
+    "winner_concession_pct_median": 2.27
+   }
+  },
+  "alternative without a deal": {
+   "none": {
+    "sessions": 11,
+    "cases": 3,
+    "deal_rate": 1.0,
+    "score_mean": 0.55,
+    "gap_closed_median": 0.66,
+    "winner_concession_pct_median": 1.24
+   },
+   "yes": {
+    "sessions": 40,
+    "cases": 9,
+    "deal_rate": 1.0,
+    "score_mean": 0.59,
+    "gap_closed_median": 0.56,
+    "winner_concession_pct_median": 3.32
+   }
+  },
+  "category goal": {
+   "leverage": {
+    "sessions": 15,
+    "cases": 4,
+    "deal_rate": 1.0,
+    "score_mean": 0.35,
+    "gap_closed_median": 0.34,
+    "winner_concession_pct_median": 8.2
+   },
+   "stabilise": {
+    "sessions": 19,
+    "cases": 4,
+    "deal_rate": 1.0,
+    "score_mean": 0.71,
+    "gap_closed_median": 0.79,
+    "winner_concession_pct_median": 2.13
+   }
+  }
+ },
+ "supplier_reasoning": [
+  {
+   "pattern": "My call: counter.",
+   "seen": 133,
+   "cases": 12
+  },
+  {
+   "pattern": "Read the buyer's e-mail: … term sheets; we answer with our offer.",
+   "seen": 92,
+   "cases": 11
+  },
+  {
+   "pattern": "My call: hold.",
+   "seen": 42,
+   "cases": 10
+  },
+  {
+   "pattern": "Read the buyer's e-mail: … term sheets and … cited fact to check; we answer with our offer.",
+   "seen": 31,
+   "cases": 10
+  },
+  {
+   "pattern": "Read the buyer's e-mail: … term sheets; we answer with our final offer.",
+   "seen": 30,
+   "cases": 10
+  },
+  {
+   "pattern": "Read the buyer's e-mail: … term sheets and … cited facts to check; we answer with our offer.",
+   "seen": 14,
+   "cases": 4
+  },
+  {
+   "pattern": "Read the buyer's e-mail: … term sheets; we agree.",
+   "seen": 8,
+   "cases": 4
+  },
+  {
+   "pattern": "The buyer asks something for Freight Forwarder; please answer.",
+   "seen": 12,
+   "cases": 3
+  },
+  {
+   "pattern": "The buyer shows a much lower rival quote. I give half the step now and check the rest.",
+   "seen": 8,
+   "cases": 2
+  },
+  {
+   "pattern": "The buyer asks something for Legal Department; please answer.",
+   "seen": 7,
+   "cases": 2
+  },
+  {
+   "pattern": "My call: accept.",
+   "seen": 5,
+   "cases": 2
+  },
+  {
+   "pattern": "The buyer asks something for Logistics; please answer.",
+   "seen": 4,
+   "cases": 2
+  },
+  {
+   "pattern": "Checked: give the rest of the step.",
+   "seen": 3,
+   "cases": 2
+  },
+  {
+   "pattern": "The buyer wants more than my band allows. Approve a further step?",
+   "seen": 2,
+   "cases": 2
+  },
+  {
+   "pattern": "My call: <x>.",
+   "seen": 2,
+   "cases": 2
+  }
+ ]
+}
