@@ -16,6 +16,7 @@ import math
 import re
 
 from .cost import RELATIONSHIP_GOALS, closing_terms, complete_offer, must_haves_ok, total_cost
+from .dossier import safe_query
 
 ANCHOR = {"leverage": 0.12, "routine": 0.08, "quality_first": 0.06, "stabilise": 0.06, "secure_supply": 0.05}
 # Which way each field is worth more to the supplier: -1 lower, +1 higher (index_clause: having one).
@@ -125,10 +126,10 @@ def estimate(case, sid, package, threads_events, opening, cash_short=False):
             if "breakdown" in (att.get("name") or "").lower() and att.get("text"):
                 if (fc := breakdown_cost(att["text"])) is not None:
                     return Estimate(fc, rate, "cost breakdown", opening)
-    if package and package.db:
+    if package:
         for p in case.get("parts", []):
-            rows = package.query(
-                "SELECT supplier_id, unit_cost, confidence_pct FROM should_cost WHERE part_id = ?", (p,)
+            rows = safe_query(
+                package, "SELECT supplier_id, unit_cost, confidence_pct FROM should_cost WHERE part_id = ?", (p,)
             )
             rows.sort(key=lambda r: r["supplier_id"] != sid)
             if rows and rows[0]["unit_cost"]:

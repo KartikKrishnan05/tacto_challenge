@@ -19,10 +19,10 @@ CASH_WORDS = re.compile(
 _cache, _lock = {}, threading.Lock()
 
 
-def _q(package, sql, params=()):
+def safe_query(package, sql, params=()):
     try:
         return package.query(sql, params)
-    except Exception:  # a package without SQLite, or a table this release does not have
+    except Exception:  # no package, no tables, or a table this release does not have
         return []
 
 
@@ -67,62 +67,62 @@ def gather(package, case, sid):
 def _from_package(package, case, sid, parts):
     marks = ",".join("?" * len(parts)) or "''"
     d = {
-        "supplier": _q(
+        "supplier": safe_query(
             package,
             "SELECT id, name, country, payment_days, skonto_days, skonto_pct, incoterm, "
             "category, standard_lead_time_days, abc_class, contract_id FROM suppliers WHERE id = ?",
             (sid,),
         ),
-        "intel": _q(package, "SELECT * FROM supplier_intel WHERE supplier_id = ?", (sid,)),
-        "sourcing": _q(package, f"SELECT * FROM sourcing WHERE part_id IN ({marks})", parts),
-        "parts": _q(
+        "intel": safe_query(package, "SELECT * FROM supplier_intel WHERE supplier_id = ?", (sid,)),
+        "sourcing": safe_query(package, f"SELECT * FROM sourcing WHERE part_id IN ({marks})", parts),
+        "parts": safe_query(
             package,
             f"SELECT id, description, category, material_group, net_weight_kg, price_unit, "
             f"standard_price, abc_class FROM parts WHERE id IN ({marks})",
             parts,
         ),
-        "scorecards": _q(
+        "scorecards": safe_query(
             package,
             "SELECT id, quarter, otd_pct, ppm, qn_count, open_8d_overdue, score, colour "
             "FROM scorecards WHERE supplier_id = ? ORDER BY quarter DESC LIMIT 4",
             (sid,),
         ),
-        "history": _q(
+        "history": safe_query(
             package,
             "SELECT date, part_id, type, asked_pct, settled_pct, note FROM negotiation_history "
             "WHERE supplier_id = ? ORDER BY date DESC LIMIT 12",
             (sid,),
         ),
-        "price_conditions": _q(
+        "price_conditions": safe_query(
             package,
             f"SELECT part_id, valid_from, valid_to, price, basis FROM price_conditions "
             f"WHERE supplier_id = ? AND part_id IN ({marks}) ORDER BY valid_from DESC LIMIT 6",
             (sid, *parts),
         ),
-        "quotes": _q(
+        "quotes": safe_query(
             package,
             f"SELECT id, supplier_id, part_id, quote_date, unit_price, lead_time_days, incoterm, "
             f"payment_days, tooling_eur, awarded, remarks FROM quotes WHERE part_id IN ({marks}) "
             f"ORDER BY quote_date DESC LIMIT 10",
             parts,
         ),
-        "should_cost": _q(package, f"SELECT * FROM should_cost WHERE part_id IN ({marks})", parts),
-        "cost_drivers": _q(
+        "should_cost": safe_query(package, f"SELECT * FROM should_cost WHERE part_id IN ({marks})", parts),
+        "cost_drivers": safe_query(
             package, f"SELECT part_id, series_id, weight FROM cost_drivers WHERE part_id IN ({marks})", parts
         ),
-        "news": _q(
+        "news": safe_query(
             package,
             "SELECT id, date, topic, headline, body FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 6",
             (sid,),
         ),
-        "quality": _q(
+        "quality": safe_query(
             package,
             f"SELECT count(*) AS notifications, sum(complaint_qty) AS complaints, "
             f"sum(cost_recharged_eur) AS recharged_eur, max(qn_date) AS last FROM quality_notifications "
             f"WHERE supplier_id = ? AND part_id IN ({marks}) AND qn_date >= '2025-10-01'",
             (sid, *parts),
         ),
-        "payments": _q(
+        "payments": safe_query(
             package,
             "SELECT count(*) AS invoices, round(avg(julianday(paid_date) - julianday(invoice_date)), 1) "
             "AS days_to_pay, round(avg(julianday(paid_date) - julianday(due_date)), 1) AS days_late, "
@@ -130,7 +130,7 @@ def _from_package(package, case, sid, parts):
             "AND invoice_date >= '2025-10-01'",
             (sid,),
         ),
-        "forecast": _q(
+        "forecast": safe_query(
             package,
             f"SELECT id, part_id, snapshot_month, qty_next_12m FROM forecasts WHERE part_id IN "
             f"({marks}) ORDER BY snapshot_month DESC LIMIT 2",
@@ -139,7 +139,7 @@ def _from_package(package, case, sid, parts):
     }
     ctr = next((r["contract_id"] for r in d["supplier"] if r.get("contract_id")), None)
     d["contract"] = (
-        _q(
+        safe_query(
             package,
             "SELECT id, type, valid_from, valid_to, payment_days, incoterm, notice_days, price_basis "
             "FROM contracts WHERE id = ?",
@@ -148,8 +148,10 @@ def _from_package(package, case, sid, parts):
         if ctr
         else []
     )
-    d["clauses"] = _q(package, "SELECT id, text FROM contract_clauses WHERE contract_id = ?", (ctr,)) if ctr else []
-    docs = _q(
+    d["clauses"] = (
+        safe_query(package, "SELECT id, text FROM contract_clauses WHERE contract_id = ?", (ctr,)) if ctr else []
+    )
+    docs = safe_query(
         package,
         "SELECT id, date, kind, subject, asked_pct, asked_price, effective_date, notice_days "
         "FROM documents WHERE supplier_id = ? ORDER BY date DESC LIMIT 18",

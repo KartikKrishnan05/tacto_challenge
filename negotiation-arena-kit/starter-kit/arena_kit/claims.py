@@ -12,6 +12,8 @@ supplier), so `Ledger` remembers what has been cited.
 import re
 from dataclasses import dataclass, field
 
+from .dossier import safe_query
+
 DATA_END = "2026-09"  # the data is frozen at 2026-09-30
 
 
@@ -62,7 +64,7 @@ def series_name(package, series):
     row = package.lookup(series) if package else None
     name = ""
     if package and not row:
-        rows = package.query("SELECT name FROM index_series WHERE id = ?", (series,)) if package.db else []
+        rows = safe_query(package, "SELECT name FROM index_series WHERE id = ?", (series,))
         name = rows[0]["name"] if rows else ""
     name = name or (row or {}).get("name") or ""
     if m := re.match(r"Producer prices DE: (.+)", name):
@@ -113,9 +115,9 @@ def candidates(package, case, sid, their_price=None, rivals=None):
 
     # 1. The index series that drive the part's cost (or that a clause would follow).
     weights = {}
-    if package and package.db:
+    if package:
         for p in parts:
-            for r in package.query("SELECT series_id, weight FROM cost_drivers WHERE part_id = ?", (p,)):
+            for r in safe_query(package, "SELECT series_id, weight FROM cost_drivers WHERE part_id = ?", (p,)):
                 weights[r["series_id"]] = max(weights.get(r["series_id"], 0), r["weight"] or 0)
     for opt in case.get("term_options", {}).get("index_clause", []) or []:
         if opt:
@@ -286,9 +288,9 @@ def candidates(package, case, sid, their_price=None, rivals=None):
                 )
 
     # 7. News about the supplier: true by ID; the model judges whether it helps.
-    if package and package.db:
-        for r in package.query(
-            "SELECT id, headline, topic FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 3", (sid,)
+    if package:
+        for r in safe_query(
+            package, "SELECT id, headline, topic FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 3", (sid,)
         ):
             out.append(
                 Claim(

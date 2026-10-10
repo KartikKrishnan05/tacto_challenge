@@ -28,6 +28,7 @@ from . import claims as cl
 from . import writing
 from .cost import complete_offer, must_haves_ok, total_cost
 from .docs import standard_terms
+from .dossier import safe_query
 
 log = logging.getLogger("arena")
 
@@ -346,11 +347,8 @@ class Analyst:
 
     def _series_ids(self):
         ids = set()
-        if self.package is not None and getattr(self.package, "db", None):
-            try:
-                ids |= {r["id"] for r in self.package.query("SELECT id FROM index_series")}
-            except Exception:
-                pass
+        if self.package is not None:
+            ids |= {r["id"] for r in safe_query(self.package, "SELECT id FROM index_series")}
         ids |= {k[4:].split("@")[0] for k in (self.case.get("facts") or {}) if k.startswith("idx:")}
         return sorted(ids, key=len, reverse=True)
 
