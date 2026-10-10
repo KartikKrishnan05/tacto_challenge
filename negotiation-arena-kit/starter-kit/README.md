@@ -48,6 +48,17 @@ uv run arena play case:D02 -v                              # the sandbox: 3 demo
 **Sunday 08:00:** run `arena data` again - it adds `data/release-sunday` (new news, letters, a
 memo). `DataPackage` merges its facts and documents automatically; hidden cases may cite them.
 
+**Master data file:** convert the downloaded package (and an available Sunday release) into one
+`master.json` with:
+
+```bash
+uv run arena-build-master-data ../data
+```
+
+`DataPackage` reads that JSON for lookups, documents, cases and negotiation dossiers. It refreshes
+the file automatically when source files change. Its general `query()` method creates a temporary,
+read-only in-memory SQLite view from the JSON rows; it does not reopen the source database.
+
 ## Hello World (local, 3 commands)
 
 No key yet? Play a whole case against the local simulator - no network, no quota, no LLM costs.
