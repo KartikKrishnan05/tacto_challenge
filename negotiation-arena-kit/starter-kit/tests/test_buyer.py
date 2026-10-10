@@ -294,7 +294,10 @@ def test_an_ask_is_granted_for_a_lower_price_not_for_free():
     sheets = [t["terms"] for t in agent.decide_all(case, {sid: [quote]})[0]["message"]["term_sheets"]]
     assert [t["payment_days"] for t in sheets] == [14, 60]
     ask, ref = sheets
-    assert ask["unit_price"] <= round(ref["unit_price"] * (1 - strategy.SKONTO_PER_30_DAYS * 46 / 30), 2) + 0.01
+    # worth more to the supplier than the reference (its cash rate, cash-short: 8 % + 6 %) ...
+    rate = case["buyer"]["interest_rate"] + strategy.CASH_SHORT_PREMIUM
+    assert ask["unit_price"] > ref["unit_price"] * (1 - rate * 46 / 360)
+    # ... and cheaper for us: both sides gain from the trade
     assert total_cost(case, ask) < total_cost(case, ref)
 
 

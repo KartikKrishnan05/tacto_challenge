@@ -15,7 +15,7 @@ that strategic and bottleneck cases price a squeezed supplier too. Each round ha
              a trade the supplier may value (e.g. faster payment) at a lower price still, and our
              preferred terms at a higher price. Which one it answers tells us what it values.
              When the supplier asked for a term (e.g. payment in 15 days): two sheets instead - yes
-             to its ask at a clearly lower price, or our terms at the target.
+             to its ask at a lower price that still leaves it better off, or our terms at the target.
 """
 
 import math
@@ -54,15 +54,15 @@ OPENING_GUESS = "opening price - 10%"
 MIN_STEP = 0.004  # our smallest visible concession, 0.4 % of C: below it we hold instead
 DECOY_GAP = 0.02  # the lean option: the recommended one 2 % cheaper and one term worse for the supplier
 RECIPROCITY = 0.5  # our step answers theirs with at most this share of it
-GIVE_FOR = 0.01  # a term we give the supplier costs it at least 1 % of the price
+# A term we give the supplier is worth something to it (faster payment: its cost of money, more when
+# short of cash) and costs us something (our interest). Between the two lies a gain for both sides;
+# the sheet that gives the term splits it, so the supplier is better off taking it and so are we.
+SURPLUS_SHARE = 0.5  # our share of that gain
 ROUND_HORIZON = 6  # rounds per thread we plan for: the Live Final's cap leaves about this many
 # The opening comes from the data. A fair price is the supplier's should-cost plus a margin the goal
 # allows (relationship goals: the case's sustainable margin - below it C rises again).
 FAIR_MARGIN = {"leverage": 0.05, "routine": 0.06, "quality_first": 0.08}
 MAX_ANCHOR_CUT = 0.25  # never open more than 25 % under their price: below that it is not credible
-# Paying faster is the classic trade: the market's 2 % skonto for paying ~30 days earlier. A supplier
-# that asks for faster payment gets it for at least this, or what the cash is worth to it if more.
-SKONTO_PER_30_DAYS = 0.02
 CASH_SHORT_PREMIUM = 0.06  # a supplier short of cash values money this much more per year than we do
 # Fields with a buyer reference (the plan): what the supplier asks beyond it is a give from us.
 REFERENCE_FIELDS = ("payment_days", "volume_per_year", "contract_months", "lead_time_days", "index_clause")
@@ -310,11 +310,10 @@ def supplier_rate(case, est):
     return est.interest_rate if est else case["buyer"].get("interest_rate", 0.08)
 
 
-def trade_price(case, give, reference, ref_price, std, est):
-    """The price for `give` (the reference terms plus what the supplier asked) that leaves the
-    supplier as well off in cash as `reference` at `ref_price` - so the ask is paid for at what it is
-    worth to the supplier (more to one short of cash), and at least the market's skonto for faster
-    payment. None if it cannot be computed."""
+def indifference_price(case, give, reference, ref_price, std, est):
+    """The price for `give` that leaves the supplier exactly as well off in cash as `reference` at
+    `ref_price` (`supplier_value` at its estimated cost of money). Below it the supplier would rather
+    take `reference`. None if it cannot be computed."""
     standard = closing_terms(case, {}, {**((est.opening if est else {}) or {}), **(std or {})})
     sup = {"standard": standard, "interest_rate": supplier_rate(case, est), "full_cost": 0.0}
     try:
@@ -325,11 +324,20 @@ def trade_price(case, give, reference, ref_price, std, est):
         return None
     if v1 - v0 <= 0:
         return None
-    p = (v_ref - v0) / (v1 - v0)
-    ref_days, days = reference.get("payment_days"), give.get("payment_days")
-    if ref_days is not None and days is not None and days < ref_days:
-        p = min(p, ref_price * (1 - SKONTO_PER_30_DAYS * (ref_days - days) / 30))
-    return math.floor(p * 100) / 100
+    return (v_ref - v0) / (v1 - v0)
+
+
+def give_price(p_equal, p_indifferent):
+    """The price for a sheet that gives the supplier a term. `p_equal`: the price at which it costs us
+    as much as the sheet without the give; `p_indifferent`: the price at which the supplier is as well
+    off as without it. When the term is worth more to the supplier than it costs us, the gap is shared
+    (SURPLUS_SHARE): both are better off with the give. Otherwise equal cost for us - nothing to gain,
+    and the supplier picks by preference."""
+    if p_equal is None:
+        return None
+    if p_indifferent is None or p_indifferent >= p_equal:
+        return p_equal
+    return math.floor((p_equal - SURPLUS_SHARE * (p_equal - p_indifferent)) * 100) / 100
 
 
 def base_combo(case, terms, std):
@@ -363,7 +371,8 @@ def sheets(case, std, est, their_terms, target, levers, floor, asks=None):
     """Up to three term sheets around `target` (our C):
     their terms    their non-price terms plus every gain for both sides (`mutual_combo`), at the
                    price that costs us `target`
-    a give         one lever moved the supplier's way, which costs us something - for 1 % less
+    a give         one lever moved the supplier's way, which costs us something - for a lower price
+                   that shares the gain when the term is worth more to it than it costs us
     our terms      every term at our best - for a higher price, still costing `target`
     When the supplier asked for terms (`asks`, see `supplier_asks`), `ask_sheets` instead.
     """
@@ -394,7 +403,8 @@ def sheets(case, std, est, their_terms, target, levers, floor, asks=None):
         if label == "their terms":
             cap = p
         elif p is not None and cap and label.endswith("toward them"):
-            p = min(p, round(cap * (1 - GIVE_FOR), 2))  # a concession on terms buys a lower price
+            # a term given to the supplier buys a lower price: the gain from the trade, shared
+            p = give_price(p, indifference_price(case, combo, base, cap, std, est))
         if p is None or p >= their_price or p < lo:
             continue
         t = complete_offer(case, {**combo, "unit_price": p})
@@ -409,9 +419,9 @@ def sheets(case, std, est, their_terms, target, levers, floor, asks=None):
 
 def ask_sheets(case, std, est, base, their_price, target, asks, lo, hi):
     """Two sheets when the supplier asked for something: [their ask, our reference].
-    their ask   exactly what it asked for (e.g. payment in 15 days), at a clearly lower price: the
-                cheapest of what the ask costs us (equal C), what it is worth to the supplier
-                (`trade_price`, with the market's skonto for faster payment) and GIVE_FOR off
+    their ask   exactly what it asked for (e.g. payment in 15 days), at a lower price: between what
+                the ask costs us (equal C) and what it is worth to the supplier (`give_price`), so
+                taking it leaves both sides better off than the reference
     reference   our reference terms at the target price - the contrast shows what the ask is worth
     No decoy here: a third sheet that takes the ask back would blur the trade. [] if it does not work."""
     ref = reference_combo(case, base, std, est, their_price)
@@ -419,12 +429,10 @@ def ask_sheets(case, std, est, base, their_price, target, asks, lo, hi):
     p_ref = price_at(case, ref, std, est, target, lo, hi)
     if p_ref is None or p_ref >= their_price or give == complete_offer(case, ref):
         return []
-    prices = [
-        price_at(case, give, std, est, target, lo, hi),
-        trade_price(case, give, ref, p_ref, std, est),
-        round(p_ref * (1 - GIVE_FOR), 2),
-    ]
-    p = max(min(x for x in prices if x is not None), lo)
+    p = give_price(price_at(case, give, std, est, target, lo, hi), indifference_price(case, give, ref, p_ref, std, est))
+    if p is None:
+        return []
+    p = max(p, lo)
     out = []
     for label, combo, price in (("their ask", give, p), ("reference", ref, p_ref)):
         t = complete_offer(case, {**combo, "unit_price": round(price, 2)})
