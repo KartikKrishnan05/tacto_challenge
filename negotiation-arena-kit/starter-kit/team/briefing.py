@@ -56,6 +56,7 @@ class Briefing:
         self.case, self.p = case, package
         self.facts = {**(package.facts if package else {}), **(case.get("facts") or {})}
         self.claims, self.sections = [], []
+        self.supplier_text = {}  # sid -> its news and correspondence, raw (for signals such as cash needs)
         if package is None:
             self.sections.append("No data package loaded: argue from the case file only.")
             return
@@ -178,6 +179,7 @@ class Briefing:
         for n in _q(p, "SELECT id, date, topic, headline FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 3",
                     sid):
             out.append(f"- news {n['id']} {n['date']}: {n['headline']} ({n['topic']})")
+            self.supplier_text[sid] = self.supplier_text.get(sid, "") + f" {n['headline']} {n['topic']}"
         out.append("- correspondence, newest first (read for mood, cash needs, capacity, what they want):")
         for d in _q(p, "SELECT id, date, kind, subject FROM documents WHERE supplier_id = ? ORDER BY date DESC LIMIT ?",
                     sid, MAX_DOCS):
@@ -188,6 +190,7 @@ class Briefing:
             except (FileNotFoundError, ValueError):
                 text = ""
             out.append(f"  - {d['id']} {d['kind']} '{d['subject']}': {text}")
+            self.supplier_text[sid] = self.supplier_text.get(sid, "") + f" {d['subject']} {text}"
         self.sections.append("\n".join(out))
 
     # ---- notice period: a letter that gives less notice than the contract ------------------------

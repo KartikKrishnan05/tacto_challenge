@@ -51,11 +51,31 @@ def save(folder, case_id, result):
 
 
 def one(client, case, deadline, folder):
-    try:
-        result = play_case(RemoteTable(client, case), case["case_id"], make(), deadline)
-    except Exception as e:  # one broken case must not stop the others
-        log.exception("%s failed", case["case_id"])
-        result = e
+    """Play a case until it has a result or the cap is near. Every try uses a fresh table: after a crash,
+    the 409 'one session per case' resumes the running session where it stands."""
+    cap = deadline() if callable(deadline) else deadline
+    result = None
+    while True:
+        try:
+            result = play_case(RemoteTable(client, case), case["case_id"], make(), deadline)
+            if isinstance(result, dict) and "deal" in result:
+                break
+            log.warning("%s: no result yet (%s) - retrying", case["case_id"], result)
+        except ArenaError as e:
+            result = e
+            if e.status == 429 and "open sessions" in str(e.detail):
+                close_practice_sessions(client)
+            elif not (e.status >= 500 or e.status in (409, 429)):
+                log.exception("%s failed", case["case_id"])
+                break
+            log.warning("%s: %s - retrying", case["case_id"], e)
+        except Exception as e:  # venue Wi-Fi and other trouble: try again while the wave runs
+            result = e
+            log.exception("%s failed - retrying", case["case_id"])
+        cap = (deadline() if callable(deadline) else deadline) or cap
+        if not cap or time.time() > cap - 20:
+            break
+        time.sleep(2)
     save(folder, case["case_id"], result)
     score = result.get("score") if isinstance(result, dict) else None
     log.warning("DONE %s deal=%s score=%s", case["case_id"],

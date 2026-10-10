@@ -20,6 +20,7 @@ import time
 import httpx
 
 from arena_kit.agents.llm import ID_RE, parse
+from arena_kit.cli import load_env
 from arena_kit.cost import RELATIONSHIP_GOALS, complete_offer, must_haves_ok, total_cost
 from arena_kit.docs import standard_terms
 from arena_kit.play import latest, live_threads, moves_left, standing
@@ -29,6 +30,7 @@ from .levers import _label, lever_table
 
 log = logging.getLogger("arena")
 
+load_env()  # .env before the settings below are read (real environment variables win)
 LLM_TIMEOUT_S = float(os.environ.get("TEAM_LLM_TIMEOUT", "28"))
 ROUND_BUDGET = int(os.environ.get("TEAM_ROUNDS", "6"))  # aim to close within this many of our messages
 SECONDS_PER_ROUND = 75  # our move + the supplier's reply (up to about a minute)
@@ -99,8 +101,10 @@ GOAL_NOTE = {
 }
 ASK_DATA = re.compile(r"send (?:us )?the data|which figures|share the (?:detailed )?(?:forecast )?data|provide the "
                       r"(?:forecast|data|figures)|verify (?:this|it)", re.I)
-CASH_WORDS = re.compile(r"cash|liquidity|pay(?:ment)? (?:of )?invoices|within \d+ days|early payment|skonto|discount",
-                        re.I)
+# a supplier short of cash, from its own words only (never our briefing labels or echoes of our e-mails)
+CASH = re.compile(r"\bcash\b|liquidit|pay(?:ment)?\s+(?:of\s+)?(?:our\s+)?invoices\s+(?:with)?in\s+\d+\s+days|"
+                  r"faster payment|early payment|overdue|restructur|insolven", re.I)
+FULL_COST_K = 1.02  # its full cost = should-cost / 1.02: fits the arena's relationship charge at 31 recorded deals
 
 
 def openai_complete(timeout=LLM_TIMEOUT_S):
@@ -157,22 +161,32 @@ class TeamAgent:
             self.brief = Briefing(case, None)
         self.supplier_est, self.confirmed = {}, set()
         for sid in case["suppliers"]:
-            text = " ".join(s for s in self.brief.sections if sid in s)
-            self.supplier_est[sid] = {"cash_short": bool(CASH_WORDS.search(text))}
+            text = getattr(self.brief, "supplier_text", {}).get(sid, "")
+            self.supplier_est[sid] = {"cash_short": bool(CASH.search(text))}
         self.should_cost = next((c["value"] for c in self.brief.claims if c["kind"] == "should_cost"), None)
 
     def supplier(self, case, sid, std):
         """Our estimate of the supplier for the relationship term (strategic goals only)."""
         if case["buyer"].get("category_goal") not in RELATIONSHIP_GOALS or not self.should_cost or not std:
             return None
-        rate = 0.14 if self.supplier_est.get(sid, {}).get("cash_short") else 0.08
+        rate = 0.10 if self.supplier_est.get(sid, {}).get("cash_short") else 0.08
         b, fixed = case["buyer"], case.get("fixed_terms", {})
         full_std = {  # the quote PDF may leave fields out: fill them as the buyer would assume
             "payment_days": b["reference_payment_days"],
             "incoterm": fixed.get("incoterm") or min(b["freight_eur_per_unit"], key=b["freight_eur_per_unit"].get),
             **{k: v for k, v in std.items() if v is not None},
         }
-        return {"standard": full_std, "interest_rate": rate, "usual_rate": 0.08, "full_cost": self.should_cost}
+        return {"standard": full_std, "interest_rate": rate, "usual_rate": 0.08,
+                "full_cost": self.should_cost / FULL_COST_K}
+
+    @staticmethod
+    def std(events):
+        """Its standard terms from the quote PDF; a PDF we cannot parse gives {} instead of an exception."""
+        try:
+            return standard_terms(events)
+        except Exception as e:
+            log.warning("standard terms unreadable: %s", e)
+            return {}
 
     def cost(self, case, terms, std, sup):
         try:
@@ -188,7 +202,7 @@ class TeamAgent:
     def plan(self, case, events, sid, threads=None):
         """2-3 term sheets on the concession path, the price floor and the C of each."""
         _, theirs = standing(events)
-        std = standard_terms(events)
+        std = self.std(events)
         sup = self.supplier(case, sid, std)
         if theirs.get("unit_price") is None:
             return {"sheets": [], "floor": None, "target": None, "std": std, "sup": sup}
@@ -277,7 +291,9 @@ class TeamAgent:
                 variants.append(complete_offer(case, {**a, "payment_days": fast}))
         out = []
         for v in variants:
-            v = self.iso_price(case, v, c_a, std, sup, floor)
+            # each structure has its own floor: faster payment is worth more to it, so it can go lower
+            floor_v = min(floor, self.price_floor(case, v, std, sup, theirs.get("unit_price") or v["unit_price"]))
+            v = self.iso_price(case, v, c_a, std, sup, floor_v)
             # a give worth more than the price room (e.g. half the need uncovered) is no offer
             if v and self.cost(case, v, std, sup) <= c_a * 1.002 and must_haves_ok(case, v, std) and v not in out:
                 out.append(v)
@@ -297,13 +313,18 @@ class TeamAgent:
         return round(best_p, 2)
 
     def iso_price(self, case, sheet, c_target, std, sup, floor):
-        """The same sheet with the price that makes its C equal `c_target` (not below the floor)."""
-        p0 = sheet["unit_price"]
-        c0, c1 = self.cost(case, sheet, std, sup), self.cost(case, {**sheet, "unit_price": p0 + 1}, std, sup)
-        if not math.isfinite(c0) or c1 - c0 <= 0:
+        """The same sheet with the price that makes its C equal `c_target`, by bisection between the floor and
+        1.25 x its price (C is not linear in the price with a relationship charge); None if there is no such price."""
+        def c(p):
+            return self.cost(case, {**sheet, "unit_price": round(p, 2)}, std, sup)
+
+        lo, hi = floor, sheet["unit_price"] * 1.25
+        if not math.isfinite(c(lo)) or c(lo) > c_target * 1.001 or c(hi) < c_target:
             return None
-        p = round(max(p0 - (c0 - c_target) / (c1 - c0), floor), 2)
-        return complete_offer(case, {**sheet, "unit_price": p})
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if c(mid) <= c_target else (lo, mid)
+        return complete_offer(case, {**sheet, "unit_price": round(lo, 2)})
 
     def rounds_budget(self, case, events):
         """How many of our messages we plan for: the round limit, our target, the time left."""
@@ -322,9 +343,13 @@ class TeamAgent:
         if sid is not None and sid not in live_threads(threads):
             return {"supplier_id": sid, "idle": True}
         live = live_threads(threads)
-        for s in live:  # a reply asking for faster payment marks a supplier short of cash
-            if any(CASH_WORDS.search(str(m.get("body", ""))) for m in threads[s] if m.get("from") != "buyer"):
-                self.supplier_est.setdefault(s, {})["cash_short"] = True
+        for s in live:  # a reply asking for faster payment marks a supplier short of cash - unless it echoes us
+            mine = ""
+            for m in threads[s]:
+                if m.get("from") == "buyer":
+                    mine = str(m.get("body", "")).lower()
+                elif (hit := CASH.search(str(m.get("body", "")))) and hit.group(0).lower() not in mine:
+                    self.supplier_est.setdefault(s, {})["cash_short"] = True
         if sid is None:  # the kit's sequential loop: talk to the supplier whose offer costs least
             sid = min(live, key=lambda s: self.standing_cost(case, threads, s))
         events = threads[sid]
@@ -332,7 +357,7 @@ class TeamAgent:
             plan = self.plan(case, events, sid, threads)
         except Exception as e:  # never let a planning bug cost the case
             log.exception("plan failed: %s", e)
-            plan = {"sheets": [], "floor": None, "target": None, "std": standard_terms(events), "sup": None}
+            plan = {"sheets": [], "floor": None, "target": None, "std": self.std(events), "sup": None}
         rule = self.close_rule(case, threads, sid, plan)
         if rule:
             self.log.append((sid, plan.get("round"), "rule", rule[1]))
@@ -346,143 +371,185 @@ class TeamAgent:
         except Exception as e:  # slow or broken LLM: the planned move, on time
             log.warning("LLM failed after %.0fs (%s) - planned move", time.monotonic() - t0, e)
             move = None
-        return move or self.planned_move(case, events, sid, plan)
+        return move or self.planned_move(case, events, sid, plan, threads)
+
+    # ---- every sheet the supplier has offered, and the accept ladder -------------------------------
+    def thread_sheets(self, case, events, sid):
+        """Every sheet the supplier has put on the table in this thread - main offers and alternatives, latest
+        message last: [{id, terms, latest, main, c, valid}]. valid = it keeps the must-haves and beats the
+        alternative; c is our C with its standard terms (and our estimate of its margin)."""
+        std = self.std(events)
+        sup = self.supplier(case, sid, std)
+        c_alt = self.c_alt(case)
+        replies = [m for m in events if m.get("from") != "buyer"]
+        out = []
+        for i, m in enumerate(replies):
+            for j, ts in enumerate(m.get("term_sheets") or []):
+                terms = ts.get("terms") or {}
+                if not ts.get("term_sheet_id") or terms.get("unit_price") is None:
+                    continue
+                c = self.cost(case, terms, std, sup)
+                valid = must_haves_ok(case, terms, std) and self.cost(case, terms, std, None) <= c_alt
+                out.append({"id": ts["term_sheet_id"], "terms": terms, "latest": i == len(replies) - 1,
+                            "main": j == 0, "c": c, "valid": valid})
+        return out
+
+    def accept_candidates(self, case, threads):
+        """The accept ladder over all live threads: valid sheets, cheapest first; a few earlier or alternative
+        IDs (the arena may refuse those - a refused accept changes nothing), then every latest valid sheet."""
+        rows = sorted((r["c"], not r["latest"], not r["main"], sid, r["id"]) for sid in live_threads(threads)
+                      for r in self.thread_sheets(case, threads[sid], sid) if r["valid"])
+        now = [x for x in rows if not x[1]]
+        if not now:  # an earlier ID alone is no safe accept
+            return []
+        earlier = [x for x in rows if x[1] and x[0] < now[0][0] * 0.999][:3]
+        return list(dict.fromkeys((x[3], x[4]) for x in sorted(earlier + now)))
+
+    def accept(self, case, threads):
+        """An accept with the whole ladder (the runner tries the IDs in order), or None."""
+        ladder = self.accept_candidates(case, threads)
+        if not ladder:
+            return None
+        sid, oid = ladder[0]
+        return {"supplier_id": sid, "message": {"action": {"type": "accept", "term_sheet_id": oid}},
+                "candidates": ladder}
 
     def best_sheet(self, case, events, sid=None):
-        """(term_sheet_id, terms) of the cheapest sheet on the table now: the supplier's main offer or an
-        alternative it sent in the same message (C with its standard terms; sheets keeping the must-haves first).
-        Accepting an alternative the arena refuses falls back to the main offer (runner retry)."""
-        sheets = [(ts.get("term_sheet_id"), ts.get("terms") or {}) for ts in (latest(events).get("term_sheets") or [])]
-        sheets = [s for s in sheets if s[0] and s[1].get("unit_price") is not None]
-        if len(sheets) < 2:
+        """(term_sheet_id, terms) of the cheapest valid sheet in the supplier's latest message (main offer or
+        alternative), else its main offer."""
+        rows = [r for r in self.thread_sheets(case, events, sid) if r["latest"]]
+        if not rows:
             return standing(events)
-        std = standard_terms(events)
-        sup = self.supplier(case, sid, std) if sid else None
-        return min(sheets, key=lambda s: (not must_haves_ok(case, s[1], std), self.cost(case, s[1], std, sup)))
+        r = min(rows, key=lambda r: (not r["valid"], r["c"]))
+        return r["id"], r["terms"]
 
     def standing_cost(self, case, threads, sid):
-        _, terms = self.best_sheet(case, threads[sid], sid)
-        std = standard_terms(threads[sid])
-        return self.cost(case, terms, std, self.supplier(case, sid, std)) if terms.get("unit_price") else math.inf
+        rows = [r["c"] for r in self.thread_sheets(case, threads[sid], sid) if r["latest"]]
+        return min(rows) if rows else math.inf
 
     def acceptable(self, case, events, sid):
-        sheet_id, terms = self.best_sheet(case, events, sid)
-        std = standard_terms(events)
-        if not sheet_id or terms.get("unit_price") is None or not must_haves_ok(case, terms, std):
-            return False
-        return total_cost(case, terms, std) <= self.c_alt(case)
+        return any(r["valid"] and r["latest"] for r in self.thread_sheets(case, events, sid))
 
     def best_thread(self, case, threads):
-        ok = [s for s in live_threads(threads) if self.acceptable(case, threads[s], s)]
-        return min(ok, key=lambda s: self.standing_cost(case, threads, s)) if ok else None
+        ladder = self.accept_candidates(case, threads)
+        return ladder[0][0] if ladder else None
 
     def close_rule(self, case, threads, sid, plan):
         """Hard rules before the LLM: (decision, reason) or None."""
         events = threads[sid]
         status = latest(events).get("status")
         left = moves_left(case, events)
-        best = self.best_thread(case, threads)
-        accept = lambda s: {"supplier_id": s, "message": {"action": {"type": "accept",  # noqa: E731
-                                                                     "term_sheet_id": self.best_sheet(
-                                                                         case, threads[s], s)[0]}}}
-        if status == "agreed" and self.acceptable(case, events, sid) and best == sid:
-            return accept(sid), "agreed to our terms"
-        if status == "final_offer":  # its last word: pushing on makes it walk away
-            confirm = self.confirm_final(case, events, sid, plan)
-            if confirm and best in (sid, None):
-                return confirm, "accept its price, confirm our terms"
-            if best:
-                return accept(best), "final offer"
+        accept = self.accept(case, threads)
+        best = accept["supplier_id"] if accept else None
+        if status == "agreed" and accept:
+            # 'agreed' only echoes our last sheet: if it offered something cheaper before, ask for that once
+            earlier = self.better_earlier(case, events, sid, plan)
+            if earlier:
+                return earlier, "its earlier offer was cheaper than the agreed sheet"
+            return accept, "agreed to our terms"
+        if status == "final_offer":  # its last word: any further message makes it walk away (8/8 recorded)
+            if accept:
+                return accept, "final offer"
+            repair = self.confirm_final(case, events, sid, plan)  # nothing acceptable anywhere: one repair try
+            if repair:
+                return repair, "final offer breaks a must-have - one repair message"
         if self.stalled(case, threads, sid) and best == sid:
             earlier = self.better_earlier(case, events, sid, plan)
             if earlier:
                 return earlier, "back to its own earlier, cheaper offer"
-            return accept(sid), "no more movement"
+            return accept, "no more movement"
         spent = plan.get("round") or 0
-        if (left <= 0 or spent >= plan.get("budget", ROUND_BUDGET)) and best:
+        if (left <= 0 or spent >= plan.get("budget", ROUND_BUDGET)) and accept:
             if best == sid or len(live_threads(threads)) == 1:
-                return accept(best), "round budget used"
+                return accept, "round budget used"
         if left <= 0 or (spent >= plan.get("budget", ROUND_BUDGET) and best and best != sid):
             if len(live_threads(threads)) > 1:  # RFQ: leave this thread, the others go on
                 return {"supplier_id": sid, "idle": True}, "no messages left here"
-            if not best:
+            if not accept:
                 return {"supplier_id": sid, "message": {"action": {"type": "walk_away"}}}, "nothing acceptable"
         return None
 
     def confirm_final(self, case, events, sid, plan):
-        """A final offer that leaves fields out closes them on its standard terms. Once per thread:
-        take its price and ask it to confirm our terms for the rest - if that saves at least 0.5 %."""
-        missing = latest(events).get("missing_fields") or []
+        """Only when nothing on the table is acceptable (its final offer breaks a must-have or costs more than
+        our alternative): one message at its price with the nearest must-have-keeping option and full coverage."""
         _, theirs = standing(events)
         if sid in self.confirmed or moves_left(case, events) <= 0 or not theirs.get("unit_price"):
             return None
-        # fields it left out, and the coverage of our need (an uncovered need is bought at the fallback price)
-        std, sup = plan.get("std"), plan.get("sup")
+        std = plan.get("std")
         must = {m["field"] for m in case["buyer"].get("must_haves", [])}
-        wanted = set(missing) | COVERAGE | must
-        levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in wanted}
-        broken = not must_haves_ok(case, theirs, std)
-        if broken:  # its offer breaks a must-have: ask for the nearest option that keeps it, at its price
-            for f in must:
-                for o in case.get("term_options", {}).get(f, []):
-                    if must_haves_ok(case, {**theirs, **levers, f: o}, std):
-                        levers.setdefault(f, o)
-                        break
-        if not levers:
-            return None
-        sheet = complete_offer(case, {**theirs, **levers})
-        sheets = [sheet]
-        if "index_clause" in case["negotiable"] and not sheet.get("index_clause"):  # longer only with a clause?
-            clauses = [o for o in case.get("term_options", {}).get("index_clause", []) if o]
-            if clauses:
-                best = min(clauses, key=lambda o: self.cost(case, {**sheet, "index_clause": o}, std, sup))
-                sheets.append(complete_offer(case, {**sheet, "index_clause": best}))
-        c_now = self.cost(case, theirs, std, sup)
-        sheets = [s for s in sheets if must_haves_ok(case, s, std)
-                  and (broken or self.cost(case, s, std, sup) <= 0.995 * c_now)]
-        if not sheets:
+        levers = {f: row["option"] for f, row in (plan.get("levers") or {}).items() if f in COVERAGE | must}
+        sheet = self.keep_must_haves(case, complete_offer(case, {**theirs, **levers}), std)
+        if not must_haves_ok(case, sheet, std):
             return None
         self.confirmed.add(sid)
         body = (f"Thank you - we accept your price of EUR {theirs['unit_price']:.2f}. To complete the agreement and "
-                "cover our full requirement, please confirm it on one of the attached term sheets; that is all we "
-                "need to sign.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
+                "cover our full requirement, please confirm it on the attached term sheet; that is all we need to "
+                "sign.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
         return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
-                                                 "term_sheets": [{"terms": s} for s in sheets]}}
+                                                 "term_sheets": [{"terms": sheet}]}}
 
     def better_earlier(self, case, events, sid, plan):
-        """Once per thread: if one of its earlier offers cost us 0.3 % less than the standing one, offer
-        exactly those terms back - it has said yes to them before."""
+        """Once per thread: if one of its earlier sheets (main or alternative) costs us 0.3 % less than the best
+        sheet of its latest message, offer exactly those terms back - it has offered them before."""
         if ("earlier", sid) in self.confirmed or moves_left(case, events) <= 0:
             return None
-        std, sup = plan.get("std"), plan.get("sup")
-        offers = [(ts["term_sheet_id"], ts["terms"]) for m in events if m.get("from") != "buyer"
-                  for ts in (m.get("term_sheets") or []) if ts["terms"].get("unit_price") is not None]
-        if len(offers) < 2:
+        rows = self.thread_sheets(case, events, sid)
+        now = [r["c"] for r in rows if r["latest"] and r["valid"]] or [r["c"] for r in rows if r["latest"]]
+        before = [r for r in rows if not r["latest"] and r["valid"]]
+        if not now or not before:
             return None
-        oid, terms = min(offers[:-1], key=lambda o: self.cost(case, o[1], std, sup))
-        if self.cost(case, terms, std, sup) > 0.997 * self.cost(case, offers[-1][1], std, sup):
+        r = min(before, key=lambda r: r["c"])
+        if r["c"] > 0.997 * min(now):
             return None
-        sheet = complete_offer(case, terms)
-        if not must_haves_ok(case, sheet, std):
+        sheet = complete_offer(case, r["terms"])
+        if not must_haves_ok(case, sheet, plan.get("std")):
             return None
         self.confirmed.add(("earlier", sid))
         body = (f"Thank you. We have reviewed everything again and are ready to sign on your own earlier offer "
-                f"{oid} - the attached term sheet repeats exactly those terms. Can you confirm?\n\n"
+                f"{r['id']} - the attached term sheet repeats exactly those terms. Can you confirm?\n\n"
                 "Best regards\nHollerau Pumpenwerke, Purchasing")
         return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
                                                  "term_sheets": [{"terms": sheet}]}}
 
     def stalled(self, case, threads, sid):
-        """Its offer has not got cheaper for us over its last two replies, after 3+ of our messages."""
+        """Its offers have not got cheaper for us over its last two replies, after 3+ of our messages."""
         events = threads[sid]
         replies = [m for m in events if m.get("from") != "buyer" and m.get("term_sheets")]
         if sum(m.get("from") == "buyer" for m in events) < 3 or len(replies) < 3:
             return False
-        std = standard_terms(events)
-        cs = [self.cost(case, m["term_sheets"][0]["terms"], std, None) for m in replies[-3:]]
+        std = self.std(events)
+        cs = [min(self.cost(case, ts.get("terms") or {}, std, None) for ts in m["term_sheets"]) for m in replies[-3:]]
         return cs[-1] >= cs[0] - max(1.0, 0.001 * cs[0])
 
-    def planned_move(self, case, events, sid, plan):
+    def no_regress(self, case, threads, sid, plan, sheets):
+        """Never offer a sheet that costs us as much as one the supplier already offered: (sheets, fallback).
+        If nothing is left, fall back to its earlier offer (once) or the accept ladder."""
+        valid = [r["c"] for r in self.thread_sheets(case, threads[sid], sid) if r["valid"]]
+        if not valid:
+            return sheets, None
+        best_c = min(valid)
+        keep = [s for s in sheets if self.cost(case, s, plan.get("std"), plan.get("sup")) < 0.999 * best_c]
+        if keep:
+            return keep, None
+        return [], self.better_earlier(case, threads[sid], sid, plan) or self.accept(case, threads)
+
+    def fallback(self, case, threads, sid):
+        """A move without the LLM: the close rules, else the planned sheets, else the accept ladder."""
+        events = threads[sid]
+        plan = self.plan(case, events, sid, threads)
+        rule = self.close_rule(case, threads, sid, plan)
+        if rule:
+            return rule[0]
+        if plan["sheets"]:
+            return self.planned_move(case, events, sid, plan, threads)
+        return self.accept(case, threads) or self.planned_move(case, events, sid, plan, threads)
+
+    def planned_move(self, case, events, sid, plan, threads=None):
+        sheets, instead = self.no_regress(case, threads or {sid: events}, sid, plan, plan["sheets"])
+        if plan["sheets"] and not sheets and instead:
+            self.log.append((sid, plan.get("round"), "planned", "nothing cheaper to offer than its own sheets"))
+            return instead
+        plan = {**plan, "sheets": sheets}
         if not plan["sheets"]:
             body = ("Thank you for your message. Could you please send us your offer with a unit price and "
                     "your standard terms?\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
@@ -579,9 +646,7 @@ class TeamAgent:
             best = self.best_thread(case, threads)
             # no accepting an open offer early: it can still move
             if best == sid and (status in ("final_offer", "agreed") or r >= 2):
-                return {"supplier_id": sid,
-                        "message": {"action": {"type": "accept",
-                                               "term_sheet_id": self.best_sheet(case, events, sid)[0]}}}
+                return self.accept(case, threads)
             return None
         if kind == "walk_away":
             alt = self.c_alt(case)
@@ -610,6 +675,9 @@ class TeamAgent:
             sheets.append(plan["sheets"][0])  # always offer the planned package too
         if not sheets and plan["sheets"]:
             sheets = plan["sheets"]
+        sheets, instead = self.no_regress(case, threads, sid, plan, sheets)
+        if not sheets:
+            return instead
         offers = {ts.get("term_sheet_id") for ev in threads.values() for m in ev if m.get("from") != "buyer"
                   for ts in (m.get("term_sheets") or [])}  # every offer ID in this session is citable
 
