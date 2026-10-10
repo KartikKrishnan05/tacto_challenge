@@ -204,8 +204,14 @@ def dispatch(args):
             print(f"waves: {points}  points so far: {round(sum(points.values()), 1)} (the board is the record)")
         elif scores and all(v is not None for v in scores.values()):
             print(f"mean score: {100 * statistics.mean(scores.values()):.1f}")
+        for c in sorted(runlog.cases_played(), key=lambda c: c["case_id"]):
+            print(f"replay {c['case_id']}: {c.get('replay_url') or '-'}")
     if args.cmd in ("play", "run") and client.practice_remaining is not None:
         print(f"practice sessions left today: {client.practice_remaining}")
+    if args.cmd in ("play", "run"):  # learn from the sessions just played (no agent reads it yet)
+        from .cheatsheet import after_run
+
+        after_run()
 
 
 if __name__ == "__main__":

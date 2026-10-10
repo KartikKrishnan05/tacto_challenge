@@ -204,6 +204,12 @@ def _ensure_run():
     return _run
 
 
+def cases_played():
+    """The cases this run has finished so far: case_id, session_id, deal, score, replay_url, path."""
+    with _lock:
+        return list(_run.meta["cases"]) if _run else []
+
+
 def current():
     """The case this thread is playing, or None."""
     return getattr(_local, "case", None)
@@ -374,11 +380,13 @@ class CaseLog:
             **{k: r.get(k) for k in ("deal", "supplier_id", "score", "c_deal", "c_open", "c_best", "end_reason")},
             "rounds": self.rounds,
             "error": error,
+            "replay_url": replay,
             "path": str(self.dir.relative_to(log_root())),
         }
         _append(log_root() / "index.jsonl", entry)
         with _lock:
-            self.run.meta["cases"].append({k: entry[k] for k in ("case_id", "session_id", "deal", "score", "path")})
+            keep = ("case_id", "session_id", "deal", "score", "replay_url", "path")
+            self.run.meta["cases"].append({k: entry[k] for k in keep})
             self.run._write_meta()
 
 

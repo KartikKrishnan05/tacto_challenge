@@ -366,6 +366,23 @@ uv run arena logs case:P01        # the latest transcript of that case (or pass 
 
 `ARENA_LOG_DIR` puts the logs elsewhere; `ARENA_LOG=0` switches them off.
 
+## Cheatsheet: tips learned from past sessions
+
+After every `arena run` / `arena play`, `arena_kit/cheatsheet.py` reads the new hosted sessions in
+`logs/` and updates `knowledge/` (tracked in git): `cheatsheet.md` to read, `cheatsheet.json` for
+code, `sessions.jsonl` with the facts and lessons per session. Code computes the numbers per case
+type and the supplier's recurring back-office reasoning; the model (`LLM_CHEATSHEET_MODEL`, else
+`LLM_MODEL`) writes up to five general lessons per session and files each under a tip. A tip is
+*established* only with support from several sessions of different cases; lessons naming a case,
+an ID, a supplier or a euro amount are dropped. **No agent reads it yet.**
+
+```bash
+uv run python -m arena_kit.cheatsheet             # update by hand (new sessions only)
+uv run python -m arena_kit.cheatsheet --no-llm    # numbers only
+```
+
+`ARENA_CHEATSHEET=0` skips the update after a run.
+
 ## Good to know
 
 - **60 s per message**, per thread. A late message counts as a timeout (your last offer repeated);
