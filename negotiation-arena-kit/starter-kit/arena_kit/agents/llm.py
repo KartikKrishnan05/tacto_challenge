@@ -15,9 +15,11 @@ import logging
 import math
 import os
 import re
+import time
 
 import httpx
 
+from .. import runlog
 from ..cost import complete_offer, must_haves_ok, total_cost
 from ..docs import standard_terms
 from ..play import latest, live_threads, moves_left, standing
@@ -51,13 +53,14 @@ Reply with ONE JSON object and nothing else:
   120 words, no placeholders."""
 
 
-def llm_from_env():
-    """LLM_PROVIDER=anthropic (Anthropic SDK) or openai (any OpenAI-compatible endpoint)."""
-    provider, model = os.environ.get("LLM_PROVIDER", "openai"), os.environ["LLM_MODEL"]
+def llm_from_env(model=None, timeout=45.0):
+    """LLM_PROVIDER=anthropic (Anthropic SDK) or openai (any OpenAI-compatible endpoint). `model`
+    overrides LLM_MODEL, e.g. a stronger model for preparing before the clock runs."""
+    provider, model = os.environ.get("LLM_PROVIDER", "openai"), model or os.environ["LLM_MODEL"]
     if provider == "anthropic":
         import anthropic
 
-        client = anthropic.Anthropic(timeout=45.0)
+        client = anthropic.Anthropic(timeout=timeout)
         extra = {"output_config": {"effort": e}} if (e := os.environ.get("LLM_EFFORT")) else {}
 
         def complete(system, user):
@@ -79,7 +82,7 @@ def llm_from_env():
             "model": model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         }
-        r = httpx.post(f"{base}/chat/completions", json=body, headers=headers, timeout=45.0)
+        r = httpx.post(f"{base}/chat/completions", json=body, headers=headers, timeout=timeout)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"]
 
@@ -93,15 +96,35 @@ class LLMAgent:
         self.case_id, self.brief = None, ""
 
     def decide(self, case, threads):
+        rec = runlog.current()
         if case["case_id"] != self.case_id:
             self.case_id, self.brief = case["case_id"], self.prepare(case)
+            if rec:
+                rec.llm(kind="system", system=SYSTEM)
+        prompt = reply = parsed = error = None
+        t0 = time.monotonic()
         try:
-            reply = self.complete(SYSTEM, self.render(case, threads))
-            checked = self.guard(case, threads, parse(reply))
+            prompt = self.render(case, threads)
+            reply = self.complete(SYSTEM, prompt)
+            parsed = parse(reply)
+            checked = self.guard(case, threads, parsed)
         except Exception as e:  # a slow or broken LLM must not cost the case
             log.warning("LLM failed (%s) - falling back to the naive move", e)
-            checked = None
-        return checked or self.fallback.decide(case, threads)
+            checked, error = None, f"{type(e).__name__}: {e}"
+        out = checked or self.fallback.decide(case, threads)
+        if rec:
+            rec.flag = "fell back to naive" if checked is None else None
+            rec.llm(
+                kind="decide",
+                seconds=round(time.monotonic() - t0, 2),
+                prompt=prompt,
+                reply=reply,
+                parsed=parsed,
+                error=error,
+                fallback=checked is None,  # the guard refused the model's move, or the model failed
+                sent=out,
+            )
+        return out
 
     def prepare(self, case):
         """Before the clock matters: the case, the letter, the data rows the case points to."""

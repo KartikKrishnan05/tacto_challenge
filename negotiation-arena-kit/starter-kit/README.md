@@ -296,6 +296,65 @@ or any client with an `mcpServers` config:
   "arena", "mcp", "--data", "/path/to/data/package"]}}}
 ```
 
+## The buyer agent (`--agent buyer`)
+
+`agents/buyer.py` does what the plain LLM agent does, but splits up the work. Code decides the
+numbers, the model reads the supplier and writes, and code checks every e-mail before it goes out:
+
+| Step | Module | What |
+|---|---|---|
+| Before the session opens | `dossier.py` | everything the package says about each supplier: notes, letters, past negotiations, finances, our payment record, scorecards, cost drivers, contract |
+| | `agents/buyer.py` | one model call per supplier turns the dossier into a profile: persona, tone, pressures, the terms it values, what to avoid, which arguments will land |
+| Every round | `strategy.py` | the target C (an anchor for the goal, shrinking concessions, half a step when the supplier did not move, never worse than the alternative); up to 3 term sheets around it (their terms plus gains for both sides, a trade the supplier values for a lower price, our terms for a higher one); accept or walk |
+| | `claims.py` | data arguments computed from `facts.json` the way the arena checks them, each ID used once per case, and dropped if it would argue the supplier's side |
+| | `writing.py` | the model writes the opening, the bridge, a question and the close; code inserts the arguments word for word and the options from the term sheets, then removes any sentence that leaks urgency or a budget, carries an ID, or states a figure that is not in the material |
+
+In an RFQ it writes to every live thread at once, so no thread sits idle into the 60-second rule.
+If the model is slow or fails, code writes a plain e-mail that still carries the best arguments.
+`llm.jsonl` in the run log has the profile, every prompt, the target C, the sheets and the
+sentences the lint removed.
+
+```bash
+uv run arena play case:P01 --agent buyer -v      # uses a practice session
+```
+
+**Without spending practice sessions:** listing cases is free, so save the practice case files
+and play them against the local simulator. The case, the data, the checks on your arguments and
+your e-mails are real; the supplier is the simulator's script.
+
+```bash
+uv run arena cases --save data/practice_cases.json
+uv run arena-sim serve --data data/package --cases data/practice_cases.json
+ARENA_URL=http://127.0.0.1:8000 uv run arena register "Local" sim       # a simulator key
+ARENA_URL=http://127.0.0.1:8000 ARENA_API_KEY=<that key> uv run arena play case:P01 --agent buyer -v
+```
+
+## Run log: every negotiation on disk
+
+Every `arena` command writes a folder under `starter-kit/logs/` (git-ignored), and so does every
+`play()` from your own script. Each case played gets a folder with all of it in it: the e-mails,
+what the agent decided and why, and every API call:
+
+```
+logs/
+  index.jsonl                       one line per case: when, case, session, deal, score, folder
+  2026-10-10_143205_play_case-P01/  one folder per command
+    run.json  run.log  output.txt   command, git commit, model, how it ended; full DEBUG log; what it printed
+    case-P01/
+      transcript.md                 the e-mail discussion, readable: bodies, term sheets, claim results, result, back office
+      session.json                  case file, every thread, result, session state
+      decisions.jsonl  llm.jsonl    every move chosen; every model call (prompt, raw reply, what was sent)
+      http.jsonl                    every API call: request, response, status, ms (never the key)
+      attachments/                  quote PDFs and XLSX as received
+```
+
+```bash
+uv run arena logs                 # the last 20 cases: deal, score, folder
+uv run arena logs case:P01        # the latest transcript of that case (or pass a session id)
+```
+
+`ARENA_LOG_DIR` puts the logs elsewhere; `ARENA_LOG=0` switches them off.
+
 ## Good to know
 
 - **60 s per message**, per thread. A late message counts as a timeout (your last offer repeated);

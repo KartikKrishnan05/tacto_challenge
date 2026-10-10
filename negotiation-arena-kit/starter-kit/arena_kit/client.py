@@ -7,6 +7,8 @@ import uuid
 
 import httpx
 
+from . import runlog
+
 # Venue Wi-Fi drops. Retrying with the same move id makes the server return the reply it already
 # gave instead of playing the move twice, so retries are safe even mid-negotiation.
 MOVE_ID_HEADER = "X-Move-Id"
@@ -61,13 +63,16 @@ class ArenaClient:
         headers = {MOVE_ID_HEADER: uuid.uuid4().hex} if method == "POST" else {}
         for attempt in range(self.retries + 1):
             self._pace()
+            t0 = time.monotonic()
             try:
                 r = self.http.request(method, path, json=body, params=params, headers=headers)
-            except httpx.TransportError:
+            except httpx.TransportError as e:
+                self._log(method, path, params, body, None, f"{type(e).__name__}: {e}", t0, attempt, headers)
                 if attempt == self.retries:
                     raise
                 wait = None
             else:
+                self._log(method, path, params, body, r.status_code, r, t0, attempt, headers, raw)
                 wait = r.headers.get("Retry-After", "")
                 short = wait.isdigit() and int(wait) <= MAX_RETRY_AFTER_S
                 if r.status_code not in RETRY_STATUS or attempt == self.retries or (r.status_code == 429 and not short):
@@ -82,6 +87,21 @@ class ArenaClient:
                 detail = r.text
             raise ArenaError(r.status_code, detail)
         return r.content if raw else r.json()
+
+    @staticmethod
+    def _log(method, path, params, body, status, response, t0, attempt, headers, raw=False):
+        """Every call into the run log (`runlog`): never the key, files only by size."""
+        if isinstance(response, httpx.Response):
+            if raw or status is None:
+                response = {"bytes": len(response.content), "content_type": response.headers.get("content-type")}
+            else:
+                try:
+                    response = response.json()
+                except ValueError:
+                    response = response.text
+        runlog.http(
+            method, path, params, body, status, response, time.monotonic() - t0, attempt, headers.get(MOVE_ID_HEADER)
+        )
 
     def register(self, team_name, event_code):
         """arena-sim only: the simulator hands out its own keys. On the arena, the organisers
