@@ -3,7 +3,7 @@
   "checkpoint_id": "01M4JX6BPPFH1RVA4ED4SWRM0Z",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     ".gitignore",
     "negotiation-arena-kit/.github/ISSUE_TEMPLATE/config.yml",
@@ -337,13 +337,20 @@
       "compact_transcript": "/0/transcript.jsonl",
       "content_hash": "/0/content_hash.txt",
       "prompt": "/0/prompt.txt"
+    },
+    {
+      "metadata": "/1/metadata.json",
+      "transcript": "/1/full.jsonl",
+      "compact_transcript": "/1/transcript.jsonl",
+      "content_hash": "/1/content_hash.txt",
+      "prompt": "/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 82,
-    "cache_creation_tokens": 72573,
-    "cache_read_tokens": 4255934,
-    "output_tokens": 22911,
-    "api_call_count": 41
+    "input_tokens": 96,
+    "cache_creation_tokens": 97809,
+    "cache_read_tokens": 4649473,
+    "output_tokens": 25477,
+    "api_call_count": 48
   }
 }
