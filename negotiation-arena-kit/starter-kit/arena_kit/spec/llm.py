@@ -38,7 +38,9 @@ def with_deadline(fn, timeout, *args):
 
 def from_env(default_timeout=35.0):
     """A `complete(system, user, timeout=None)` on the configured provider, or None (no model)."""
-    if os.environ.get("SPEC_LLM", "1").lower() in ("0", "false", "no", "off"):
+    # code-written e-mails by default: code-only scored 0.733 on the practice cases, with the model 0.661
+    # (it misread replies: P08 a payment ask into our sheets, P01 the earliest date). SPEC_LLM=1 turns it on.
+    if os.environ.get("SPEC_LLM", "0").lower() in ("0", "false", "no", "off"):
         return None
     provider, model = os.environ.get("LLM_PROVIDER", "openai"), os.environ.get("LLM_MODEL")
     if not model:

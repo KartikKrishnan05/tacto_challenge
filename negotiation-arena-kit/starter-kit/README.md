@@ -176,7 +176,7 @@ cap - **8 minutes** (the host may extend one) - and what is still open then ends
 Start the runner before the first wave and leave it running:
 
 ```bash
-uv run arena run --set final --agent llm --parallel 10
+uv run arena run --set final --agent spec --parallel 10
 ```
 
 It polls `GET /v1/cases?set=final`, plays every case of a new wave at once (one agent per case),

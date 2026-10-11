@@ -79,7 +79,7 @@ in words. Read it, improve your agent, play again. Next steps, the LLM agent and
 ## Rules that matter
 
 - **No human in the loop** during the Live Final. Start your agent before 12:00 and leave it running:
-  `uv run arena run --set final --agent llm --parallel 10` picks up each wave by itself.
+  `uv run arena run --set final --agent spec --parallel 10` picks up each wave by itself.
 - **Your agent must not read the live feed** during the Live Final: `/v1/events`, `/screen`,
   `/leaderboard`, `/results` and their JSON. They are for you, not for your agent.
 - **One key per team.** No attacks on the service or on other teams.
