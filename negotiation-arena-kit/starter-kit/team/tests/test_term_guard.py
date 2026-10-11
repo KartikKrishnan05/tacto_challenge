@@ -1,9 +1,12 @@
 from team.agent import TeamAgent
 from team.term_guard import (
+    anti_capitulation_check,
     validate_acceptance_offer,
+    validate_contractual_notice,
     validate_effective_date_pricing,
     validate_minimum_options,
     validate_monotonic_options,
+    validate_reciprocity,
     validate_strategic_options,
     validate_term_options,
 )
@@ -135,4 +138,47 @@ def test_option_lines_make_structured_packages_visible():
     )
     assert "Option A" in body and "Option B" in body and "EUR 100.00 per unit" in body
     assert "unit_price=" not in body
+
+
+def test_contractual_notice_blocks_date_before_compliant_floor():
+    errors = validate_contractual_notice(
+        [base(effective_date="2026-11-01")],
+        90,
+        current_date="2026-09-11",
+    )
+    assert any("Rule 14" in error and "2026-12-10" in error for error in errors)
+
+
+def test_contractual_notice_allows_date_on_or_after_floor():
+    errors = validate_contractual_notice(
+        [base(effective_date="2026-12-10")],
+        90,
+        current_date="2026-09-11",
+    )
+    assert errors == []
+
+
+def test_early_acceptance_above_ideal_target_is_blocked():
+    errors = anti_capitulation_check(base(unit_price=110), current_round=1, ideal_target=100)
+    assert any("Rule 15" in error and "round 1" in error for error in errors)
+
+
+def test_early_acceptance_near_ideal_target_is_allowed():
+    assert anti_capitulation_check(base(unit_price=100.50), current_round=2, ideal_target=100) == []
+
+
+def test_higher_price_without_buyer_term_trade_is_blocked():
+    errors = validate_reciprocity(
+        [base(unit_price=131.90, payment_days=30)],
+        [base(unit_price=132.65, payment_days=30)],
+    )
+    assert any("Rule 16" in error and "132.65" in error for error in errors)
+
+
+def test_higher_price_with_better_payment_is_allowed():
+    errors = validate_reciprocity(
+        [base(unit_price=131.90, payment_days=30)],
+        [base(unit_price=132.65, payment_days=90)],
+    )
+    assert errors == []
 

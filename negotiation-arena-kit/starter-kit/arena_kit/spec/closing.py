@@ -58,6 +58,8 @@ class View:
     repair_used: bool = False  # R12.12 repair already made
     restore_used: bool = False  # R11.17 coverage message already made
     last_step_share: float = 0.0  # how far it moved in its last reply, share of C
+    current_round: int = 0  # buyer messages already sent in this thread
+    ideal_price: float | None = None  # code-calculated unit-price target for early-accept checks
 
     @property
     def latest_rows(self):
@@ -108,8 +110,26 @@ def ladder(views):
     return list(dict.fromkeys((x[3], x[4]) for x in sorted(earlier + now)))
 
 
-def accept(views, reason):
-    cands = ladder(views)
+def guarded_ladder(views, *, force=False):
+    """Filter the accept ladder through the anti-capitulation rule."""
+    from team.term_guard import anti_capitulation_check
+
+    out = []
+    for sid, sheet_id in ladder(views):
+        view = views[sid]
+        row = next((r for r in view.rows if r.id == sheet_id), None)
+        errors = [] if force else anti_capitulation_check(
+            row.terms if row else {},
+            current_round=view.current_round,
+            ideal_target=view.ideal_price,
+        )
+        if not errors:
+            out.append((sid, sheet_id))
+    return out
+
+
+def accept(views, reason, *, force=False):
+    cands = guarded_ladder(views, force=force)
     if not cands:
         return None
     return Close("accept", reason, cands[0][0], cands[0][1], cands)
@@ -170,13 +190,13 @@ def decide(views, sid, must_close=False):
     """The close rule for thread `sid`, or None (negotiate on). `views`: every live thread."""
     v = views[sid]
     rfq = len(views) > 1
-    cands = ladder(views)
+    cands = guarded_ladder(views)
     best_sid = cands[0][0] if cands else None
     heard = all(x.sent >= 1 for x in views.values())  # R11.18: every bidder has had an offer
     may_accept = bool(cands) and (not rfq or heard)
 
     if must_close:  # R11.14: closed by the clock
-        return accept(views, "case clock: close") or walk(views, "case clock: nothing acceptable")
+        return accept(views, "case clock: close", force=True) or walk(views, "case clock: nothing acceptable")
 
     if v.status == "final_offer":  # R12.12: its last word - accept at once, anything more makes it walk
         if cands and (not rfq or best_sid == sid or all(ends(x) for x in views.values())):

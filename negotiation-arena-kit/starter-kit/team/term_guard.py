@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 PRICE_TOLERANCE = 0.005
@@ -258,5 +258,196 @@ def validate_strategic_options(
                 f"Rule 8 (index ceiling): {label} is EUR {price:.2f}, above the data-backed ceiling of "
                 f"EUR {price_ceiling:.2f}. Do not concede above this ceiling without a new verified cost fact."
             )
+    return errors
+
+
+def validate_contractual_notice(
+    options: list[dict[str, Any]],
+    minimum_notice_days: int | None,
+    *,
+    current_date: date | str | None = None,
+) -> list[str]:
+    """Enforce the contractual lead time before a price change can take effect.
+
+    ``current_date`` is injectable so recorded negotiations and tests can use the date
+    on which notice was received.  In a live run it defaults to today's date.  The
+    check is deliberately independent of the prose: every structured option must
+    carry the corrected date or it is blocked.
+    """
+    if minimum_notice_days is None:
+        return []
+    try:
+        days = int(minimum_notice_days)
+    except (TypeError, ValueError):
+        return [
+            f"Rule 14 (contractual notice): minimum_notice_days={minimum_notice_days!r} is invalid. "
+            "Supply a non-negative integer from the verified contract."
+        ]
+    if days < 0:
+        return [
+            f"Rule 14 (contractual notice): minimum_notice_days={days} cannot be negative. "
+            "Use the verified contract notice period."
+        ]
+    try:
+        received = date.fromisoformat(str(current_date)) if current_date is not None else date.today()
+    except (TypeError, ValueError):
+        return [
+            f"Rule 14 (contractual notice): current_date={current_date!r} is not a valid ISO date. "
+            "Use YYYY-MM-DD so the contract floor can be calculated."
+        ]
+    earliest = received + timedelta(days=days)
+    errors: list[str] = []
+    for index, option in enumerate(options):
+        effective = option.get("effective_date")
+        if effective is None:
+            continue
+        try:
+            effective_date = date.fromisoformat(str(effective))
+        except (TypeError, ValueError):
+            errors.append(
+                f"Rule 14 (contractual notice): {_label(index)} has invalid effective_date={effective!r}. "
+                f"Use the first contract-compliant date, {earliest.isoformat()}, or later."
+            )
+            continue
+        if effective_date < earliest:
+            errors.append(
+                f"Rule 14 (contractual notice): {_label(index)} starts on {effective_date.isoformat()}, only "
+                f"{(effective_date - received).days} days after notice on {received.isoformat()}, but the "
+                f"contract requires at least {days} days. Enforce effective_date >= {earliest.isoformat()} "
+                "in the structured term sheet and state that corrected date in the e-mail."
+            )
+    return errors
+
+
+def anti_capitulation_check(
+    terms: dict[str, Any],
+    *,
+    current_round: int,
+    ideal_target: float | None,
+    threshold_pct: float = 0.01,
+) -> list[str]:
+    """Prevent accepting an early supplier offer before it reaches our ideal target.
+
+    ``ideal_target`` is the unit-price target calculated by the cost planner.  The
+    exception is intentionally narrow: an early acceptance is allowed only when the
+    supplier is within ``threshold_pct`` above that target.  A missing target does
+    not manufacture a number; callers should continue negotiating instead.
+    """
+    try:
+        round_no = int(current_round)
+    except (TypeError, ValueError):
+        round_no = 0
+    if round_no >= 3:
+        return []
+    if ideal_target is None:
+        return [
+            f"Rule 15 (anti-capitulation): do not accept in round {round_no} because the cost planner supplied "
+            "no ideal unit-price target. Send a counter-offer or hold the standing terms until a calculated "
+            "target is available."
+        ]
+    price = _price(terms)
+    if price is None:
+        return [
+            "Rule 15 (anti-capitulation): cannot validate the supplier's offer because "
+            f"unit_price={terms.get('unit_price')!r} "
+            "is missing or invalid. Do not accept; request a complete counter-offer."
+        ]
+    try:
+        target = float(ideal_target)
+        tolerance = max(0.0, float(threshold_pct))
+    except (TypeError, ValueError):
+        return [
+            f"Rule 15 (anti-capitulation): ideal_target={ideal_target!r} is not a valid calculated unit-price target. "
+            "Do not accept until the cost planner supplies a target."
+        ]
+    if not math.isfinite(target) or target <= 0:
+        return [
+            f"Rule 15 (anti-capitulation): ideal_target={ideal_target!r} is not a finite positive calculated target. "
+            "Do not accept an early offer without a valid target."
+        ]
+    ceiling = target * (1.0 + tolerance)
+    if price <= ceiling + PRICE_TOLERANCE:
+        return []
+    return [
+        f"Rule 15 (anti-capitulation): do not accept in round {round_no}. The supplier asks EUR {price:.2f} per unit, "
+        f"above the calculated ideal target EUR {target:.2f} (early-accept ceiling EUR {ceiling:.2f}). "
+        "Send a counter-offer or hold the standing terms and keep testing the supplier's floor; acceptance is "
+        "allowed before round 3 only when the price is within the target tolerance."
+    ]
+
+
+def _buyer_term_improved(previous: dict[str, Any], current: dict[str, Any]) -> list[str]:
+    """Return buyer-valued terms that improved between two packages."""
+    improved: list[str] = []
+    for field, direction in (
+        ("payment_days", 1),
+        ("lead_time_days", -1),
+        ("contract_months", 1),
+        ("effective_date", 1),
+    ):
+        old, new = previous.get(field), current.get(field)
+        if old is None or new is None:
+            continue
+        if field == "effective_date":
+            try:
+                old, new = date.fromisoformat(str(old)), date.fromisoformat(str(new))
+            except (TypeError, ValueError):
+                continue
+        elif (
+            not isinstance(old, (int, float))
+            or isinstance(old, bool)
+            or not isinstance(new, (int, float))
+            or isinstance(new, bool)
+        ):
+            continue
+        if (new > old if direction > 0 else new < old):
+            improved.append(field)
+    return improved
+
+
+def validate_reciprocity(
+    previous: list[dict[str, Any]],
+    current: list[dict[str, Any]],
+) -> list[str]:
+    """Block a higher buyer price unless a buyer-valued term improves with it.
+
+    Each current package is compared with the closest previous package on the
+    non-price terms.  This catches both identical-term giveaways and packages that
+    quietly raise price while changing a term in the supplier's favour.
+    """
+    if not previous:
+        return []
+    errors: list[str] = []
+    for current_index, option in enumerate(current):
+        price = _price(option)
+        if price is None:
+            continue
+        candidates = [(i, old, _price(old)) for i, old in enumerate(previous) if _price(old) is not None]
+        if not candidates:
+            continue
+        # Minimise the number of non-price differences so A/B/C packages are
+        # compared with their natural equivalent across rounds.
+        def distance(item, current=option):
+            _i, old, _old_price = item
+            fields = set(old) | set(current)
+            return sum(
+                not _same_value(old.get(field), current.get(field))
+                for field in fields
+                if field != "unit_price"
+            )
+
+        previous_index, old, old_price = min(candidates, key=distance)
+        if price <= old_price + PRICE_TOLERANCE:
+            continue
+        improved = _buyer_term_improved(old, option)
+        if improved:
+            continue
+        errors.append(
+            f"Rule 16 (reciprocity): {_label(current_index)} raises unit price from EUR {old_price:.2f} in the "
+            f"closest prior package {_label(previous_index)} to EUR {price:.2f}, but no buyer-valued term improved. "
+            "A higher price requires at least one of payment_days increasing, lead_time_days decreasing, "
+            "contract_months increasing, or effective_date moving later. Hold the previous price or add one of "
+            "those concessions explicitly before sending."
+        )
     return errors
 

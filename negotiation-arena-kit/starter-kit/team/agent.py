@@ -29,10 +29,13 @@ from arena_kit.play import latest, live_threads, moves_left, standing
 from .briefing import Briefing
 from .levers import _label, lever_table, revealed_slopes
 from .term_guard import (
+    anti_capitulation_check,
     validate_acceptance_offer,
+    validate_contractual_notice,
     validate_effective_date_pricing,
     validate_minimum_options,
     validate_monotonic_options,
+    validate_reciprocity,
     validate_strategic_options,
     validate_term_options,
 )
@@ -100,6 +103,16 @@ STRATEGIC PLAYBOOK
   our internal budget.
 - Dynamic tone: answer the supplier's most recent point and vary the opening, bridge and closing each round.
   Do not repeat a stock paragraph after the supplier has changed its position.
+
+STRUCTURED-TERM ALIGNMENT (mandatory): prose reasoning and structured term sheets are one commitment. If
+you identify a contractual notice breach, calculate the first compliant effective date and put that date
+or a later date in every option; never mention the breach and then offer the illegal date. Before any
+price increase, compare the option with the previous buyer menu. A higher unit price is permitted only
+when the same option also improves a buyer-valued term (later payment, shorter lead time, longer contract,
+or later effective date). If no term is improved, hold the previous price and request a supplier trade.
+An accept action before round 3 is permitted only when the supplier's price is within the calculated ideal
+target tolerance; otherwise send a counter-offer or hold. Treat every guardrail error as a correction
+instruction, not as a reason to flatten prices or silently omit the package.
 
 Reply with ONE JSON object only:
 {"action": "send", "subject": "...", "body": "...", "term_sheets": [{"unit_price": 0.0, "...": "..."}],
@@ -241,7 +254,8 @@ class TeamAgent:
 
     def strategic_constraints(self, case):
         """Hard constraints derived from the contract, notice letter and cost-driver briefing."""
-        out = {"min_effective_date": None, "price_ceiling": None}
+        out = {"min_effective_date": None, "price_ceiling": None,
+               "minimum_notice_days": None, "notice_date": None}
         if case.get("type") != "price_increase" or not self.brief:
             return out
         facts = self.brief.facts
@@ -252,6 +266,8 @@ class TeamAgent:
             if ref.startswith("ctr:") and "#" not in ref
         ) if any(ref.startswith("ctr:") and "#" not in ref for ref in case.get("refs", [])) else 0
         if trigger.get("date") and required_notice:
+            out["minimum_notice_days"] = required_notice
+            out["notice_date"] = trigger["date"]
             out["min_effective_date"] = (
                 date.fromisoformat(trigger["date"]) + timedelta(days=required_notice)
             ).isoformat()
@@ -706,9 +722,43 @@ class TeamAgent:
         earlier = [x for x in rows if x[1] and x[0] < now[0][0] * 0.999][:3]
         return list(dict.fromkeys((x[3], x[4]) for x in sorted(earlier + now)))
 
-    def accept(self, case, threads):
-        """An accept with the whole ladder (the runner tries the IDs in order), or None."""
+    def accept(self, case, threads, *, current_round=None, ideal_target=None, threshold_pct=0.01):
+        """An accept with the whole ladder, subject to the early-capitulation guard."""
         ladder = self.accept_candidates(case, threads)
+        if not ladder:
+            return None
+        # The runner can call accept() directly after another thread has replied.
+        # Infer that thread's round here so the close path cannot bypass Rule 15.
+        allowed, blocked = [], []
+        for candidate_sid, candidate_oid in ladder:
+            row = next((r for r in self.thread_sheets(case, threads[candidate_sid], candidate_sid)
+                        if r["id"] == candidate_oid), None)
+            candidate_round = current_round
+            if candidate_round is None:
+                candidate_round = sum(
+                    m.get("from") == "buyer" and not m.get("undelivered")
+                    for m in threads[candidate_sid]
+                )
+            candidate_target = ideal_target
+            if candidate_target is None and candidate_round < 3:
+                try:
+                    candidate_plan = self.plan(case, threads[candidate_sid], candidate_sid, threads)
+                    candidate_target = (candidate_plan.get("sheets") or [{}])[0].get("unit_price")
+                except Exception:
+                    candidate_target = None
+            errors = anti_capitulation_check(
+                row["terms"] if row else {}, current_round=candidate_round,
+                ideal_target=candidate_target, threshold_pct=threshold_pct,
+            )
+            if errors:
+                blocked.extend(errors)
+            else:
+                allowed.append((candidate_sid, candidate_oid))
+        if blocked:
+            self.guard_feedback[ladder[0][0]] = blocked
+            self.log.append((ladder[0][0], current_round, "guardrail", " ".join(blocked)))
+            log.warning("%s: early acceptance blocked: %s", ladder[0][0], " | ".join(blocked))
+        ladder = allowed
         if not ladder:
             return None
         sid, oid = ladder[0]
@@ -737,7 +787,8 @@ class TeamAgent:
         events = threads[sid]
         status = latest(events).get("status")
         left = moves_left(case, events)
-        accept = self.accept(case, threads)
+        ideal_target = (plan.get("sheets") or [{}])[0].get("unit_price")
+        accept = self.accept(case, threads, current_round=plan.get("round"), ideal_target=ideal_target)
         best = accept["supplier_id"] if accept else None
         if status in ("agreed", "final_offer") and accept and self.rival_still_open(case, threads, sid, accept):
             # RFQ: the cheapest sheet is a rival's that is still moving - do not let this supplier end the case
@@ -870,7 +921,14 @@ class TeamAgent:
         rule = self.close_rule(case, threads, sid, plan)
         if rule:
             return rule[0]
-        if not plan["sheets"] and (accept := self.accept(case, threads)):
+        if not plan["sheets"] and (
+            accept := self.accept(
+                case,
+                threads,
+                current_round=plan.get("round"),
+                ideal_target=(plan.get("sheets") or [{}])[0].get("unit_price"),
+            )
+        ):
             return accept
         return self.planned_move(case, events, sid, plan, threads)
 
@@ -907,8 +965,14 @@ class TeamAgent:
             price_ceiling=constraints.get("price_ceiling"),
         )
         errors += validate_monotonic_options(self.previous_buyer_options(case, events), sheets)
+        errors += validate_contractual_notice(
+            sheets,
+            constraints.get("minimum_notice_days"),
+            current_date=constraints.get("notice_date"),
+        )
         if case.get("type") == "price_increase":
             errors += validate_effective_date_pricing(sheets)
+        errors += validate_reciprocity(self.previous_buyer_options(case, events), sheets)
         if errors:
             # Keep the deterministic fallback safe even if a future planner change
             # produces an incoherent menu. If two legal options cannot be built, ask
@@ -958,6 +1022,13 @@ class TeamAgent:
         if constraints.get("min_effective_date"):
             out.append("HARD CONTRACT FLOOR: do not offer an effective date before "
                        + constraints["min_effective_date"] + ".")
+        if constraints.get("minimum_notice_days"):
+            out.append(
+                f"CONTRACT NOTICE RULE: every structured effective_date must be at least "
+                f"{constraints['minimum_notice_days']} days after notice"
+                + (f" on {constraints['notice_date']}" if constraints.get("notice_date") else "")
+                + "; if the supplier breached notice, enforce this date in every option."
+            )
         if constraints.get("price_ceiling") is not None:
             out.append(f"HARD DATA CEILING: do not offer above EUR {constraints['price_ceiling']:.2f} per unit "
                        "without a new verified cost fact.")
@@ -1045,7 +1116,8 @@ class TeamAgent:
             best = self.best_thread(case, threads)
             # no accepting an open offer early: it can still move
             if best == sid and (status in ("final_offer", "agreed") or r >= 2):
-                return self.accept(case, threads)
+                ideal_target = (plan.get("sheets") or [{}])[0].get("unit_price")
+                return self.accept(case, threads, current_round=r, ideal_target=ideal_target)
             return None
         if kind == "walk_away":
             alt = self.c_alt(case)
@@ -1107,8 +1179,14 @@ class TeamAgent:
             price_ceiling=constraints.get("price_ceiling"),
         )
         errors += validate_monotonic_options(self.previous_buyer_options(case, events), sheets)
+        errors += validate_contractual_notice(
+            sheets,
+            constraints.get("minimum_notice_days"),
+            current_date=constraints.get("notice_date"),
+        )
         if case.get("type") == "price_increase":
             errors += validate_effective_date_pricing(sheets)
+        errors += validate_reciprocity(self.previous_buyer_options(case, events), sheets)
         errors += self.reciprocity_errors(case, events, sheets)
         if errors:
             self.guard_feedback[sid] = errors

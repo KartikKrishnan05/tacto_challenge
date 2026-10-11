@@ -75,6 +75,16 @@ STRATEGIC PLAYBOOK (apply this to every reply)
 - Human pacing: answer the supplier's latest point specifically. Vary the opening, acknowledgement and
   closing across rounds; never reuse a generic paragraph when the supplier's position has changed.
 
+STRUCTURED-TERM ALIGNMENT (mandatory): prose reasoning and structured term sheets are one commitment. If
+you identify a contractual notice breach, calculate the first compliant effective date and put that date
+or a later date in every option; never mention the breach and then offer the illegal date. Before any
+price increase, compare the option with the previous buyer menu. A higher unit price is permitted only
+when the same option also improves a buyer-valued term (later payment, shorter lead time, longer contract,
+or later effective date). If no term is improved, hold the previous price and ask for a supplier trade.
+An accept action before round 3 is permitted only when the supplier's price is within the calculated ideal
+target tolerance; otherwise continue with a counter-offer or hold. Treat every guardrail error as a
+correction instruction, not as a reason to flatten prices or omit the structured package.
+
 Rules: plain business English, short sentences, 70-130 words for all parts together. No figures,
 prices, percentages or data IDs in your own text - code adds them. Never mention deadlines, urgency,
 budgets, that we lack alternatives, our internal costs, or any scoring. No placeholders, no sign-off."""

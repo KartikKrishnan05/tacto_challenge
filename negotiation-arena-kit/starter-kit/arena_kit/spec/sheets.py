@@ -442,7 +442,15 @@ def no_regress(ctx, sheets, supplier_costs):
     return [(label, t) for label, t in sheets if ctx.c(t) < (1 - REGRESS_TOL) * best]
 
 
-def validate_menu(ctx, sheets, last_sheets=None, rival_price=None):
+def validate_menu(
+    ctx,
+    sheets,
+    last_sheets=None,
+    rival_price=None,
+    *,
+    minimum_notice_days=None,
+    current_date=None,
+):
     """Run the shared buyer term guardrails over a menu before it reaches the e-mail.
 
     SpecAgent computes all numbers itself, but this second boundary is intentional: it catches
@@ -451,9 +459,11 @@ def validate_menu(ctx, sheets, last_sheets=None, rival_price=None):
     module remains usable on its own in the kit's unit tests.
     """
     from team.term_guard import (
+        validate_contractual_notice,
         validate_effective_date_pricing,
         validate_minimum_options,
         validate_monotonic_options,
+        validate_reciprocity,
         validate_term_options,
     )
 
@@ -464,4 +474,6 @@ def validate_menu(ctx, sheets, last_sheets=None, rival_price=None):
         errors.extend(validate_effective_date_pricing(options))
     if last_sheets:
         errors.extend(validate_monotonic_options([terms for _, terms in last_sheets], options))
+        errors.extend(validate_reciprocity([terms for _, terms in last_sheets], options))
+    errors.extend(validate_contractual_notice(options, minimum_notice_days, current_date=current_date))
     return errors
