@@ -1,0 +1,473 @@
+I have an Idea. It should run 50 - 100 runs try out things and then based on the results should create a experiment and result sheet for future cases. And then in future discussions it should use this to help decide on how to negotiate. please add that to the code base and then also run the agent as often as needed
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P07 soft_anchor   (fixed) score=0.6365966192414502 deal=True wall=26.8s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 base          (fixed) score=0.3899169732969767 deal=True wall=43.3s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 base          (fixed) score=0.30521765403913176 deal=True wall=55.2s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 base          (fixed) score=0.7568314917574469 deal=True wall=59.3s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 soft_anchor   (fixed) score=0.26394323200173003 deal=True wall=27.0s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P04 soft_anchor   (fixed) score=0.8736820298574475 deal=True wall=57.8s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 base          (fixed) score=0.8084692496799755 deal=True wall=79.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 base          (fixed) score=0.9194563231244482 deal=True wall=97.0s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P07 deep_anchor   (fixed) score=0.7168703780351473 deal=True wall=58.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 base          (fixed) score=0.4669610418692489 deal=True wall=77.0s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 deep_anchor   (fixed) score=0.3899169732969767 deal=True wall=39.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 soft_anchor   (fixed) score=0.4405513904223171 deal=True wall=58.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 soft_anchor   (fixed) score=0.9194563231244482 deal=True wall=23.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 deep_anchor   (fixed) score=0.9194563231244482 deal=True wall=2.1s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 fast_concede  (fixed) score=0.9194563231244482 deal=True wall=2.5s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 slow_concede  (fixed) score=0.9194563231244482 deal=True wall=2.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P03 eager_close   (fixed) score=0.9194563231244482 deal=True wall=1.5s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 fast_concede  (fixed) score=0.3935625373784856 deal=True wall=21.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 slow_concede  (fixed) score=0.3899169732969767 deal=True wall=2.5s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 base          (fixed) score=0.7098962346486538 deal=True wall=5.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P02 eager_close   (fixed) score=0.26394323200173003 deal=True wall=1.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P04 deep_anchor   (fixed) score=0.8736820298574475 deal=True wall=65.1s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P07 fast_concede  (fixed) score=0.7404905611329671 deal=True wall=49.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 soft_anchor   (fixed) score=0.252113428815217 deal=True wall=71.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P04 fast_concede  (fixed) score=0.8736820298574475 deal=True wall=43.1s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 deep_anchor   (fixed) score=0.5597537731816552 deal=True wall=79.1s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 soft_anchor   (fixed) score=0.7814182862286956 deal=True wall=113.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 deep_anchor   (fixed) score=0.8084692496799755 deal=True wall=3.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 fast_concede  (fixed) score=0.8084692496799755 deal=True wall=2.0s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 slow_concede  (fixed) score=0.8084692496799755 deal=True wall=1.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P04 slow_concede  (fixed) score=0.8736820298574475 deal=True wall=41.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P04 eager_close   (fixed) score=0.8736820298574475 deal=True wall=2.2s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 deep_anchor   (fixed) score=0.3860786443168386 deal=True wall=55.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P07 slow_concede  (fixed) score=0.7275038183965274 deal=True wall=80.3s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 fast_concede  (fixed) score=0.4669610418692489 deal=True wall=4.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P07 eager_close   (fixed) score=0.6950369615554284 deal=True wall=3.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 slow_concede  (fixed) score=0.4669610418692489 deal=True wall=3.1s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P01 eager_close   (fixed) score=0.7194538441498796 deal=True wall=37.3s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 soft_anchor   (fixed) score=0.5426650839658143 deal=True wall=112.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 fast_concede  (fixed) score=0.43801912483885347 deal=True wall=89.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P18 eager_close   (fixed) score=0.3860786443168386 deal=True wall=52.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 soft_anchor   (fixed) score=0.3632191068790257 deal=True wall=252.0s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 slow_concede  (fixed) score=0.30521765403913176 deal=True wall=57.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P08 eager_close   (fixed) score=0.30521765403913176 deal=True wall=2.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 deep_anchor   (fixed) score=0.7568314917574469 deal=True wall=57.7s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 fast_concede  (fixed) score=0.7568314917574469 deal=True wall=4.4s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 slow_concede  (fixed) score=0.7568314917574469 deal=True wall=3.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P05 eager_close   (fixed) score=0.6610691397391576 deal=True wall=50.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 deep_anchor   (fixed) score=0.6262806593072341 deal=True wall=210.3s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 fast_concede  (fixed) score=0.7098962346486538 deal=True wall=68.9s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 slow_concede  (fixed) score=0.7098962346486538 deal=True wall=79.6s error=None</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bj957fzbs</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/e97c4871-e542-4352-be36-0b0677e8dbd6/tasks/bj957fzbs.output</output-file>
+<status>completed</status>
+<summary>Background command "Run phase-1 sweep: 6 variants x 10 cases" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>case:P11 eager_close   (fixed) score=0.7098962346486538 deal=True wall=4.1s error=None
+batch 1011-080828_sweep-1: 60 games, mean score 0.6445
+learned playbook: 10 cases from 61 games -&gt; /Users/kartikkrishnan/github/tacto_challenge/negotiation-arena-kit/starter-kit/knowledge</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b0zb5lwkh</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/e97c4871-e542-4352-be36-0b0677e8dbd6/tasks/b0zb5lwkh.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for sweep to finish and list results" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+what happended why did the score not improve?
+
+---
+
+.yes do another 40 sessions please. I only have 120 sessions left
+
+---
+
+And of course experiment around with the other choices to find the best solution for future cases ... the new agents should of course be tought about the old experiments at the beginning so they learn from past mistakes correct?
+
+---
+
+<task-notification>
+<task-id>b48llh04q</task-id>
+<summary>Monitor event: "phase-1 sweep game results"</summary>
+<event>[Monitor expired after 30m with 52 events delivered. Re-arm it if you still need the watch.]</event>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b5ttr6cb2</task-id>
+<tool-use-id>toolu_012sUf2MwPjPJMZEmSxDow59</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/e97c4871-e542-4352-be36-0b0677e8dbd6/tasks/b5ttr6cb2.output</output-file>
+<status>completed</status>
+<summary>Background command "Run phase-4 sweep with 40-session cap" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+do you always get the same result? is it hardcoded?
