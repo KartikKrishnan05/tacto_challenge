@@ -154,6 +154,21 @@ class SpecAgent:
             log.warning("standard terms unreadable: %s", e)
             return {}
 
+    def contractual_notice(self):
+        """Return the verified notice period and notice date for price-change cases."""
+        if getattr(self, "case", {}).get("type") != "price_increase":
+            return None, None
+        case = self.case
+        facts = case.get("facts") or {}
+
+        def fact(ref):
+            return facts.get(ref) or (self.package.lookup(ref) if self.package else None) or {}
+
+        trigger = fact(case.get("trigger_doc") or "")
+        refs = [ref for ref in case.get("refs", []) if ref.startswith("ctr:") and "#" not in ref]
+        notice = max((fact(ref).get("days") or 0 for ref in refs), default=0)
+        return (notice or None), trigger.get("date")
+
     def state(self, threads, sid):
         """Everything code needs about one thread now: rows, estimate, context, target, view."""
         case, events, th = self.case, threads[sid], self.t[sid]
@@ -175,6 +190,7 @@ class SpecAgent:
                                levers.revealed_rate(slopes), min(market, default=None))  # fmt: skip
         c_alt = self.prep.c_alt
         rows = []
+        opening = prep.opening_terms(events)
         for n, m in enumerate(replies):
             for j, ts in enumerate(m.get("term_sheets") or []):
                 terms = ts.get("terms") or {}
@@ -183,6 +199,15 @@ class SpecAgent:
                 c = est_mod.cost(case, terms, std, est)
                 plain = est_mod.plain_cost(case, terms, std)
                 valid = must_haves_ok(case, terms, std) and plain < c_alt and c < c_alt
+                # Never accept a punitive counter above the supplier's own opening price unless
+                # the supplier materially extended payment.  Invalid rows remain visible for
+                # analysis, but closing.ladder will never select them.
+                try:
+                    from team.term_guard import validate_acceptance_offer
+
+                    valid = valid and not validate_acceptance_offer(terms, opening)
+                except Exception:
+                    log.exception("supplier acceptance guard failed for %s", sid)
                 try:
                     bd = cost_breakdown(case, terms, std)
                     unc = bd["uncovered_need"] + bd["fallback_risk"]
@@ -294,6 +319,19 @@ class SpecAgent:
             rs = [r.c for r in st["rows"] if r.reply == n]
             cs.append(min(rs))
         step_share = (cs[-2] - cs[-1]) / cs[-2] if len(cs) > 1 and cs[-2] else 0.0
+        ideal_price = None
+        if st.get("target") is not None and st.get("base"):
+            try:
+                ideal_price = sheets.pricing.price_for(
+                    self.case,
+                    {k: v for k, v in st["base"].items() if k != "unit_price"},
+                    st["std"],
+                    st["target"],
+                    st["ctx"].supplier,
+                    st["ctx"].their_price,
+                )
+            except Exception:
+                log.exception("could not calculate early-accept target for %s", st["sid"])
         return closing.View(
             sid=st["sid"], status=st["status"], left=st["left"], sent=st["sent"], rows=st["rows"],
             target=st.get("target"), last_target=th.plan.targets[-1] if th.plan.targets else None,
@@ -301,6 +339,7 @@ class SpecAgent:
             planned_over=len(th.plan.targets) >= self.prep.horizon + 2, close_gap=self.prep.row["close_gap"],
             replies_c=cs, earlier_used="earlier" in th.flags, repair_used="repair" in th.flags,
             restore_used="restore" in th.flags, last_step_share=step_share,
+            current_round=st["sent"], ideal_price=ideal_price,
         )  # fmt: skip
 
     def views(self, threads):
@@ -352,7 +391,7 @@ class SpecAgent:
         best_rows = [r for v in views.values() for r in v.rows if r.valid]
         if fits and lock and (not best_rows or lock[1] < min(r.c for r in best_rows) - 0.01) and "lock" not in th.flags:
             return closing.Close("lock_in", "late: lock in its prose offer", sid, terms=lock[0])
-        if fits and not closing.ladder(views) and th.last_sheets and st["left"] > 1:
+        if fits and not closing.guarded_ladder(views) and th.last_sheets and st["left"] > 1:
             return closing.Close("repeat", "late: nothing acceptable yet - our last offer again", sid)
         return closing.accept(views, "late: no new counter-offers") or closing.Close("idle", "late, nothing yet", sid)
 
@@ -438,14 +477,39 @@ class SpecAgent:
         hold = info.get("kind") == "hold"
         cover_values = {f: base[f] for f in COVERAGE if f in base and f in self.case["negotiable"]}
         supplier_terms = [r.terms for r in st["rows"]]
+        rival_prices = [
+            ts.get("terms", {}).get("unit_price")
+            for other, events in threads.items()
+            if other != sid
+            for ts in (latest(events).get("term_sheets") or [])
+            if isinstance(ts.get("terms", {}).get("unit_price"), (int, float))
+        ]
+        rival_price = min(rival_prices, default=None)
+        guard_errors = []
 
         def guarded_build(c_target):
+            nonlocal guard_errors
             out, kind, fld = self.build(st, base, c_target, floor_p, asks)
 
             def guard_menu(menu):
+                nonlocal guard_errors
                 menu = sheets.lock_coverage(ctx, menu, cover_values)
                 menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets)
-                return sheets.no_regress(ctx, menu, [r.c for r in st["rows"] if r.valid])
+                menu = sheets.no_regress(ctx, menu, [r.c for r in st["rows"] if r.valid])
+                notice_days, notice_date = self.contractual_notice()
+                errors = sheets.validate_menu(
+                    ctx,
+                    menu,
+                    th.last_sheets,
+                    rival_price,
+                    minimum_notice_days=notice_days,
+                    current_date=notice_date,
+                )
+                if errors:
+                    guard_errors.extend(errors)
+                    log.warning("%s: outgoing menu blocked by guardrails: %s", sid, " | ".join(errors))
+                    return []
+                return menu
 
             out = guard_menu(out)
             while kind == "step" and len({key(t.get(fld)) for _, t in out}) < 2:
@@ -477,7 +541,15 @@ class SpecAgent:
             if len(views) > 1:
                 return {"supplier_id": sid, "idle": True}  # RFQ: leave this thread, the others go on
             if not out:
-                out = th.last_sheets or sheets.out_of_reach(ctx, base, floor_p) or sheets.just_under(ctx, base)
+                previous = [x for x in th.last_sheets if ctx.ok(x[1])]
+                if len(previous) >= 2:
+                    out = previous
+                else:
+                    # A one-sheet fallback is an ultimatum.  Block it rather than emitting a
+                    # package that violates the multi-option guardrail.
+                    return {"supplier_id": sid, "idle": True, "guardrail_errors": guard_errors or [
+                        "Rule 10 (multi-option): no valid two-option menu could be generated; output blocked."
+                    ]}
         lock = self.lock_in(st)
         pressure = st["left"] <= PRESSURE_LEFT or st["intel"].walk_risk >= LOCK_RISK or self.clock.near_end()
         if lock and (pressure or lock[1] <= target * (1 + LOCK_TOL)):
@@ -766,7 +838,7 @@ class SpecAgent:
             self.prepare(case, threads)
         with self.lock:
             _, views = self.views(threads)
-        return closing.ladder(views)
+        return closing.guarded_ladder(views)
 
     def accept(self, case, threads):
         ladder = self.accept_candidates(case, threads)
