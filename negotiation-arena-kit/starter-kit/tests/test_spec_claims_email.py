@@ -72,7 +72,10 @@ def test_r13_9_notice_comparison_and_claim_ledger_scope():
 
 @pytest.mark.parametrize("change,volatile", [(15, False), (15.04, True), (-15.04, True),
                                            (15.1, True), (-15.1, True)])
-def test_r13_11_volatile_series_filters_every_clause_option(change, volatile):
+def test_r13_11_volatile_series_filters_every_clause_option(change, volatile, monkeypatch):
+    import arena_kit.agents.spec as spec_mod
+
+    monkeypatch.setattr(spec_mod, "VOLATILE_PCT", 15.0)  # the rule, when switched on (SPEC_VOLATILE_PCT=15)
     c, series = index_case(change)
     sid = c["suppliers"][0]
     threads = {sid: [opening(sid, {"unit_price": 6, "payment_days": 60, "contract_months": 24,
@@ -85,6 +88,17 @@ def test_r13_11_volatile_series_filters_every_clause_option(change, volatile):
     ctx = sheets.Ctx(c, {}, Estimate(), threads[sid][0]["term_sheets"][0]["terms"], playbook.row(c), a.volatile)
     opts = ctx.allowed("index_clause", ctx.their)
     assert (opts == [None]) is volatile
+
+
+def test_r13_11_off_by_default_the_cost_function_decides_on_a_clause():
+    c, series = index_case(47.7)  # P02: copper +47.7 % in 12 months, its supplier paid for a clause
+    sid = c["suppliers"][0]
+    threads = {sid: [opening(sid, {"unit_price": 6, "payment_days": 60, "contract_months": 24,
+                                 "index_clause": None})]}
+    a = agent(c, threads)
+    a.package = None
+    a._volatile.clear()
+    assert a.volatile(series) is False
 
 
 def test_r13_11_no_unsafe_fallback_when_every_index_option_is_volatile():

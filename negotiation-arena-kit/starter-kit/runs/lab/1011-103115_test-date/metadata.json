@@ -1,0 +1,13 @@
+{
+  "batch": "1011-103115_test-date",
+  "label": "test-date",
+  "git_head": "914784d",
+  "source": "6190a4580929",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      null
+    ]
+  },
+  "holdout": false
+}
