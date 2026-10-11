@@ -1,0 +1,46 @@
+03:25:19 HTTP Request: POST https://arena.tacto.ai/v1/sessions "HTTP/1.1 200 OK"
+03:25:19 session e6573a9c6c739502
+03:25:20 HTTP Request: GET https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/attachments/att:70510-0-quote "HTTP/1.1 200 OK"
+03:25:20 negotiation dossier cache hit for case:P02 (1 ms)
+03:25:20 case:P02 sup:70510 stabilise, steps: payment_days (35,502 EUR)
+03:25:20 case:P02 sup:70510 step payment_days, locked {}, target C 2,271,453: {"unit_price": 369.1, "payment_days": 30} | {"unit_price": 370.33, "payment_days": 45}
+03:25:28 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:25:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510 "HTTP/1.1 200 OK"
+03:25:46 HTTP Request: POST https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510/messages "HTTP/1.1 200 OK"
+03:25:46 sup:70510 open {'unit_price': 370.78, 'payment_days': 45, 'index_clause': None}
+03:25:46 case:P02 sup:70510 price, locked {"payment_days": 45}, target C 2,262,838: {"unit_price": 368.79}
+03:25:50 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:25:51 HTTP Request: GET https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510 "HTTP/1.1 200 OK"
+03:26:09 HTTP Request: POST https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510/messages "HTTP/1.1 200 OK"
+03:26:09 sup:70510 open {'unit_price': 370.78, 'payment_days': 45, 'index_clause': None}
+03:26:09 case:P02 sup:70510 price, locked {"payment_days": 45}, target C 2,262,838: {"unit_price": 368.79}
+03:26:20 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:26:21 HTTP Request: GET https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510 "HTTP/1.1 200 OK"
+03:26:32 HTTP Request: POST https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510/messages "HTTP/1.1 200 OK"
+03:26:32 sup:70510 open {'unit_price': 370.78, 'payment_days': 45, 'index_clause': None}
+03:26:32 sup:70510 {'type': 'accept', 'term_sheet_id': 'offer:70510-3'}
+03:26:33 HTTP Request: POST https://arena.tacto.ai/v1/sessions/e6573a9c6c739502/threads/sup:70510/messages "HTTP/1.1 200 OK"
+03:26:33 HTTP Request: GET https://arena.tacto.ai/v1/sessions/e6573a9c6c739502 "HTTP/1.1 200 OK"
+{
+  "deal": true,
+  "supplier_id": "sup:70510",
+  "terms": {
+    "payment_days": 45,
+    "lead_time_days": 35,
+    "volume_per_year": 6110,
+    "contract_months": 12,
+    "effective_date": "2027-01-01",
+    "index_clause": null,
+    "incoterm": "DAP",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 250,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 370.78
+  },
+  "c_open": 2282867.49,
+  "c_deal": 2274208.8,
+  "c_best": 2235514.05,
+  "score": 0.18285239678469684
+}
+replay: https://arena.tacto.ai/replay/e6573a9c6c739502
+practice sessions left today: 336

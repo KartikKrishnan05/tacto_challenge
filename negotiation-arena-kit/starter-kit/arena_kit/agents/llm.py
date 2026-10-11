@@ -373,7 +373,7 @@ class LLMAgent:
         events = threads[sid]
         if not standing(events)[0] or moves_left(case, events) <= 0:
             return True
-        return self.finished(case, threads, sid) and self.revisit_terms(case, sid, events) is None
+        return self.over(case, threads, sid) and self.revisit_terms(case, sid, events) is None
 
     def finished(self, case, threads, sid):
         """The supplier agreed or made its final offer (pushing on makes it walk), it has stalled,
@@ -541,14 +541,20 @@ class LLMAgent:
 
     def base(self, case, events, terms, locked):
         """The supplier's terms with our locked values and the coverage both sides gain from; a value
-        that breaks a must-have is replaced by the cheapest valid option."""
+        that breaks a must-have is replaced by the cheapest valid option - before the coverage move,
+        which only sees options that keep the must-haves (P10: the supplier's short volume hid the
+        24-month contract that saved EUR 340k)."""
         std = standard_terms(events)
-        t = self.mutual(case, events, complete_offer(case, {**terms, **locked}), locked)
-        for field in case["negotiable"]:
-            if field != "unit_price" and not must_haves_ok(case, t, std):
-                if opts := self.options(case, field, t, std):
-                    t[field] = min(opts, key=lambda o: self.cost(case, events, {**t, field: o}))
-        return t
+
+        def keep_must_haves(t):
+            for field in case["negotiable"]:
+                if field != "unit_price" and not must_haves_ok(case, t, std):
+                    if opts := self.options(case, field, t, std):
+                        t[field] = min(opts, key=lambda o: self.cost(case, events, {**t, field: o}))
+            return t
+
+        t = keep_must_haves(complete_offer(case, {**terms, **locked}))
+        return keep_must_haves(self.mutual(case, events, t, locked))
 
     def target(self, case, events, best):
         """The C we ask for with this message, as a cost: `best` - the step's term at its best
@@ -586,14 +592,34 @@ class LLMAgent:
         stated = any("We can commit to" in str(m.get("body") or "") for m in events if m.get("from") == "buyer")
         if VOLUME_ASK.search(str(latest(events).get("body") or "")) and not stated:
             extras.append(None)  # our volume commitment, filled once the sheets are known
-        if self.finished(case, threads, sid) and (t := self.revisit_terms(case, sid, events)) is not None:
+        if self.over(case, threads, sid) and (t := self.revisit_terms(case, sid, events)) is not None:
             self.special.add((sid, "revisit"))
             extras = [
                 "You have offered us exactly the terms on the attached term sheet; we are ready to sign on"
                 " them - please confirm."
             ]
             return self.one_off(case, sid, k, "revisit", t, extras)
+        field, locked, asks, sheets, target = self.draft(case, threads, sid)
+        self.steps.setdefault(sid, {})[k] = field
+        step = f"step {field}{' (asked for)' if field in asks else ''}" if field else "price"
+        note = f"{step}, locked {json.dumps(locked)}, target C {target:,.0f}: " + " | ".join(
+            json.dumps({key: s[key] for key in ("unit_price", field) if key}) for s in sheets
+        )
+        return {
+            "kind": "step" if field else "price",
+            "field": field,
+            "locked": locked,
+            "asks": asks,
+            "sheets": sheets,
+            "claims": self.arguments(case, threads, sid),
+            "extras": [x if x is not None else commitment(case, sheets[0]) for x in extras],
+            "note": note,
+        }
 
+    def draft(self, case, threads, sid):
+        """The term sheets of our next step or price message, without recording anything:
+        (field, locked, asks, sheets, target C)."""
+        events = threads[sid]
         std, price = standard_terms(events), standing(events)[1]["unit_price"]
         supplier = self.supplier(case, events)
         asks = self.asks(case, events)
@@ -613,14 +639,16 @@ class LLMAgent:
                     picks.append(o)
         target = self.target(case, events, base if field is None else {**base, field: ranked[0]})
         floor = self.floor_price(case, events)
-        if field is not None:  # every package at or above the floor, all still costing us the same
+        if field is not None and supplier is None:  # every package at or above the floor, all costing
+            # us the same (only where C rises with the price: with the margin penalty a low price
+            # costs more, and `price_for` already stays at or above the cheapest price)
             at_floor = [self.cost(case, events, {**base, field: o, "unit_price": floor}) for o in picks]
             target = min(max(target, *at_floor), self.cost_now(case, events) * (1 - self.play(case)["close_gap"]))
         sheets = []
         for o in picks:
             t = base if field is None else {**base, field: o}
             p = price_for(case, t, std, target, supplier, price)
-            if p is None or p < floor or p >= price:
+            if p is None or p < floor - 0.01 or p >= price:  # a cent of rounding is no breach
                 continue  # not credible, or no better for us than what the supplier asks
             sheet = complete_offer(case, {**t, "unit_price": p})
             if sheet not in sheets:
@@ -632,21 +660,21 @@ class LLMAgent:
                 p = cheapest_price(case, t, std, supplier, price) if supplier else floor
             p = min(max(p, floor), price)
             sheets = [complete_offer(case, {**t, "unit_price": round(p, 2)})]
-        self.steps.setdefault(sid, {})[k] = field
-        step = f"step {field}{' (asked for)' if field in asks else ''}" if field else "price"
-        note = f"{step}, locked {json.dumps(locked)}, target C {target:,.0f}: " + " | ".join(
-            json.dumps({key: s[key] for key in ("unit_price", field) if key}) for s in sheets
-        )
-        return {
-            "kind": "step" if field else "price",
-            "field": field,
-            "locked": locked,
-            "asks": asks,
-            "sheets": sheets,
-            "claims": self.arguments(case, threads, sid),
-            "extras": [x if x is not None else commitment(case, sheets[0]) for x in extras],
-            "note": note,
-        }
+        return field, locked, asks, sheets, target
+
+    def repeats(self, case, threads, sid):
+        """Our next message would only repeat our last term sheets: a repeat draws a final offer, so
+        there is nothing more to win here (P01, P02 on 11 Oct: the same sheet twice at the price
+        where the supplier's margin penalty starts to cost us)."""
+        ours = our_sheets(threads[sid])
+        if not ours:
+            return False
+        sheets = self.draft(case, threads, sid)[3]
+        return [complete_offer(case, s) for s in ours] == sheets
+
+    def over(self, case, threads, sid):
+        """Finished, or nothing new left to offer."""
+        return self.finished(case, threads, sid) or self.repeats(case, threads, sid)
 
     def one_off(self, case, sid, k, kind, terms, extras):
         self.steps.setdefault(sid, {})[k] = kind
