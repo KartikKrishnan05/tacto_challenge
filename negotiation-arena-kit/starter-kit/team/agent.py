@@ -16,6 +16,7 @@ import math
 import os
 import re
 import time
+from datetime import date, timedelta
 
 import httpx
 
@@ -27,6 +28,14 @@ from arena_kit.play import latest, live_threads, moves_left, standing
 
 from .briefing import Briefing
 from .levers import _label, lever_table, revealed_slopes
+from .term_guard import (
+    validate_acceptance_offer,
+    validate_effective_date_pricing,
+    validate_minimum_options,
+    validate_monotonic_options,
+    validate_strategic_options,
+    validate_term_options,
+)
 
 log = logging.getLogger("arena")
 
@@ -55,13 +64,24 @@ HOW TO NEGOTIATE
 - Lead with the biggest levers from the LEVERS table, not only the price.
 - Arguments: use the ready-made sentences from ARGUMENTS THAT CHECK OUT, copied with their IDs
   (max 3 per e-mail, never an ID we already used). Never invent figures or IDs.
-- Offer the PLANNED term sheets. You may re-mix their terms, but code caps every sheet at the planned C
-  (a sheet that costs us more gets a lower price), so concede only via the plan. Do not write our offered
-  prices in the body - refer to "the attached term sheets". Always ask for something back.
+- Offer at least two distinct PLANNED term sheets whenever two legal packages exist. You may re-mix their terms,
+  but code caps every sheet at the planned C (a sheet that costs us more gets a lower price), so concede only via
+  the plan. Do not write our offered
+  prices in the prose; code appends a clear, human-readable Option A/B/C block. Never refer to invisible
+  attachments. Always ask for something back.
+- Before sending, check the economic menu yourself: identical terms cannot have different prices; longer
+  payment must cost more; longer contracts must cost less; an indexed base price must undercut fixed;
+  longer lead time must be no dearer; and one option must meet a known rival quote. If Rule 1 is reported,
+  do not flatten prices: change a term and calculate the value of that term. For effective-date alternatives,
+  an earlier price-increase date must carry a lower price than a later date. If a monotonic-concession error
+  is reported, never lower an equivalent package's prior-round price. If guardrail feedback appears in the
+  next prompt, correct the listed options exactly.
 - Be warm, respectful and specific; acknowledge their situation; never threaten, never reveal urgency,
   a budget or that we lack alternatives. Ask questions (cost breakdown, cheaper variants, earliest date).
 - Suppliers walk away when pushed too long: move towards a deal every round. A final_offer is accepted
   automatically, so before it comes, make sure the big levers are already in the term sheets.
+- Never accept a current supplier offer priced above its original opening price unless it includes a documented
+  payment extension of at least 30 days. A punitive premium is not a concession.
 - Never accept an offer that breaks a must-have or costs more than our alternative.
 
 Reply with ONE JSON object only:
@@ -181,6 +201,7 @@ class TeamAgent:
         self.reply_at, self.inflight = {}, {}  # set by the runner: when each supplier last replied, who is busy
         self.deadline = None  # set by the runner in the Live Final (time.time() of the wave's cap)
         self.log = []  # (sid, round, source, why) for the evaluation
+        self.guard_feedback = {}  # sid -> explicit option errors shown to the next LLM prompt
 
     # ---- per case ------------------------------------------------------------------------------
     def prepare(self, case):
@@ -191,6 +212,7 @@ class TeamAgent:
             log.warning("briefing failed: %s", e)
             self.brief = Briefing(case, None)
         self.supplier_est, self.confirmed, self.slopes, self.anchor = {}, set(), {}, {}
+        self.guard_feedback = {}
         for sid in case["suppliers"]:
             text = getattr(self.brief, "supplier_text", {}).get(sid, "")
             self.supplier_est[sid] = {"cash_short": bool(CASH.search(text))}
@@ -199,6 +221,85 @@ class TeamAgent:
         costs = [c for c in self.brief.claims if c["kind"] == "should_cost"] if len(case.get("parts", [])) == 1 else []
         self.should_cost = costs[0]["value"] if costs else None
         self.should_cost_by = {c["supplier"]: c["value"] for c in costs if c.get("supplier")}
+
+    def strategic_constraints(self, case):
+        """Hard constraints derived from the contract, notice letter and cost-driver briefing."""
+        out = {"min_effective_date": None, "price_ceiling": None}
+        if case.get("type") != "price_increase" or not self.brief:
+            return out
+        facts = self.brief.facts
+        trigger = facts.get(case.get("trigger_doc") or "") or {}
+        required_notice = max(
+            (facts.get(ref) or {}).get("days") or 0
+            for ref in case.get("refs", [])
+            if ref.startswith("ctr:") and "#" not in ref
+        ) if any(ref.startswith("ctr:") and "#" not in ref for ref in case.get("refs", [])) else 0
+        if trigger.get("date") and required_notice:
+            out["min_effective_date"] = (
+                date.fromisoformat(trigger["date"]) + timedelta(days=required_notice)
+            ).isoformat()
+        impact = getattr(self.brief, "index_impact_pct", None)
+        current = case["buyer"].get("current_unit_price")
+        if impact is not None and current is not None:
+            # A negative weighted movement never increases the buyer's ceiling.
+            out["price_ceiling"] = round(current * (1 + max(0.0, impact) / 100), 2)
+        return out
+
+    def preferred_terms(self, case, terms):
+        """Use the latest allowed effective date that satisfies the contractual notice floor."""
+        constraints = self.strategic_constraints(case)
+        options = [
+            value for value in case.get("term_options", {}).get("effective_date", [])
+            if not constraints["min_effective_date"] or value >= constraints["min_effective_date"]
+        ]
+        if case.get("type") == "price_increase" and options:
+            return {**terms, "effective_date": max(options)}
+        return terms
+
+    @staticmethod
+    def supplier_nonprice_trade(case, events):
+        """Whether the supplier granted a buyer-valued non-price concession since its last reply."""
+        replies = [m for m in events if m.get("from") != "buyer" and m.get("term_sheets")]
+        if len(replies) < 2:
+            return False
+        previous = (replies[-2].get("term_sheets") or [{}])[0].get("terms") or {}
+        latest_terms = (replies[-1].get("term_sheets") or [{}])[0].get("terms") or {}
+        for field, direction in {
+            "effective_date": 1,  # a later price change is better for the buyer
+            "payment_days": 1,    # paying later is better for the buyer
+            "contract_months": 1,
+            "lead_time_days": -1,  # shorter delivery is better for the buyer
+        }.items():
+            old, new = previous.get(field), latest_terms.get(field)
+            if old is None or new is None or not isinstance(old, type(new)):
+                continue
+            if (new > old if direction == 1 else new < old):
+                return True
+        return False
+
+    @staticmethod
+    def reciprocity_errors(case, events, sheets):
+        """Block a price increase when the supplier gave no non-price concession."""
+        buyers = [m for m in events if m.get("from") == "buyer" and m.get("term_sheets")]
+        if not buyers or TeamAgent.supplier_nonprice_trade(case, events):
+            return []
+        previous = [ts.get("terms") or {} for ts in buyers[-1].get("term_sheets") or []]
+        errors = []
+        for index, option in enumerate(sheets):
+            payment = option.get("payment_days")
+            matches = [p for p in previous if p.get("payment_days") == payment and p.get("unit_price") is not None]
+            if not matches:
+                continue
+            prior = min(p["unit_price"] for p in matches)
+            price = option.get("unit_price")
+            if isinstance(price, (int, float)) and price > prior + 0.005:
+                errors.append(
+                    f"Rule 9 (reciprocity): Option {chr(ord('A') + index)} raises the price from EUR {prior:.2f} "
+                    f"to EUR {price:.2f} at the same payment terms, but the supplier granted no buyer-valued "
+                    "non-price concession. Hold the previous price or obtain a later effective date, longer "
+                    "payment, longer commitment, or shorter lead time first."
+                )
+        return errors
 
     def supplier(self, case, sid, std):
         """Our estimate of the supplier for the relationship term (strategic goals only)."""
@@ -254,6 +355,7 @@ class TeamAgent:
         budget = self.rounds_budget(case, events)
         # the best value of every non-price lever, first at their price (for floor and anchor)
         base = self.keep_must_haves(case, complete_offer(case, theirs), std)  # levers from a valid sheet
+        base = self.preferred_terms(case, base)
         best = self.best_levers(case, base, std, sup, slopes)
         levers = {f: row["option"] for f, row in best.items()}
         # price floor: below it C rises again (relationship charge), or the should-cost minus a bit
@@ -278,6 +380,10 @@ class TeamAgent:
         best = self.best_levers(case, {**base, "unit_price": anchor}, std, sup, slopes)
         levers = {f: row["option"] for f, row in best.items()}
         struct = self.keep_must_haves(case, complete_offer(case, {**base, **levers, "unit_price": anchor}), std)
+        struct = self.preferred_terms(case, struct)
+        constraints = self.strategic_constraints(case)
+        if constraints["price_ceiling"] is not None:
+            struct["unit_price"] = min(struct["unit_price"], constraints["price_ceiling"])
         # real steps in C along STEPS of the gap between our anchor and its cheapest sheet, and at least
         # MIN_STEP of what was left after our last message - suppliers mirror steps, not words
         c_anchor, c_their = self.cost(case, struct, std, sup), self.cost(case, theirs, std, sup)
@@ -289,6 +395,8 @@ class TeamAgent:
         target_c = min(target_c, 0.997 * c_their)
         a = self.iso_price(case, struct, target_c, std, sup, floor) or struct
         a = {**a, "unit_price": round(min(max(a["unit_price"], floor), their_price), 2)}
+        if constraints["price_ceiling"] is not None:
+            a["unit_price"] = min(a["unit_price"], constraints["price_ceiling"])
         sheets = [a]
         c_a = self.cost(case, a, std, sup)
         # B, C: equal-cost alternatives (MESO). Each gives the supplier one term it asked for, and takes
@@ -296,6 +404,17 @@ class TeamAgent:
         for v in self.menu(case, a, theirs, std, sup, floor, c_a, slopes)[:2]:
             if v not in sheets:
                 sheets.append(v)
+        sheets = self.ensure_minimum_options(case, sheets, std, sup, floor, c_a)
+        reciprocity_blocked = bool(self.reciprocity_errors(case, events, sheets))
+        if reciprocity_blocked:
+            previous = [ts.get("terms") or {} for m in events if m.get("from") == "buyer"
+                        for ts in m.get("term_sheets") or []]
+            capped = []
+            for sheet in sheets:
+                matches = [p["unit_price"] for p in previous
+                           if p.get("payment_days") == sheet.get("payment_days") and p.get("unit_price") is not None]
+                capped.append({**sheet, "unit_price": min(sheet["unit_price"], min(matches))} if matches else sheet)
+            sheets = capped
         # coverage lock: once sheet A covers the need, no sheet we send covers less
         cover = {f: a[f] for f in COVERAGE if f in case["negotiable"] and a.get(f) is not None}
         last_sheets = (delivered[-1].get("term_sheets") or []) if delivered else []
@@ -303,7 +422,55 @@ class TeamAgent:
         repeat = bool(sent) and all(any(same(s, t) for t in sent) for s in sheets)
         return {"repeat": repeat, "sheets": sheets, "floor": floor, "std": std, "sup": sup,
                 "levers": best, "costs": [self.cost(case, s, std, sup) for s in sheets], "budget": budget,
-                "round": r, "cover": cover, "their_price": their_price}
+                "round": r, "cover": cover, "their_price": their_price, "constraints": constraints,
+                "reciprocity_blocked": reciprocity_blocked}
+
+    def ensure_minimum_options(self, case, sheets, std, sup, floor, target_cost):
+        """Add one deterministic trade package if a planner or LLM produced only one.
+
+        The first candidate is kept intact.  The supplement changes one allowed non-price
+        field and is checked against the same economic and strategic rules before it is used.
+        If a case genuinely has only one legal combination, the caller will block the send
+        instead of silently turning it into an ultimatum.
+        """
+        out = []
+        for sheet in sheets:
+            if sheet and sheet not in out:
+                out.append(sheet)
+        if len(out) >= 2 or not out:
+            return out
+        seed = out[0]
+        options = case.get("term_options", {})
+        constraints = self.strategic_constraints(case)
+        for field in case.get("negotiable", []):
+            if field in COVERAGE or field == "unit_price":
+                continue
+            for value in options.get(field, []):
+                if value == seed.get(field):
+                    continue
+                candidate = complete_offer(case, {**seed, field: value})
+                if field == "payment_days" and candidate.get("unit_price") is not None:
+                    # Make the payment probe economically coherent when no equal-cost menu exists.
+                    if value > (seed.get("payment_days") or 0):
+                        candidate["unit_price"] = round(seed["unit_price"] + 0.01, 2)
+                    else:
+                        candidate["unit_price"] = round(max(floor, seed["unit_price"] - 0.01), 2)
+                candidate = complete_offer(case, candidate)
+                if not must_haves_ok(case, candidate, std):
+                    continue
+                if validate_strategic_options(
+                    [candidate],
+                    min_effective_date=constraints.get("min_effective_date"),
+                    price_ceiling=constraints.get("price_ceiling"),
+                ):
+                    continue
+                if self.cost(case, candidate, std, sup) > target_cost * 1.01:
+                    continue
+                if validate_term_options([seed, candidate]):
+                    continue
+                out.append(candidate)
+                return out
+        return out
 
     def best_levers(self, case, terms, std, sup, slopes=None):
         """{field: lever row} - the best option per non-price field that saves at least MIN_LEVER_SHARE of C
@@ -351,6 +518,10 @@ class TeamAgent:
         variants = []
         for f in neg:
             if f not in COVERAGE and f != "unit_price" and full.get(f) is not None and full.get(f) != a.get(f):
+                if f == "effective_date" and case.get("type") == "price_increase":
+                    date_floor = (self.strategic_constraints(case) or {}).get("min_effective_date")
+                    if date_floor and str(full[f]) < date_floor:
+                        continue
                 variants.append(complete_offer(case, {**a, f: full[f]}))  # never give back coverage
         if "index_clause" in neg and full.get("index_clause") and not a.get("index_clause"):
             # it wants an index clause: offer its series with the deadband that costs us least
@@ -471,6 +642,7 @@ class TeamAgent:
         sup = self.supplier(case, sid, std)
         c_alt = self.c_alt(case)
         replies = [m for m in events if m.get("from") != "buyer"]
+        opening = self.opening_terms(events)
         out = []
         for i, m in enumerate(replies):
             for j, ts in enumerate(m.get("term_sheets") or []):
@@ -478,10 +650,33 @@ class TeamAgent:
                 if not ts.get("term_sheet_id") or terms.get("unit_price") is None:
                     continue
                 c = self.cost(case, terms, std, sup)
-                valid = must_haves_ok(case, terms, std) and self.cost(case, terms, std, None) <= c_alt
+                penalty = validate_acceptance_offer(terms, opening)
+                valid = (must_haves_ok(case, terms, std)
+                         and self.cost(case, terms, std, None) <= c_alt
+                         and not penalty)
                 out.append({"id": ts["term_sheet_id"], "terms": terms, "latest": i == len(replies) - 1,
-                            "main": j == 0, "c": c, "valid": valid})
+                            "main": j == 0, "c": c, "valid": valid, "penalty": penalty})
         return out
+
+    @staticmethod
+    def opening_terms(events):
+        """Return the supplier's first primary offer, the reference for anti-penalty checks."""
+        for event in events:
+            if event.get("from") == "buyer":
+                continue
+            sheets = event.get("term_sheets") or []
+            if sheets:
+                return sheets[0].get("terms") or {}
+        return None
+
+    @staticmethod
+    def previous_buyer_options(case, events):
+        """Return the last delivered buyer menu for monotonic round-to-round checks."""
+        for event in reversed(events):
+            if event.get("from") != "buyer" or not event.get("term_sheets"):
+                continue
+            return [complete_offer(case, sheet.get("terms") or sheet) for sheet in event["term_sheets"]]
+        return []
 
     def accept_candidates(self, case, threads):
         """The accept ladder over all live threads: valid sheets, cheapest first; a few earlier or alternative
@@ -536,7 +731,9 @@ class TeamAgent:
             if earlier:
                 return earlier, "its earlier offer was cheaper than the agreed sheet"
             return accept, "agreed to our terms"
-        if plan.get("repeat") and accept and left > 0:  # we would only repeat ourselves: no more room
+        if (
+            plan.get("repeat") and not plan.get("reciprocity_blocked") and accept and left > 0
+        ):  # we would only repeat ourselves: no more room
             return accept, "no more room"
         if status == "final_offer":  # its last word: any further message makes it walk away (8/8 recorded)
             if accept:
@@ -675,14 +872,51 @@ class TeamAgent:
         if plan["sheets"] and not sheets and instead:
             self.log.append((sid, plan.get("round"), "planned", "nothing cheaper to offer than its own sheets"))
             return instead
+        sheets = self.ensure_minimum_options(
+            case,
+            sheets,
+            plan.get("std"),
+            plan.get("sup"),
+            plan.get("floor") or 0,
+            plan.get("costs", [math.inf])[0],
+        )
+        rival_price = self.rival_price(case, threads or {sid: events}, sid)
+        errors = validate_minimum_options(sheets)
+        errors += validate_term_options(sheets, rival_price=rival_price)
+        constraints = plan.get("constraints") or self.strategic_constraints(case)
+        errors += validate_strategic_options(
+            sheets,
+            min_effective_date=constraints.get("min_effective_date"),
+            price_ceiling=constraints.get("price_ceiling"),
+        )
+        errors += validate_monotonic_options(self.previous_buyer_options(case, events), sheets)
+        if case.get("type") == "price_increase":
+            errors += validate_effective_date_pricing(sheets)
+        if errors:
+            # Keep the deterministic fallback safe even if a future planner change
+            # produces an incoherent menu. If two legal options cannot be built, ask
+            # for a fresh quote instead of sending a one-option ultimatum.
+            self.guard_feedback[sid] = errors
+            self.log.append((sid, plan.get("round"), "guardrail", " ".join(errors)))
+            sheets = []
         plan = {**plan, "sheets": sheets}
         if not plan["sheets"]:
             body = ("Thank you for your message. Could you please send us your offer with a unit price and "
                     "your standard terms?\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
         else:
-            body = ("Thank you for your offer. We value working with you and have looked at the whole package. "
-                    f"{extra}Please find our proposals attached as term sheets - we are flexible on how we get there "
-                    "and would appreciate your best terms.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
+            round_no = min(int(plan.get("round") or 0), 3)
+            intros = (
+                "Thank you for your offer. We have reviewed the whole package and would like to find a workable path.",
+                "Thank you for clarifying your position. We have refined the trade-offs so you can choose the "
+                "structure that fits your production needs.",
+                "We appreciate the continued discussion. The following packages address the points raised while "
+                "keeping the economics transparent.",
+                "Thank you for the constructive dialogue. We have kept the remaining proposal focused on the terms "
+                "that matter most to both sides.",
+            )
+            body = (f"{intros[round_no]} {extra}Please review the following packages and let us know which "
+                    "structure you can support.\n\nBest regards\nHollerau Pumpenwerke, Purchasing")
+            body = self.with_option_text(body, sheets)
         self.log.append((sid, plan.get("round"), "planned", ""))
         return {"supplier_id": sid, "message": {"subject": f"Re: {case['title']}"[:300], "body": body,
                                                  "term_sheets": [{"terms": s} for s in plan["sheets"]]}}
@@ -703,6 +937,23 @@ class TeamAgent:
             "STRATEGY: " + PLAYBOOK.get(case.get("type"), "") + " " + GOAL_NOTE.get(b.get("category_goal"), ""),
             self.brief.text if self.brief else "",
         ]
+        constraints = plan.get("constraints") or {}
+        if constraints.get("min_effective_date"):
+            out.append("HARD CONTRACT FLOOR: do not offer an effective date before "
+                       + constraints["min_effective_date"] + ".")
+        if constraints.get("price_ceiling") is not None:
+            out.append(f"HARD DATA CEILING: do not offer above EUR {constraints['price_ceiling']:.2f} per unit "
+                       "without a new verified cost fact.")
+        if plan.get("reciprocity_blocked"):
+            out.append("RECIPROCITY STOP: the supplier has not granted a buyer-valued non-price concession. "
+                       "Hold our last price until it gives later effective date, longer payment, longer commitment, "
+                       "or shorter lead time.")
+        opening = self.opening_terms(threads[sid])
+        if opening and opening.get("unit_price") is not None:
+            out.append(
+                f"ANTI-PENALTY FLOOR: do not accept a current supplier price above its opening EUR "
+                f"{opening['unit_price']:.2f} unless payment days increase by at least 30 days."
+            )
         if case.get("trigger_doc") and self.package:
             try:
                 out.append("THE LETTER THAT STARTED IT:\n" + self.package.document(case["trigger_doc"])[:1500])
@@ -711,6 +962,11 @@ class TeamAgent:
         used = sorted({i for m in self.all_buyer_messages(threads) for i in ID_RE.findall(m.get("body", ""))})
         if used:
             out.append("IDS WE ALREADY CITED (do not cite again): " + ", ".join(used))
+        if feedback := self.guard_feedback.get(sid):
+            out.append(
+                "LAST LLM OUTPUT BLOCKED BY THE ECONOMIC GUARDRAIL. Do not repeat it. Repair these exact "
+                "option errors before returning JSON:\n- " + "\n- ".join(feedback)
+            )
         rivals = [s for s in live_threads(threads) if s != sid]
         for s in rivals:
             rid, rterms = self.best_sheet(case, threads[s], s)
@@ -781,6 +1037,13 @@ class TeamAgent:
             return None
         if kind != "send" or moves_left(case, events) <= 0:
             return None
+        raw_options = d.get("term_sheets") or []
+        if len(raw_options) < 2:
+            errors = validate_minimum_options(raw_options)
+            self.guard_feedback[sid] = errors
+            self.log.append((sid, plan.get("round"), "guardrail", " ".join(errors)))
+            log.warning("%s: blocked single-option LLM output: %s", sid, " | ".join(errors))
+            return None
         _, theirs = self.best_sheet(case, events, sid)
         their_price = plan.get("their_price") or theirs.get("unit_price")
         floor = plan.get("floor") or 0
@@ -809,6 +1072,33 @@ class TeamAgent:
                       if 0.998 * c_plan <= self.cost(case, t, plan.get("std"), plan.get("sup")) <= 1.002 * c_plan]
             if plan["sheets"][0] not in sheets and len(sheets) < 3:
                 sheets.insert(0, plan["sheets"][0])  # the planned package always goes out
+        sheets = self.ensure_minimum_options(
+            case,
+            sheets,
+            plan.get("std"),
+            plan.get("sup"),
+            plan.get("floor") or 0,
+            plan.get("costs", [math.inf])[0],
+        )
+        rival_price = self.rival_price(case, threads, sid)
+        errors = validate_minimum_options(sheets)
+        errors += validate_term_options(sheets, rival_price=rival_price)
+        constraints = plan.get("constraints") or self.strategic_constraints(case)
+        errors += validate_strategic_options(
+            sheets,
+            min_effective_date=constraints.get("min_effective_date"),
+            price_ceiling=constraints.get("price_ceiling"),
+        )
+        errors += validate_monotonic_options(self.previous_buyer_options(case, events), sheets)
+        if case.get("type") == "price_increase":
+            errors += validate_effective_date_pricing(sheets)
+        errors += self.reciprocity_errors(case, events, sheets)
+        if errors:
+            self.guard_feedback[sid] = errors
+            self.log.append((sid, plan.get("round"), "guardrail", " ".join(errors)))
+            log.warning("%s: blocked LLM term sheets: %s", sid, " | ".join(errors))
+            return None
+        self.guard_feedback.pop(sid, None)
         sheets, instead = self.no_regress(case, threads, sid, plan, sheets)
         if not sheets:
             return instead
@@ -826,11 +1116,57 @@ class TeamAgent:
         body = self.drop_repeated_claims(threads, sid, body)
         if not body:
             return None
+        body = self.with_option_text(body, sheets)
         message = {"subject": str(d.get("subject") or f"Re: {case['title']}")[:300], "body": body,
                    "term_sheets": [{"terms": t} for t in sheets]}
         if att := self.data_attachment(threads, body):
             message["attachments"] = [att]
         return {"supplier_id": sid, "message": message}
+
+    @staticmethod
+    def rival_price(case, threads, sid):
+        """Lowest quoted rival unit price, if another live supplier has a quote."""
+        prices = []
+        for rival in live_threads(threads):
+            if rival == sid:
+                continue
+            for event in threads[rival]:
+                if event.get("from") == "buyer":
+                    continue
+                for sheet in event.get("term_sheets") or []:
+                    price = (sheet.get("terms") or {}).get("unit_price")
+                    if isinstance(price, (int, float)) and not isinstance(price, bool):
+                        prices.append(float(price))
+        return min(prices) if prices else None
+
+    @staticmethod
+    def with_option_text(body, sheets):
+        """Make packages visible in plain business language as well as structured API fields."""
+        labels = {
+            "payment_days": "payment",
+            "effective_date": "effective",
+            "contract_months": "contract",
+            "lead_time_days": "lead time",
+        }
+        rows = ["Proposed packages:"]
+        for index, sheet in enumerate(sheets):
+            values = []
+            for field in ("unit_price", "payment_days", "effective_date", "contract_months", "lead_time_days"):
+                if sheet.get(field) is None:
+                    continue
+                value = sheet[field]
+                if field == "unit_price":
+                    values.append(f"EUR {float(value):.2f} per unit")
+                elif field == "effective_date":
+                    values.append(f"effective {value}")
+                elif field == "contract_months":
+                    values.append(f"contract {value} months")
+                else:
+                    values.append(f"{labels[field]} {value} days")
+            if sheet.get("index_clause") is not None:
+                values.append("indexed pricing" if sheet["index_clause"] else "fixed pricing")
+            rows.append(f"Option {chr(ord('A') + index)} — " + "; ".join(values))
+        return body.rstrip() + ("\n\n" + "\n".join(rows) if len(rows) > 1 else "")
 
     def drop_repeated_claims(self, threads, sid, body):
         """Each data ID counts once per case (a repeat comes back 'duplicate', 18 % of our claims did): drop

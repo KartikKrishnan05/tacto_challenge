@@ -244,6 +244,11 @@ def main(argv=None):
     import os
 
     data = a.data or os.environ.get("ARENA_DATA")
+    # Module factories (for example team.compat:make) are intentionally zero-argument so
+    # they can also be used by the standard runner. Make an explicit --data path visible to
+    # those factories as well as to the built-in agent factory.
+    if a.data:
+        os.environ["ARENA_DATA"] = a.data
     if a.set == "final":
         raise SystemExit("not for the Live Final: use `arena run --set final`")
     if a.sim:

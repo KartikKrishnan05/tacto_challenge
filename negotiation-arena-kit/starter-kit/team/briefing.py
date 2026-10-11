@@ -57,6 +57,8 @@ class Briefing:
         self.case, self.p = case, package
         self.facts = {**(package.facts if package else {}), **(case.get("facts") or {})}
         self.claims, self.sections = [], []
+        self.index_impact_pct = None
+        self.index_impacts = []
         self.supplier_text = {}  # sid -> its news and correspondence, raw (for signals such as cash needs)
         if package is None:
             self.sections.append("No data package loaded: argue from the case file only.")
@@ -100,6 +102,7 @@ class Briefing:
             pct, a, b = ch
             weighted += d["weight"] * pct
             weights += d["weight"]
+            self.index_impacts.append({"series": d["series_id"], "weight": d["weight"], "change_pct": pct})
             out.append(f"- cost driver {d['series_id']} ({name}), weight {d['weight']:.0%}: {pct:+.1f} % in 12 months")
             self.claims.append({
                 "kind": "index", "ids": [a, b], "value": pct, "supplier": None,
@@ -108,6 +111,8 @@ class Briefing:
                             f"{b.split('@')[1]} ({a}, {b}).",
             })
         if weights:
+            if len(self.case.get("parts", [])) == 1:
+                self.index_impact_pct = round(weighted, 2)
             out.append(f"- => cost drivers justify about {weighted:+.1f} % on the price "
                        f"({weights:.0%} of cost is index-linked; the rest is fixed or margin)")
         for s in _q(p, "SELECT * FROM should_cost WHERE part_id = ? ORDER BY estimate_date DESC", part)[:1]:
