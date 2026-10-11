@@ -13,6 +13,7 @@ supplier and never at walk risk >= 0.4; the deadlock breaker (R5.3) has priority
 step message never goes out as a disappointed hold.
 """
 
+import re
 from dataclasses import dataclass
 
 
@@ -76,8 +77,8 @@ TACTICS = {
             "Lead with the checked data ARGUMENTS and the cost arithmetic: calm, factual, precise. Let the figures "
             "carry the argument; do not restate them yourself.",
             "Thank you for your letter and for setting out your position.",
-            "The data does not support your price as it stands; the options below follow from it.",
-            "We are happy to go through the figures together.",
+            "The data does not support your price as it stands.",
+            "We look forward to your revised offer.",
         ),
         Tactic(
             "appreciation_close",
@@ -89,6 +90,77 @@ TACTICS = {
         ),
     ]
 }
+
+
+# More code-written lines per tactic: a fallback e-mail never repeats a line this thread has already seen
+# (P18: "The data does not support your price as it stands" three e-mails in a row; P02 sent the same
+# e-mail twice with a new price).
+MORE = {
+    "competitive_pressure": {
+        "opening": ["Thank you for your revised offer."],
+        "bridge": [
+            "Other offers for this part are on our table; the options below are what it takes to win this business."
+        ],
+        "closing": ["We would welcome an offer that lets us choose you."],
+    },
+    "firm_disappointment": {
+        "opening": ["Thank you for your reply, which unfortunately leaves your price where it was."],
+        "bridge": ["We cannot accept the price as it stands; the options below show the step we need."],
+        "closing": ["A real step from your side would let us close this quickly."],
+    },
+    "measured_lowball": {
+        "opening": ["Thank you for your reply."],
+        "bridge": ["The options below set out where this part needs to be for us."],
+        "closing": ["We look forward to your answer."],
+    },
+    "humor_rapport": {
+        "opening": ["Thank you for your reply - we appreciate the good spirit of these talks."],
+        "bridge": ["We would like to get this settled and back to business; the options below should make that easy."],
+        "closing": ["We look forward to your reply."],
+    },
+    "lever_trade": {
+        "opening": ["Thank you for your reply."],
+        "bridge": [
+            "Each option below trades a term against price, so you can pick the one that helps you most.",
+            "We have built the options below around the terms that matter to you.",
+        ],
+        "closing": ["Which of these works best for you?", "We look forward to your choice."],
+    },
+    "data_argument": {
+        "opening": ["Thank you for your reply.", "Thank you for your answer."],
+        "bridge": ["The figures still do not support your price.", "On the figures, your price remains too high."],
+        "closing": ["We look forward to your answer.", "We look forward to a step from your side."],
+    },
+    "appreciation_close": {
+        "opening": ["Thank you for your reply - we are getting close.", "Thank you for your answer."],
+        "bridge": [
+            "The remaining gap is small; the options below would close it.",
+            "One more step and we have an agreement.",
+        ],
+        "closing": ["We would be glad to finalise on this basis.", "We hope we can sign on this basis."],
+    },
+}
+
+
+CHOICE = re.compile(r"\b(?:each option|options|either|which of these|choose|choice|pick)\b", re.I)
+SINGLE = {
+    "opening": "Thank you for your reply.",
+    "bridge": "Our offer below sets out where we need to be.",
+    "closing": "We look forward to your answer.",
+}
+
+
+def fresh(tactic, previous="", single=False):
+    """(opening, bridge, closing) of `tactic`: per part the first line not already in our earlier e-mails
+    (`previous`, their text joined); the last variant when all are used. `single`: one sheet only, so no
+    line about choosing between options (P08: "each option below is a different trade" over one sheet)."""
+    out = []
+    for part in ("opening", "bridge", "closing"):
+        lines = [getattr(tactic, part), *MORE.get(tactic.name, {}).get(part, [])]
+        if single:
+            lines = [x for x in lines if not CHOICE.search(x)] or [SINGLE[part]]
+        out.append(next((x for x in lines if x not in previous), lines[-1]))
+    return tuple(out)
 
 
 def pick(intel, ctx):
@@ -125,6 +197,10 @@ def pick(intel, ctx):
         scores["competitive_pressure"] -= 1.0
     if ctx.get("relationship") or (i and i.relationship_style == "relationship"):
         add("humor_rapport", 1.0, "relationship-driven supplier")
+        if ctx.get("goal") in ("leverage", "quality_first"):
+            # the case's own goal comes first: a leverage or quality case is argued firmly, not with a joke
+            # (P08, leverage: two "making good pumps together" e-mails)
+            scores["humor_rapport"] -= 1.5
         if i and (i.tone or 0) >= 1 and not (i.unchanged_rounds >= 1):
             add("humor_rapport", 1.0, "friendly tone")
     if i and i.tone is not None and i.tone <= -1:

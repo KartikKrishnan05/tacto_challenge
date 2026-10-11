@@ -1,6 +1,6 @@
 {
-  "built": "2026-10-11T08:56:57",
-  "games": 239,
+  "built": "2026-10-11T10:14:26",
+  "games": 289,
   "rules": {
     "min_gain": 0.005,
     "max_loss": 0.05
@@ -320,9 +320,9 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.808469,
-            "n": 2,
-            "best": 0.808469
+            "mean": 0.817837,
+            "n": 3,
+            "best": 0.836574
           },
           "soft_anchor": {
             "mean": 0.781418,
@@ -370,13 +370,13 @@
             "best": 0.808469
           },
           "measured_meet": {
-            "mean": 0.859239,
-            "n": 2,
+            "mean": 0.851684,
+            "n": 3,
             "best": 0.859239
           },
           "no_meet": {
-            "mean": 0.859239,
-            "n": 1,
+            "mean": 0.847906,
+            "n": 2,
             "best": 0.859239
           },
           "weight_order": {
@@ -414,83 +414,95 @@
             "n": 1,
             "best": 0.808469
           }
+        },
+        "model": {
+          "measured_firm": {
+            "mean": 0.655267,
+            "n": 1,
+            "best": 0.655267
+          },
+          "base": {
+            "mean": 0.6312,
+            "n": 1,
+            "best": 0.6312
+          }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": -0.027051,
+          "gain": -0.036419,
           "n": 1
         },
         "deep_anchor": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "fast_concede": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "slow_concede": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "eager_close": {
-          "gain": -0.089015,
+          "gain": -0.098383,
           "n": 1
         },
         "deep_fast": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "mid_anchor": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 3
         },
         "firm_deep_fast": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "measured_meet": {
-          "gain": 0.05077,
-          "n": 2
+          "gain": 0.033847,
+          "n": 3
         },
         "no_meet": {
-          "gain": 0.05077,
-          "n": 1
+          "gain": 0.030069,
+          "n": 2
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "no_reopen": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "date_first": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "one_step": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "measured_firm": {
-          "gain": 0.05077,
-          "n": 1
+          "gain": 0.032734,
+          "n": 2
         },
         "deep_one_step": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         },
         "firm_one_step": {
-          "gain": 0.0,
+          "gain": -0.009368,
           "n": 1
         }
       },
-      "base": 0.808469
+      "base": 0.724519
     },
     "case:P02": {
       "type": "price_increase",
@@ -500,9 +512,9 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.389917,
-            "n": 2,
-            "best": 0.389917
+            "mean": 0.391132,
+            "n": 3,
+            "best": 0.393563
           },
           "soft_anchor": {
             "mean": 0.263943,
@@ -540,8 +552,8 @@
             "best": 0.389917
           },
           "firm_close": {
-            "mean": 0.506721,
-            "n": 5,
+            "mean": 0.503527,
+            "n": 6,
             "best": 0.506721
           },
           "firm_deep_fast": {
@@ -591,86 +603,98 @@
           },
           "firm_one_step": {
             "mean": 0.506721,
-            "n": 2,
+            "n": 3,
             "best": 0.506721
+          }
+        },
+        "model": {
+          "firm_one_step": {
+            "mean": 0.506721,
+            "n": 1,
+            "best": 0.506721
+          },
+          "base": {
+            "mean": 0.43545,
+            "n": 1,
+            "best": 0.43545
           }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": -0.125974,
+          "gain": -0.127189,
           "n": 1
         },
         "deep_anchor": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "fast_concede": {
-          "gain": 0.003646,
+          "gain": 0.002431,
           "n": 1
         },
         "slow_concede": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "eager_close": {
-          "gain": -0.125974,
+          "gain": -0.127189,
           "n": 1
         },
         "deep_fast": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "mid_anchor": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.116804,
-          "n": 5
+          "gain": 0.112395,
+          "n": 6
         },
         "firm_deep_fast": {
-          "gain": 0.116804,
+          "gain": 0.115589,
           "n": 1
         },
         "measured_meet": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "no_meet": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "no_reopen": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "date_first": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "one_step": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "measured_firm": {
-          "gain": 0.116804,
+          "gain": 0.115589,
           "n": 1
         },
         "deep_one_step": {
-          "gain": 0.0,
+          "gain": -0.001215,
           "n": 1
         },
         "firm_one_step": {
-          "gain": 0.116804,
-          "n": 2
+          "gain": 0.09343,
+          "n": 4
         }
       },
-      "base": 0.389917
+      "base": 0.413291
     },
     "case:P03": {
       "type": "renewal",
@@ -681,7 +705,7 @@
         "code": {
           "base": {
             "mean": 0.919456,
-            "n": 3,
+            "n": 6,
             "best": 0.919456
           },
           "soft_anchor": {
@@ -772,6 +796,13 @@
           "firm_one_step": {
             "mean": 0.919456,
             "n": 1,
+            "best": 0.919456
+          }
+        },
+        "model": {
+          "base": {
+            "mean": 0.919456,
+            "n": 2,
             "best": 0.919456
           }
         }
@@ -861,7 +892,7 @@
         "code": {
           "base": {
             "mean": 0.873682,
-            "n": 5,
+            "n": 8,
             "best": 0.873682
           },
           "soft_anchor": {
@@ -950,6 +981,13 @@
             "best": 0.873682
           },
           "firm_one_step": {
+            "mean": 0.873682,
+            "n": 2,
+            "best": 0.873682
+          }
+        },
+        "model": {
+          "base": {
             "mean": 0.873682,
             "n": 2,
             "best": 0.873682
@@ -1040,8 +1078,8 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.756831,
-            "n": 5,
+            "mean": 0.734277,
+            "n": 7,
             "best": 0.756831
           },
           "soft_anchor": {
@@ -1081,7 +1119,7 @@
           },
           "firm_close": {
             "mean": 0.756831,
-            "n": 1,
+            "n": 2,
             "best": 0.756831
           },
           "firm_deep_fast": {
@@ -1134,83 +1172,95 @@
             "n": 1,
             "best": 0.756831
           }
+        },
+        "model": {
+          "firm_close": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "base": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": -0.393612,
+          "gain": -0.371058,
           "n": 1
         },
         "deep_anchor": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "fast_concede": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 3
         },
         "slow_concede": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "eager_close": {
-          "gain": -0.095762,
+          "gain": -0.073208,
           "n": 1
         },
         "deep_fast": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "mid_anchor": {
-          "gain": -0.08065,
+          "gain": -0.058096,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.0,
-          "n": 1
+          "gain": 0.011277,
+          "n": 3
         },
         "firm_deep_fast": {
-          "gain": -0.183621,
+          "gain": -0.161067,
           "n": 1
         },
         "measured_meet": {
-          "gain": -0.08065,
+          "gain": -0.058096,
           "n": 1
         },
         "no_meet": {
-          "gain": -0.132136,
+          "gain": -0.109582,
           "n": 1
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "no_reopen": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "date_first": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "one_step": {
-          "gain": -0.132136,
+          "gain": -0.109582,
           "n": 1
         },
         "measured_firm": {
-          "gain": -0.08065,
+          "gain": -0.058096,
           "n": 1
         },
         "deep_one_step": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         },
         "firm_one_step": {
-          "gain": 0.0,
+          "gain": 0.022554,
           "n": 1
         }
       },
-      "base": 0.756831
+      "base": 0.745554
     },
     "case:P07": {
       "type": "bundling",
@@ -1220,8 +1270,8 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.753477,
-            "n": 2,
+            "mean": 0.747812,
+            "n": 3,
             "best": 0.753477
           },
           "soft_anchor": {
@@ -1250,8 +1300,8 @@
             "best": 0.695037
           },
           "deep_fast": {
-            "mean": 0.762629,
-            "n": 5,
+            "mean": 0.761695,
+            "n": 7,
             "best": 0.762629
           },
           "mid_anchor": {
@@ -1314,83 +1364,95 @@
             "n": 2,
             "best": 0.753477
           }
+        },
+        "model": {
+          "firm_deep_fast": {
+            "mean": 0.762629,
+            "n": 1,
+            "best": 0.762629
+          },
+          "base": {
+            "mean": 0.727504,
+            "n": 1,
+            "best": 0.727504
+          }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": -0.11688,
+          "gain": -0.111215,
           "n": 1
         },
         "deep_anchor": {
-          "gain": -0.036607,
+          "gain": -0.030942,
           "n": 1
         },
         "fast_concede": {
-          "gain": -0.012986,
+          "gain": -0.007321,
           "n": 1
         },
         "slow_concede": {
-          "gain": -0.025973,
+          "gain": -0.020308,
           "n": 1
         },
         "eager_close": {
-          "gain": -0.05844,
+          "gain": -0.052775,
           "n": 1
         },
         "deep_fast": {
-          "gain": 0.009152,
-          "n": 5
+          "gain": 0.013883,
+          "n": 7
         },
         "mid_anchor": {
-          "gain": -0.01948,
+          "gain": -0.013815,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "firm_deep_fast": {
-          "gain": 0.009152,
-          "n": 1
+          "gain": 0.024971,
+          "n": 2
         },
         "measured_meet": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "no_meet": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "no_reopen": {
-          "gain": -0.020744,
+          "gain": -0.015079,
           "n": 1
         },
         "date_first": {
-          "gain": -0.020744,
+          "gain": -0.015079,
           "n": 1
         },
         "one_step": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "measured_firm": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 1
         },
         "deep_one_step": {
-          "gain": -0.036607,
+          "gain": -0.030942,
           "n": 1
         },
         "firm_one_step": {
-          "gain": 0.0,
+          "gain": 0.005665,
           "n": 2
         }
       },
-      "base": 0.753477
+      "base": 0.737658
     },
     "case:P08": {
       "type": "raw_material",
@@ -1400,9 +1462,9 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.305218,
-            "n": 2,
-            "best": 0.305218
+            "mean": 0.345796,
+            "n": 3,
+            "best": 0.426952
           },
           "soft_anchor": {
             "mean": 0.440551,
@@ -1485,8 +1547,8 @@
             "best": 0.305218
           },
           "deep_one_step": {
-            "mean": 0.592954,
-            "n": 2,
+            "mean": 0.548687,
+            "n": 4,
             "best": 0.592954
           },
           "firm_one_step": {
@@ -1494,83 +1556,95 @@
             "n": 2,
             "best": 0.360552
           }
+        },
+        "model": {
+          "deep_anchor": {
+            "mean": 0.309674,
+            "n": 1,
+            "best": 0.309674
+          },
+          "base": {
+            "mean": 0.426952,
+            "n": 1,
+            "best": 0.426952
+          }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": 0.135333,
+          "gain": 0.094755,
           "n": 1
         },
         "deep_anchor": {
-          "gain": 0.254536,
-          "n": 2
+          "gain": 0.04834,
+          "n": 3
         },
         "fast_concede": {
-          "gain": 0.132801,
+          "gain": 0.092223,
           "n": 1
         },
         "slow_concede": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "eager_close": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "deep_fast": {
-          "gain": 0.254536,
+          "gain": 0.213958,
           "n": 1
         },
         "mid_anchor": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "firm_deep_fast": {
-          "gain": 0.254536,
+          "gain": 0.213958,
           "n": 1
         },
         "measured_meet": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "no_meet": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "no_reopen": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "date_first": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "one_step": {
-          "gain": 0.055334,
+          "gain": 0.014756,
           "n": 1
         },
         "measured_firm": {
-          "gain": 0.0,
+          "gain": -0.040578,
           "n": 1
         },
         "deep_one_step": {
-          "gain": 0.287736,
-          "n": 2
+          "gain": 0.202891,
+          "n": 4
         },
         "firm_one_step": {
-          "gain": 0.055334,
+          "gain": 0.014756,
           "n": 2
         }
       },
-      "base": 0.305218
+      "base": 0.386374
     },
     "case:P10": {
       "type": "capacity",
@@ -1581,7 +1655,7 @@
         "code": {
           "base": {
             "mean": 0.662905,
-            "n": 4,
+            "n": 7,
             "best": 0.662905
           },
           "soft_anchor": {
@@ -1674,6 +1748,13 @@
             "n": 2,
             "best": 0.662905
           }
+        },
+        "model": {
+          "base": {
+            "mean": 0.647294,
+            "n": 2,
+            "best": 0.647294
+          }
         }
       },
       "gains": {
@@ -1750,7 +1831,7 @@
           "n": 2
         }
       },
-      "base": 0.662905
+      "base": 0.655099
     },
     "case:P11": {
       "type": "quality",
@@ -1761,7 +1842,7 @@
         "code": {
           "base": {
             "mean": 0.709896,
-            "n": 6,
+            "n": 9,
             "best": 0.709896
           },
           "soft_anchor": {
@@ -1854,6 +1935,13 @@
             "n": 2,
             "best": 0.709896
           }
+        },
+        "model": {
+          "base": {
+            "mean": 0.709896,
+            "n": 2,
+            "best": 0.709896
+          }
         }
       },
       "gains": {
@@ -1940,8 +2028,8 @@
       "scores": {
         "code": {
           "base": {
-            "mean": 0.466961,
-            "n": 2,
+            "mean": 0.44,
+            "n": 3,
             "best": 0.466961
           },
           "soft_anchor": {
@@ -2015,8 +2103,8 @@
             "best": 0.466961
           },
           "one_step": {
-            "mean": 0.512819,
-            "n": 2,
+            "mean": 0.497533,
+            "n": 3,
             "best": 0.512819
           },
           "measured_firm": {
@@ -2030,87 +2118,99 @@
             "best": 0.434608
           },
           "firm_one_step": {
-            "mean": 0.512819,
-            "n": 1,
+            "mean": 0.457134,
+            "n": 2,
             "best": 0.512819
+          }
+        },
+        "model": {
+          "one_step": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "base": {
+            "mean": 0.386079,
+            "n": 1,
+            "best": 0.386079
           }
         }
       },
       "gains": {
         "soft_anchor": {
-          "gain": -0.214848,
+          "gain": -0.187887,
           "n": 1
         },
         "deep_anchor": {
-          "gain": -0.080882,
+          "gain": -0.053921,
           "n": 1
         },
         "fast_concede": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 3
         },
         "slow_concede": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 1
         },
         "eager_close": {
-          "gain": -0.080882,
+          "gain": -0.053921,
           "n": 1
         },
         "deep_fast": {
-          "gain": -0.0139,
+          "gain": 0.013061,
           "n": 1
         },
         "mid_anchor": {
-          "gain": -0.0139,
+          "gain": 0.013061,
           "n": 1
         },
         "firm_close": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 1
         },
         "firm_deep_fast": {
-          "gain": -0.0139,
+          "gain": 0.013061,
           "n": 1
         },
         "measured_meet": {
-          "gain": -0.147865,
+          "gain": -0.120904,
           "n": 1
         },
         "no_meet": {
-          "gain": -0.147865,
+          "gain": -0.120904,
           "n": 1
         },
         "weight_order": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 1
         },
         "no_reopen": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 1
         },
         "date_first": {
-          "gain": 0.0,
+          "gain": 0.026961,
           "n": 1
         },
         "one_step": {
-          "gain": 0.045858,
-          "n": 2
+          "gain": 0.069208,
+          "n": 4
         },
         "measured_firm": {
-          "gain": -0.147865,
+          "gain": -0.120904,
           "n": 1
         },
         "deep_one_step": {
-          "gain": -0.032353,
+          "gain": -0.005392,
           "n": 1
         },
         "firm_one_step": {
-          "gain": 0.045858,
-          "n": 1
+          "gain": 0.017134,
+          "n": 2
         }
       },
-      "base": 0.466961
+      "base": 0.41304
     }
   }
 }

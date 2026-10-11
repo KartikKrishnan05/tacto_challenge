@@ -138,3 +138,48 @@ Findings that changed the agent (details in `knowledge/EXPERIMENTS.md`):
 
 Validation, code-only: base 0.665, the agent's own picks 0.716, leave-one-out picks 0.682. Leave-one-out
 (`lab learned --holdout`) is the honest estimate for hidden cases.
+
+## Listening to the supplier, words that match the numbers
+
+Reading the recorded games (`runs/lab/1011-085641_learned-2`) showed the agent reacting to the supplier's
+numbers but not to its words. Every lab game ran code-only, with no model, so the e-mails were the
+tactic's template lines. Changes:
+
+- **No step back.** `CEILING` (0.997 x their C) could fall under our own last target: in P02 the next
+  offer went from 370.85 to 370.52, the supplier called it "a step backwards" and sent its final offer.
+  The target never goes below our last one now. The alternative and, in an RFQ, a cheaper rival bid stay
+  hard caps above that rule. When the ceiling is under our last offer the gap is too small to split:
+  `closing.decide` lets our offer stand once, then takes its offer (`at_ceiling`). Taking it at once
+  cost P02 0.02 (372.05, where the old run's hold drew a final offer of 371.88).
+- **Every cost driver.** `drivers_by_code` read one driver per sentence. P18's sentence named LCI-C and
+  PPI-C2431, so PPI (+12.3 % at 38 %) was dropped and our "weighted effect" was +2.8 % instead of +7.5 %,
+  a figure the supplier could check.
+- **Words match numbers.** P08 opened 15 % under today's price next to "the weighted effect is about
+  +7.5 %", which argues for more than we offered. Dropping the sentence cost P08 0.09
+  (fixes-code-learned): the supplier moves on its own figures. So when our offer is below today's price x
+  (1 + X), the sentence takes the figure as an upper bound ("Even taken at face value, the figures you
+  gave us ... explain at most about +X %"). `summary:indices`, which states the same figure as ours, is
+  not cited then. The data_argument bridge no longer says the options "follow from" the data, and no
+  closing line promises to "go through the figures together" (P18's supplier offered a meeting in reply).
+- **Refused terms.** The analyst reads term values the supplier says it will not give, by code (a fixed
+  price, payment days, a contract length) and by the model (`refused_terms`, a figure only if the e-mail
+  has it). Sheets drop them (`sheets.drop_refused`), unless every sheet would go, and the e-mail
+  acknowledges the point once. P08 offered a fixed price again after "we cannot offer a fixed price over
+  a 24-month period".
+- **Answers.** An offer of a call gets a code line (we settle in writing). A request for our figures gets
+  the attachment and a line saying so. The model prompt lists the supplier's questions and the opening
+  must answer them.
+- **Keep arguing.** `email.position_lines` computes an argument without a data ID every round, so it never
+  comes back `duplicate`. It uses only what the supplier can check itself: the share it still asks over
+  today's price, and our movement since our first offer when it held. Each is used once per thread.
+  Claims it could not check (the price risk we carry under an index clause, the value of our volume)
+  drew "please provide the data behind your target price" and a binding-forecast demand, and the round
+  stalled (fixes-code-learned P08, P18), so they were taken out again. The tactics' code lines have
+  variants (`tactics.MORE`), a fallback e-mail never repeats a line the thread has seen, and a single sheet
+  gets no line about choosing between options. A leverage or quality case no longer gets the joking tone.
+
+**The model and the numbers.** R9.1 and R11.2 still hold: the model never sets a price. The model reads,
+and what it reads now reaches the numbers through code. Its `refused_terms` change which sheets we send,
+and its `at_limit` and `wants_close` feed the close rules (OR-ed with the regexes), together with the
+prose offers and lever hints it already gave. Letting the model choose a price would make every game
+irreproducible (no replay screen, no lab comparison) and would bring back invented figures.

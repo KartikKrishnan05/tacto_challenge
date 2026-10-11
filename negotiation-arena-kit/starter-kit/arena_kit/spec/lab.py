@@ -1,7 +1,7 @@
 """The lab: play strategy variants on the practice cases, keep every game in the experiment sheet, and
 learn from it which strategy to play on a new case.
 
-    # experiments: every variant on every hosted practice case (code-only: no model credits)
+    # experiments: every variant on every hosted practice case (with the model; --code-only: no model credits)
     python -m arena_kit.spec.lab run --variants base soft_anchor deep_anchor --parallel 8 --label sweep-1
     # the learned playbook's own pick per case; --holdout ignores the case's own games (an unseen case)
     python -m arena_kit.spec.lab learned --holdout --label holdout-1
@@ -408,7 +408,9 @@ def main():
     ap.add_argument("--ids", nargs="*", help="cases (P01 ...); default every hosted practice case")
     ap.add_argument("--repeat", type=int, default=1, help="games per case and variant")
     ap.add_argument("--parallel", type=int, default=8)
-    ap.add_argument("--model", action="store_true", help="the model writes and reads e-mails (costs credits)")
+    # the competition plays with the model (LLM_MODEL), so the lab does too; code-only games are opt-in
+    ap.add_argument("--model", action="store_true", default=True, help="the model writes and reads e-mails (default)")
+    ap.add_argument("--code-only", dest="model", action="store_false", help="no model: code-written e-mails")
     ap.add_argument("--holdout", action="store_true", help="learned: ignore each case's own games")
     ap.add_argument("--label", default="lab")
     ap.add_argument("--knowledge", type=Path, default=strat.KNOWLEDGE_DIR)

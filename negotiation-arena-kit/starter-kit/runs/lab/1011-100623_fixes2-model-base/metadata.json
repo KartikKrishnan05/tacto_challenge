@@ -1,0 +1,40 @@
+{
+  "batch": "1011-100623_fixes2-model-base",
+  "label": "fixes2-model-base",
+  "git_head": "dde8c9d",
+  "source": "4bd607a9c0dd",
+  "model_name": "gpt-6-astra",
+  "jobs": {
+    "case:P01": [
+      "base"
+    ],
+    "case:P02": [
+      "base"
+    ],
+    "case:P03": [
+      "base"
+    ],
+    "case:P04": [
+      "base"
+    ],
+    "case:P05": [
+      "base"
+    ],
+    "case:P07": [
+      "base"
+    ],
+    "case:P08": [
+      "base"
+    ],
+    "case:P10": [
+      "base"
+    ],
+    "case:P11": [
+      "base"
+    ],
+    "case:P18": [
+      "base"
+    ]
+  },
+  "holdout": false
+}

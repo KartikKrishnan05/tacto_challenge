@@ -115,10 +115,11 @@ uv run python -m arena_kit.spec.lab learned --holdout --label holdout           
 uv run python -m arena_kit.spec.lab build                                            # rebuild sheet + playbook
 ```
 
-Without `--model`, games are code-only: no model credits, and repeatable. The suppliers answer identical
-e-mails identically, so the lab first replays each game against the recorded ones (`spec.replay`). A
-practice session is used only when the agent sends an e-mail no recorded game sent. Cap the number of real
-sessions with `--sessions N`; `--sessions 0` is a free dry run that shows which games would need one. To
+Games play with the model (`LLM_MODEL` in `.env`), as the competition does: every game uses a practice
+session and model credits, and games vary, so cap real sessions with `--sessions N`. `--code-only` plays
+without the model. Those games repeat exactly, so the lab first replays them against the recorded ones
+(`spec.replay`) and uses a session only when the agent sends an e-mail no recorded game sent (`--sessions 0`
+is a free dry run). To
 test a new idea, add a variant to `VARIANTS` and `HYPOTHESES` and run it. At the start of each case the
 agent logs the lessons the playbook holds for its goal and type (`spec.strategy.briefing`).
 `spec.evaluate --no-learned` plays the defaults.

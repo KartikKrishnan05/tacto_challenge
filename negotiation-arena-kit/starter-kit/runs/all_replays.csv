@@ -1,0 +1,303 @@
+case,score,deal,replay_url,session_id,sources
+D02,0.65,True,https://arena.tacto.ai/replay/137147ac8199bf6d,137147ac8199bf6d,spec-sandbox-d02
+P01,0.941,,https://arena.tacto.ai/replay/8ffc168595182655,8ffc168595182655,best_replays
+P01,0.875,,https://arena.tacto.ai/replay/b775dc4741937f96,b775dc4741937f96,baseline
+P01,0.859,True,https://arena.tacto.ai/replay/c46040211678cc56,c46040211678cc56,lab/1011-084158_sweep-4 [measured_meet]
+P01,0.859,True,https://arena.tacto.ai/replay/d63cf8907c227347,d63cf8907c227347,lab/1011-084158_sweep-4 [measured_firm]
+P01,0.828,True,https://arena.tacto.ai/replay/cffc6de48923f4ab,cffc6de48923f4ab,spec-practice-final
+P01,0.828,True,https://arena.tacto.ai/replay/11c34a18a7161c91,11c34a18a7161c91,spec-practice-fixed
+P01,0.828,True,https://arena.tacto.ai/replay/6de62a6ce3660f47,6de62a6ce3660f47,spec-practice-verified
+P01,0.826,,https://arena.tacto.ai/replay/0899787d838046d7,0899787d838046d7,meso2
+P01,0.812,,https://arena.tacto.ai/replay/1ced2b1205b139e9,1ced2b1205b139e9,meso
+P01,0.808,True,https://arena.tacto.ai/replay/a03395f520d44cb7,a03395f520d44cb7,lab/1011-080828_sweep-1 [base]
+P01,0.808,True,https://arena.tacto.ai/replay/1c975b9ef4bc164f,1c975b9ef4bc164f,lab/1011-080828_sweep-1 [deep_anchor]
+P01,0.808,True,https://arena.tacto.ai/replay/feec1aebd6a822ea,feec1aebd6a822ea,lab/1011-080828_sweep-1 [fast_concede]
+P01,0.808,True,https://arena.tacto.ai/replay/3897b7fd243572fc,3897b7fd243572fc,lab/1011-080828_sweep-1 [slow_concede]
+P01,0.808,True,https://arena.tacto.ai/replay/78f64d4610b01790,78f64d4610b01790,lab/1011-081928_sweep-2 [deep_fast]
+P01,0.808,True,https://arena.tacto.ai/replay/e49e150835c90cca,e49e150835c90cca,lab/1011-081928_sweep-2 [mid_anchor]
+P01,0.808,True,https://arena.tacto.ai/replay/2ff030d3bca7884b,2ff030d3bca7884b,lab/1011-081928_sweep-2 [firm_close]
+P01,0.808,True,https://arena.tacto.ai/replay/a178ad2756840315,a178ad2756840315,lab/1011-082432_sweep-3 [firm_deep_fast]
+P01,0.808,True,https://arena.tacto.ai/replay/05029e67c92be80b,05029e67c92be80b,lab/1011-082724_learned-1 [base]
+P01,0.808,True,https://arena.tacto.ai/replay/1d81cdec59d2d975,1d81cdec59d2d975,lab/1011-082802_holdout-1 [firm_close]
+P01,0.808,True,https://arena.tacto.ai/replay/b5831b4ba87edfe8,b5831b4ba87edfe8,lab/1011-084158_sweep-4 [no_reopen]
+P01,0.781,True,https://arena.tacto.ai/replay/52f74e213be9c0d3,52f74e213be9c0d3,lab/1011-080828_sweep-1 [soft_anchor]
+P01,0.76,True,https://arena.tacto.ai/replay/e32e125860796425,e32e125860796425,spec-practice-code
+P01,0.719,True,https://arena.tacto.ai/replay/709f9598785a8b36,709f9598785a8b36,lab/1011-080828_sweep-1 [eager_close]
+P01,0.669,True,https://arena.tacto.ai/replay/964039064bead6b2,964039064bead6b2,spec-v2-a
+P01,0.667,True,https://arena.tacto.ai/replay/548773412b6e5cd0,548773412b6e5cd0,spec-practice-astra-repeat
+P01,0.647,,https://arena.tacto.ai/replay/eb74db7ff984aada,eb74db7ff984aada,meso3
+P01,0.631,True,https://arena.tacto.ai/replay/fa412ed2a0c0632b,fa412ed2a0c0632b,spec-practice-model
+P01,0.631,True,https://arena.tacto.ai/replay/d01209438a6099ea,d01209438a6099ea,spec-v1-a
+P01,0.631,True,https://arena.tacto.ai/replay/1bee11926ebcb0a6,1bee11926ebcb0a6,spec-practice-astra-final
+P01,0.159,,https://arena.tacto.ai/replay/76dfe50b81f0f704,76dfe50b81f0f704,meso4
+P02,0.507,,https://arena.tacto.ai/replay/136d81f9aa6fc78b,136d81f9aa6fc78b,best_replays
+P02,0.507,True,https://arena.tacto.ai/replay/67053b97d8859c5d,67053b97d8859c5d,lab/1011-081928_sweep-2 [firm_close]
+P02,0.507,True,https://arena.tacto.ai/replay/f2b3ffbaa91fb687,f2b3ffbaa91fb687,lab/1011-082432_sweep-3 [firm_deep_fast]
+P02,0.507,True,https://arena.tacto.ai/replay/52cfa5bbf58785fc,52cfa5bbf58785fc,lab/1011-082724_learned-1 [firm_close]
+P02,0.507,True,https://arena.tacto.ai/replay/40d46c8baaafba43,40d46c8baaafba43,lab/1011-085057_release-sunday-x2 [firm_close]
+P02,0.507,True,https://arena.tacto.ai/replay/13c089bcec7fe68d,13c089bcec7fe68d,lab/1011-085057_release-sunday-x2 [firm_close]
+P02,0.507,True,https://arena.tacto.ai/replay/c5598548c50aa532,c5598548c50aa532,spec-practice-final
+P02,0.507,True,https://arena.tacto.ai/replay/f8f9c85eb2952682,f8f9c85eb2952682,spec-practice-verified
+P02,0.507,True,https://arena.tacto.ai/replay/856223af9a9bfd1d,856223af9a9bfd1d,spec-practice-model
+P02,0.507,True,https://arena.tacto.ai/replay/e8e876da1b66a750,e8e876da1b66a750,spec-practice-code
+P02,0.476,True,https://arena.tacto.ai/replay/85b5b23de4bd2a61,85b5b23de4bd2a61,spec-practice-astra-repeat
+P02,0.435,True,https://arena.tacto.ai/replay/4301c254b1146ed2,4301c254b1146ed2,spec-v2-a
+P02,0.435,True,https://arena.tacto.ai/replay/18cff719ebd0e2c2,18cff719ebd0e2c2,spec-v1-a
+P02,0.394,True,https://arena.tacto.ai/replay/8ac207bccda48f62,8ac207bccda48f62,lab/1011-080828_sweep-1 [fast_concede]
+P02,0.39,True,https://arena.tacto.ai/replay/b0d7bc0dd1377ae9,b0d7bc0dd1377ae9,lab/1011-080828_sweep-1 [base]
+P02,0.39,True,https://arena.tacto.ai/replay/f41f5df739d192d8,f41f5df739d192d8,lab/1011-080828_sweep-1 [deep_anchor]
+P02,0.39,True,https://arena.tacto.ai/replay/2244f9444c5c9d28,2244f9444c5c9d28,lab/1011-080828_sweep-1 [slow_concede]
+P02,0.39,True,https://arena.tacto.ai/replay/cf308d4011b96f79,cf308d4011b96f79,lab/1011-081928_sweep-2 [deep_fast]
+P02,0.39,True,https://arena.tacto.ai/replay/8c3ef161411d9f5e,8c3ef161411d9f5e,lab/1011-081928_sweep-2 [mid_anchor]
+P02,0.39,True,https://arena.tacto.ai/replay/2b8832fdb07eeb9c,2b8832fdb07eeb9c,lab/1011-082802_holdout-1 [base]
+P02,0.374,,https://arena.tacto.ai/replay/9d5f900fdc540386,9d5f900fdc540386,meso3
+P02,0.264,True,https://arena.tacto.ai/replay/df3e62e7d238bf37,df3e62e7d238bf37,lab/1011-080828_sweep-1 [soft_anchor]
+P02,0.264,True,https://arena.tacto.ai/replay/d18ccbaef1ac4491,d18ccbaef1ac4491,lab/1011-080828_sweep-1 [eager_close]
+P02,0.183,,https://arena.tacto.ai/replay/e6573a9c6c739502,e6573a9c6c739502,meso4
+P02,0.107,,https://arena.tacto.ai/replay/b7f13b61f880ba8d,b7f13b61f880ba8d,baseline
+P02,0.0,False,https://arena.tacto.ai/replay/b145fdbb0db61a7d,b145fdbb0db61a7d,spec-practice-astra-final
+P02,0.0,,https://arena.tacto.ai/replay/f673f8e59074b63a,f673f8e59074b63a,meso
+P02,0.0,,https://arena.tacto.ai/replay/4fcd21f50d139aa6,4fcd21f50d139aa6,meso2
+P03,0.919,True,https://arena.tacto.ai/replay/abad6d3c316cbf95,abad6d3c316cbf95,lab/1011-080828_sweep-1 [base]
+P03,0.919,True,https://arena.tacto.ai/replay/d59ae7058213de89,d59ae7058213de89,lab/1011-080828_sweep-1 [soft_anchor]
+P03,0.919,True,https://arena.tacto.ai/replay/05fe325a651c70d5,05fe325a651c70d5,lab/1011-080828_sweep-1 [deep_anchor]
+P03,0.919,True,https://arena.tacto.ai/replay/cc15a82898c4aad2,cc15a82898c4aad2,lab/1011-080828_sweep-1 [fast_concede]
+P03,0.919,True,https://arena.tacto.ai/replay/783d3b36f66795ba,783d3b36f66795ba,lab/1011-080828_sweep-1 [slow_concede]
+P03,0.919,True,https://arena.tacto.ai/replay/17d82065d0450abb,17d82065d0450abb,lab/1011-080828_sweep-1 [eager_close]
+P03,0.919,True,https://arena.tacto.ai/replay/6bef984bd8cdac38,6bef984bd8cdac38,lab/1011-081928_sweep-2 [deep_fast]
+P03,0.919,True,https://arena.tacto.ai/replay/6ee1889a2b4e5e43,6ee1889a2b4e5e43,lab/1011-081928_sweep-2 [mid_anchor]
+P03,0.919,True,https://arena.tacto.ai/replay/3e4ec9687af0f572,3e4ec9687af0f572,lab/1011-081928_sweep-2 [firm_close]
+P03,0.919,True,https://arena.tacto.ai/replay/8c82897833413745,8c82897833413745,lab/1011-082432_sweep-3 [firm_deep_fast]
+P03,0.919,True,https://arena.tacto.ai/replay/b5c1ae90dd97fa2a,b5c1ae90dd97fa2a,lab/1011-082724_learned-1 [base]
+P03,0.919,True,https://arena.tacto.ai/replay/4e1c6dd28904b65a,4e1c6dd28904b65a,lab/1011-082802_holdout-1 [firm_close]
+P03,0.919,True,https://arena.tacto.ai/replay/9bd21c8b967fc6ab,9bd21c8b967fc6ab,lab/1011-084158_sweep-4 [measured_meet]
+P03,0.919,True,https://arena.tacto.ai/replay/87f679ac35f01b78,87f679ac35f01b78,lab/1011-084158_sweep-4 [measured_firm]
+P03,0.919,,https://arena.tacto.ai/replay/d029f1712030d904,d029f1712030d904,meso3
+P03,0.919,,https://arena.tacto.ai/replay/c7767a0427aae84f,c7767a0427aae84f,best_replays
+P03,0.903,,https://arena.tacto.ai/replay/3333102b5862569d,3333102b5862569d,baseline
+P03,0.9,True,https://arena.tacto.ai/replay/d5bc16ad0d9bf943,d5bc16ad0d9bf943,spec-v2-a
+P03,0.9,True,https://arena.tacto.ai/replay/bf06053430e595f2,bf06053430e595f2,spec-v1-a
+P03,0.864,True,https://arena.tacto.ai/replay/6d3daae7da4c16bd,6d3daae7da4c16bd,spec-practice-final
+P03,0.864,True,https://arena.tacto.ai/replay/43d2b95761f4af21,43d2b95761f4af21,spec-practice-fixed
+P03,0.864,True,https://arena.tacto.ai/replay/74482de264362c34,74482de264362c34,spec-practice-verified
+P03,0.864,True,https://arena.tacto.ai/replay/41b45aa1c7ed4f84,41b45aa1c7ed4f84,spec-practice-model
+P03,0.864,True,https://arena.tacto.ai/replay/4f62011f7e371d45,4f62011f7e371d45,spec-practice-astra-repeat
+P03,0.864,True,https://arena.tacto.ai/replay/514baafd968881a5,514baafd968881a5,spec-practice-code
+P03,0.843,True,https://arena.tacto.ai/replay/2a49e95c64367ae5,2a49e95c64367ae5,spec-practice-astra-final
+P03,0.828,,https://arena.tacto.ai/replay/aaf99c8c2200a196,aaf99c8c2200a196,meso2
+P03,0.762,,https://arena.tacto.ai/replay/6e81d1c393a38a5e,6e81d1c393a38a5e,meso4
+P03,0.607,,https://arena.tacto.ai/replay/85df06967aa40a6d,85df06967aa40a6d,meso
+P04,0.874,True,https://arena.tacto.ai/replay/725bef96bcc43f2d,725bef96bcc43f2d,lab/1011-080739_smoke [base]
+P04,0.874,True,https://arena.tacto.ai/replay/04a4eb4fd72242cc,04a4eb4fd72242cc,lab/1011-080828_sweep-1 [base]
+P04,0.874,True,https://arena.tacto.ai/replay/255547896cf662a0,255547896cf662a0,lab/1011-080828_sweep-1 [soft_anchor]
+P04,0.874,True,https://arena.tacto.ai/replay/97b18932d515fc78,97b18932d515fc78,lab/1011-080828_sweep-1 [deep_anchor]
+P04,0.874,True,https://arena.tacto.ai/replay/974a817ca931a215,974a817ca931a215,lab/1011-080828_sweep-1 [fast_concede]
+P04,0.874,True,https://arena.tacto.ai/replay/8a314bb0280b93bb,8a314bb0280b93bb,lab/1011-080828_sweep-1 [slow_concede]
+P04,0.874,True,https://arena.tacto.ai/replay/daaee472434abceb,daaee472434abceb,lab/1011-080828_sweep-1 [eager_close]
+P04,0.874,True,https://arena.tacto.ai/replay/8e669d7c6e2725e3,8e669d7c6e2725e3,lab/1011-081928_sweep-2 [deep_fast]
+P04,0.874,True,https://arena.tacto.ai/replay/94a71490588f1f67,94a71490588f1f67,lab/1011-081928_sweep-2 [mid_anchor]
+P04,0.874,True,https://arena.tacto.ai/replay/2373340597f4a9a1,2373340597f4a9a1,lab/1011-081928_sweep-2 [firm_close]
+P04,0.874,True,https://arena.tacto.ai/replay/a134e1adf3eec0c4,a134e1adf3eec0c4,lab/1011-082432_sweep-3 [firm_deep_fast]
+P04,0.874,True,https://arena.tacto.ai/replay/81b7299b4dbfa1d7,81b7299b4dbfa1d7,lab/1011-082724_learned-1 [base]
+P04,0.874,True,https://arena.tacto.ai/replay/edf12238ad9bd53c,edf12238ad9bd53c,lab/1011-082802_holdout-1 [base]
+P04,0.874,True,https://arena.tacto.ai/replay/cddad5f585563e94,cddad5f585563e94,spec-v2-a
+P04,0.874,True,https://arena.tacto.ai/replay/911ee402b7bc8721,911ee402b7bc8721,spec-v1-a
+P04,0.86,True,https://arena.tacto.ai/replay/5e2124ee1fed7b23,5e2124ee1fed7b23,spec-practice-final
+P04,0.86,True,https://arena.tacto.ai/replay/f622cc4bf1a32976,f622cc4bf1a32976,spec-practice-verified
+P04,0.86,True,https://arena.tacto.ai/replay/756c542148cc3b1d,756c542148cc3b1d,spec-practice-model
+P04,0.86,True,https://arena.tacto.ai/replay/9fe46e6a36479925,9fe46e6a36479925,spec-practice-astra-repeat
+P04,0.86,True,https://arena.tacto.ai/replay/7818b42a78061e13,7818b42a78061e13,spec-practice-code
+P04,0.86,True,https://arena.tacto.ai/replay/606fcdb4f3f0337e,606fcdb4f3f0337e,spec-practice-astra-final
+P04,0.86,,https://arena.tacto.ai/replay/acd908a2f74f5ff2,acd908a2f74f5ff2,best_replays
+P04,0.766,,https://arena.tacto.ai/replay/1b769476e0ec0ac0,1b769476e0ec0ac0,baseline
+P04,0.7,,https://arena.tacto.ai/replay/463864f7e10f3d8a,463864f7e10f3d8a,meso
+P04,0.7,,https://arena.tacto.ai/replay/a30cc44fa13ea2b8,a30cc44fa13ea2b8,meso2
+P04,0.056,,https://arena.tacto.ai/replay/4feb5f7965f4c138,4feb5f7965f4c138,meso4
+P04,0.056,,https://arena.tacto.ai/replay/cdc323f01dbef20d,cdc323f01dbef20d,meso3
+P05,0.824,True,https://arena.tacto.ai/replay/5ef69b0415fe7def,5ef69b0415fe7def,spec-practice-astra-final
+P05,0.781,,https://arena.tacto.ai/replay/7a0d2f4fe874bd57,7a0d2f4fe874bd57,best_replays
+P05,0.757,True,https://arena.tacto.ai/replay/a61bec1fd8aa3d0e,a61bec1fd8aa3d0e,lab/1011-080828_sweep-1 [base]
+P05,0.757,True,https://arena.tacto.ai/replay/94b2953b8a6c698b,94b2953b8a6c698b,lab/1011-080828_sweep-1 [deep_anchor]
+P05,0.757,True,https://arena.tacto.ai/replay/c5d1f6ae295724d1,c5d1f6ae295724d1,lab/1011-080828_sweep-1 [fast_concede]
+P05,0.757,True,https://arena.tacto.ai/replay/87a920c671656a2c,87a920c671656a2c,lab/1011-080828_sweep-1 [slow_concede]
+P05,0.757,True,https://arena.tacto.ai/replay/e82441e74691165d,e82441e74691165d,lab/1011-081928_sweep-2 [deep_fast]
+P05,0.757,True,https://arena.tacto.ai/replay/86a8b09a809aad88,86a8b09a809aad88,lab/1011-081928_sweep-2 [firm_close]
+P05,0.757,True,https://arena.tacto.ai/replay/e26b3054ee6bb881,e26b3054ee6bb881,lab/1011-082724_learned-1 [base]
+P05,0.757,True,https://arena.tacto.ai/replay/dc9d55923806e7d2,dc9d55923806e7d2,lab/1011-082802_holdout-1 [fast_concede]
+P05,0.757,True,https://arena.tacto.ai/replay/a9ffd09a0384e7f4,a9ffd09a0384e7f4,lab/1011-084158_sweep-4 [weight_order]
+P05,0.757,True,https://arena.tacto.ai/replay/d9639a385fe565f9,d9639a385fe565f9,lab/1011-084158_sweep-4 [no_reopen]
+P05,0.757,True,https://arena.tacto.ai/replay/d21b0fdf3dce4cf2,d21b0fdf3dce4cf2,lab/1011-084158_sweep-4 [date_first]
+P05,0.757,True,https://arena.tacto.ai/replay/287e288313fb5a6c,287e288313fb5a6c,lab/1011-085057_release-sunday-x2 [base]
+P05,0.757,True,https://arena.tacto.ai/replay/831b26e157a402d5,831b26e157a402d5,lab/1011-085057_release-sunday-x2 [base]
+P05,0.757,True,https://arena.tacto.ai/replay/b132f2f37c408279,b132f2f37c408279,lab/1011-085252_sweep-5 [deep_one_step]
+P05,0.757,True,https://arena.tacto.ai/replay/d511ffa83c303805,d511ffa83c303805,lab/1011-085252_sweep-5 [firm_one_step]
+P05,0.757,True,https://arena.tacto.ai/replay/b6af9e5d24adca20,b6af9e5d24adca20,lab/1011-085641_learned-2 [base]
+P05,0.757,True,https://arena.tacto.ai/replay/afa749b75c678d3a,afa749b75c678d3a,spec-v2-a
+P05,0.676,True,https://arena.tacto.ai/replay/7e8dacf03195b572,7e8dacf03195b572,lab/1011-081928_sweep-2 [mid_anchor]
+P05,0.676,True,https://arena.tacto.ai/replay/3d76ca432eac1978,3d76ca432eac1978,lab/1011-084158_sweep-4 [measured_meet]
+P05,0.676,True,https://arena.tacto.ai/replay/67f34be50b1cdee7,67f34be50b1cdee7,lab/1011-084158_sweep-4 [measured_firm]
+P05,0.676,True,https://arena.tacto.ai/replay/97cdc78e007443b5,97cdc78e007443b5,spec-practice-verified
+P05,0.676,True,https://arena.tacto.ai/replay/a9daf65aa52e0758,a9daf65aa52e0758,spec-practice-code
+P05,0.676,True,https://arena.tacto.ai/replay/60aec30abdf9a4de,60aec30abdf9a4de,spec-v1-a
+P05,0.665,,https://arena.tacto.ai/replay/713e3e0f1421dff6,713e3e0f1421dff6,baseline
+P05,0.661,True,https://arena.tacto.ai/replay/52a0cc6f4d0cf5c5,52a0cc6f4d0cf5c5,lab/1011-080828_sweep-1 [eager_close]
+P05,0.625,True,https://arena.tacto.ai/replay/b949bf9b356e4d19,b949bf9b356e4d19,lab/1011-084158_sweep-4 [no_meet]
+P05,0.625,True,https://arena.tacto.ai/replay/476f155000e20062,476f155000e20062,lab/1011-084158_sweep-4 [one_step]
+P05,0.625,True,https://arena.tacto.ai/replay/c8a1c31f47151d28,c8a1c31f47151d28,spec-practice-final
+P05,0.625,True,https://arena.tacto.ai/replay/995d7f083ff8fcdc,995d7f083ff8fcdc,spec-practice-astra-repeat
+P05,0.573,True,https://arena.tacto.ai/replay/bc524bb7ed490a0a,bc524bb7ed490a0a,lab/1011-082432_sweep-3 [firm_deep_fast]
+P05,0.573,True,https://arena.tacto.ai/replay/423cb87d337b658b,423cb87d337b658b,spec-practice-p05-lead-fix
+P05,0.556,,https://arena.tacto.ai/replay/0a42b76c2583dd65,0a42b76c2583dd65,meso4
+P05,0.522,True,https://arena.tacto.ai/replay/d4d7b5d26cdbbc8d,d4d7b5d26cdbbc8d,spec-practice-model
+P05,0.363,True,https://arena.tacto.ai/replay/a19b0abf59195ddd,a19b0abf59195ddd,lab/1011-080828_sweep-1 [soft_anchor]
+P05,0.257,,https://arena.tacto.ai/replay/f7b143d11f627bdf,f7b143d11f627bdf,meso2
+P05,0.0,,https://arena.tacto.ai/replay/c2bd3503471fb72d,c2bd3503471fb72d,meso3
+P05,,,https://arena.tacto.ai/replay/9d08f85a631df9df,9d08f85a631df9df,meso
+P07,0.773,,https://arena.tacto.ai/replay/c0d536a599a46f42,c0d536a599a46f42,baseline; best_replays
+P07,0.763,True,https://arena.tacto.ai/replay/52e55604e03fd9b0,52e55604e03fd9b0,lab/1011-081928_sweep-2 [deep_fast]
+P07,0.763,True,https://arena.tacto.ai/replay/5d601796f8d4c2df,5d601796f8d4c2df,lab/1011-082432_sweep-3 [firm_deep_fast]
+P07,0.763,True,https://arena.tacto.ai/replay/ef5bd857abbea203,ef5bd857abbea203,lab/1011-082724_learned-1 [deep_fast]
+P07,0.763,True,https://arena.tacto.ai/replay/e4793fe9f1eeb766,e4793fe9f1eeb766,lab/1011-085057_release-sunday-x2 [deep_fast]
+P07,0.763,True,https://arena.tacto.ai/replay/445379984cdd4cf8,445379984cdd4cf8,lab/1011-085057_release-sunday-x2 [deep_fast]
+P07,0.753,True,https://arena.tacto.ai/replay/dad2488199fd9933,dad2488199fd9933,lab/1011-080828_sweep-1 [base]
+P07,0.753,True,https://arena.tacto.ai/replay/fb852343af17ba13,fb852343af17ba13,lab/1011-081928_sweep-2 [firm_close]
+P07,0.753,True,https://arena.tacto.ai/replay/46f0bfa094fdcd5b,46f0bfa094fdcd5b,lab/1011-082802_holdout-1 [base]
+P07,0.753,True,https://arena.tacto.ai/replay/582c8be97644fc06,582c8be97644fc06,spec-practice-final
+P07,0.753,True,https://arena.tacto.ai/replay/990dfe6dfb3b58c1,990dfe6dfb3b58c1,spec-practice-verified
+P07,0.753,True,https://arena.tacto.ai/replay/5038212778e9c179,5038212778e9c179,spec-v2-a
+P07,0.753,True,https://arena.tacto.ai/replay/bb387a5267640fb3,bb387a5267640fb3,spec-practice-code
+P07,0.74,True,https://arena.tacto.ai/replay/085f8bef98e5dc44,085f8bef98e5dc44,lab/1011-080828_sweep-1 [fast_concede]
+P07,0.74,True,https://arena.tacto.ai/replay/dba7822bb46e91f5,dba7822bb46e91f5,spec-practice-astra-repeat
+P07,0.734,True,https://arena.tacto.ai/replay/ea19540c0d76f1bc,ea19540c0d76f1bc,lab/1011-081928_sweep-2 [mid_anchor]
+P07,0.733,True,https://arena.tacto.ai/replay/eaddd0575ddc0cb9,eaddd0575ddc0cb9,lab/1011-084158_sweep-4 [no_reopen]
+P07,0.728,True,https://arena.tacto.ai/replay/e8a8a7beaf61fa77,e8a8a7beaf61fa77,lab/1011-080828_sweep-1 [slow_concede]
+P07,0.728,True,https://arena.tacto.ai/replay/4633ff7e62e9f510,4633ff7e62e9f510,spec-practice-astra-final
+P07,0.721,True,https://arena.tacto.ai/replay/112139aa0528ff20,112139aa0528ff20,spec-v1-a
+P07,0.717,True,https://arena.tacto.ai/replay/70b90f935832e599,70b90f935832e599,lab/1011-080828_sweep-1 [deep_anchor]
+P07,0.715,True,https://arena.tacto.ai/replay/242092d541736d27,242092d541736d27,spec-practice-model
+P07,0.715,,https://arena.tacto.ai/replay/9e7ee437501d8e15,9e7ee437501d8e15,meso3
+P07,0.708,,https://arena.tacto.ai/replay/a6609b6a8c5d3f01,a6609b6a8c5d3f01,meso4
+P07,0.702,,https://arena.tacto.ai/replay/9e934ad0cddaab8b,9e934ad0cddaab8b,meso2
+P07,0.695,True,https://arena.tacto.ai/replay/2f2481c8924d918e,2f2481c8924d918e,lab/1011-080828_sweep-1 [eager_close]
+P07,0.637,True,https://arena.tacto.ai/replay/19aeb1d61ccdc518,19aeb1d61ccdc518,lab/1011-080828_sweep-1 [soft_anchor]
+P07,0.483,,https://arena.tacto.ai/replay/c590408ec9c260f6,c590408ec9c260f6,meso
+P08,0.593,True,https://arena.tacto.ai/replay/c2b8d829f03e3deb,c2b8d829f03e3deb,lab/1011-085252_sweep-5 [deep_one_step]
+P08,0.56,True,https://arena.tacto.ai/replay/3e00edbac2531995,3e00edbac2531995,lab/1011-080828_sweep-1 [deep_anchor]
+P08,0.56,True,https://arena.tacto.ai/replay/1cbf41ef233bba0a,1cbf41ef233bba0a,lab/1011-081928_sweep-2 [deep_fast]
+P08,0.56,True,https://arena.tacto.ai/replay/12f923378519a9aa,12f923378519a9aa,lab/1011-082432_sweep-3 [firm_deep_fast]
+P08,0.56,True,https://arena.tacto.ai/replay/7e1516c03a44884a,7e1516c03a44884a,lab/1011-082724_learned-1 [deep_anchor]
+P08,0.549,,https://arena.tacto.ai/replay/0e69ff6b63b35cd8,0e69ff6b63b35cd8,best_replays
+P08,0.482,True,https://arena.tacto.ai/replay/0ec144a345c89fd9,0ec144a345c89fd9,spec-v2-a
+P08,0.441,True,https://arena.tacto.ai/replay/1bbab8f7fc6bed61,1bbab8f7fc6bed61,lab/1011-080828_sweep-1 [soft_anchor]
+P08,0.438,True,https://arena.tacto.ai/replay/56aa80acc793682d,56aa80acc793682d,lab/1011-080828_sweep-1 [fast_concede]
+P08,0.427,True,https://arena.tacto.ai/replay/7f928734066db2ee,7f928734066db2ee,spec-practice-astra-repeat
+P08,0.427,True,https://arena.tacto.ai/replay/9cce8c15a18aec8e,9cce8c15a18aec8e,spec-practice-astra-final
+P08,0.408,,https://arena.tacto.ai/replay/194f871ed867045b,194f871ed867045b,meso3
+P08,0.397,,https://arena.tacto.ai/replay/ed6104742d4bef4d,ed6104742d4bef4d,meso4
+P08,0.394,True,https://arena.tacto.ai/replay/2a50ac8eecc83765,2a50ac8eecc83765,spec-practice-final
+P08,0.394,True,https://arena.tacto.ai/replay/75477cb8c83e1ea7,75477cb8c83e1ea7,spec-practice-verified
+P08,0.361,True,https://arena.tacto.ai/replay/6a585df373660d83,6a585df373660d83,lab/1011-084158_sweep-4 [one_step]
+P08,0.361,True,https://arena.tacto.ai/replay/467a0c64cdd8983a,467a0c64cdd8983a,spec-practice-code
+P08,0.361,True,https://arena.tacto.ai/replay/484b66e7c468511b,484b66e7c468511b,spec-v1-a
+P08,0.332,True,https://arena.tacto.ai/replay/8b7426b2c8a35259,8b7426b2c8a35259,spec-practice-fixed
+P08,0.332,True,https://arena.tacto.ai/replay/cf8876e86e1b01be,cf8876e86e1b01be,spec-practice-model
+P08,0.305,True,https://arena.tacto.ai/replay/af850ef8eb7bbdd1,af850ef8eb7bbdd1,lab/1011-080828_sweep-1 [base]
+P08,0.305,True,https://arena.tacto.ai/replay/5291ddca54c8fea7,5291ddca54c8fea7,lab/1011-080828_sweep-1 [slow_concede]
+P08,0.305,True,https://arena.tacto.ai/replay/3a91c978a1b2a461,3a91c978a1b2a461,lab/1011-080828_sweep-1 [eager_close]
+P08,0.305,True,https://arena.tacto.ai/replay/6775e189346de7bb,6775e189346de7bb,lab/1011-081928_sweep-2 [mid_anchor]
+P08,0.305,True,https://arena.tacto.ai/replay/f7ae32b77d1234c7,f7ae32b77d1234c7,lab/1011-081928_sweep-2 [firm_close]
+P08,0.305,True,https://arena.tacto.ai/replay/016ad18a2f03a5e3,016ad18a2f03a5e3,lab/1011-082802_holdout-1 [base]
+P08,0.287,,https://arena.tacto.ai/replay/9b27fc0802a4a497,9b27fc0802a4a497,baseline
+P08,0.244,,https://arena.tacto.ai/replay/4ca3093aea9b1f1f,4ca3093aea9b1f1f,meso2
+P08,0.189,,https://arena.tacto.ai/replay/5e31a6be5737b7da,5e31a6be5737b7da,meso
+P10,0.671,,https://arena.tacto.ai/replay/b05f015f822ea7e1,b05f015f822ea7e1,best_replays
+P10,0.663,True,https://arena.tacto.ai/replay/a9be7cb246e1b24e,a9be7cb246e1b24e,lab/1011-080828_sweep-1 [base]
+P10,0.663,True,https://arena.tacto.ai/replay/de0da72b9e1ac4ba,de0da72b9e1ac4ba,lab/1011-080828_sweep-1 [soft_anchor]
+P10,0.663,True,https://arena.tacto.ai/replay/cbed85ea5b6dfca5,cbed85ea5b6dfca5,lab/1011-080828_sweep-1 [deep_anchor]
+P10,0.663,True,https://arena.tacto.ai/replay/ca416eb8b2cca682,ca416eb8b2cca682,lab/1011-080828_sweep-1 [fast_concede]
+P10,0.663,True,https://arena.tacto.ai/replay/f2016c9284f5493a,f2016c9284f5493a,lab/1011-080828_sweep-1 [slow_concede]
+P10,0.663,True,https://arena.tacto.ai/replay/7f47c77859cd0e83,7f47c77859cd0e83,lab/1011-080828_sweep-1 [eager_close]
+P10,0.663,True,https://arena.tacto.ai/replay/79f21c9c97065c00,79f21c9c97065c00,lab/1011-081928_sweep-2 [deep_fast]
+P10,0.663,True,https://arena.tacto.ai/replay/e2febecd3d73cca6,e2febecd3d73cca6,lab/1011-081928_sweep-2 [mid_anchor]
+P10,0.663,True,https://arena.tacto.ai/replay/77c28581bbbd1a30,77c28581bbbd1a30,lab/1011-081928_sweep-2 [firm_close]
+P10,0.663,True,https://arena.tacto.ai/replay/acd6ed1d9f22eaa3,acd6ed1d9f22eaa3,lab/1011-082432_sweep-3 [firm_deep_fast]
+P10,0.663,True,https://arena.tacto.ai/replay/8923a569298cbf39,8923a569298cbf39,lab/1011-082724_learned-1 [base]
+P10,0.663,True,https://arena.tacto.ai/replay/287fa797ffce17f4,287fa797ffce17f4,lab/1011-082802_holdout-1 [base]
+P10,0.663,True,https://arena.tacto.ai/replay/d92c29c67408b505,d92c29c67408b505,spec-practice-final
+P10,0.663,True,https://arena.tacto.ai/replay/39add6cbb593973b,39add6cbb593973b,spec-practice-verified
+P10,0.663,True,https://arena.tacto.ai/replay/c8628f3bdc103e93,c8628f3bdc103e93,spec-practice-code
+P10,0.655,,https://arena.tacto.ai/replay/9f56c41646ab7f8d,9f56c41646ab7f8d,meso2
+P10,0.647,True,https://arena.tacto.ai/replay/0e009cc8336d2ff3,0e009cc8336d2ff3,spec-practice-model
+P10,0.647,True,https://arena.tacto.ai/replay/3df33ae102ba72c8,3df33ae102ba72c8,spec-practice-astra-repeat
+P10,0.647,True,https://arena.tacto.ai/replay/558966f17d09413f,558966f17d09413f,spec-v2-a
+P10,0.647,True,https://arena.tacto.ai/replay/a9c063616f86d549,a9c063616f86d549,spec-v1-a
+P10,0.647,True,https://arena.tacto.ai/replay/fd99b614f385fe5d,fd99b614f385fe5d,spec-practice-astra-final
+P10,0.624,,https://arena.tacto.ai/replay/361fbe64b0afb96c,361fbe64b0afb96c,meso
+P10,0.578,,https://arena.tacto.ai/replay/bb510d9bae0b2bcc,bb510d9bae0b2bcc,baseline
+P10,0.0,,https://arena.tacto.ai/replay/49bf39b20542239d,49bf39b20542239d,meso4
+P10,0.0,,https://arena.tacto.ai/replay/aa8723ccd081fdb2,aa8723ccd081fdb2,meso3
+P11,0.71,True,https://arena.tacto.ai/replay/ab87895b8c54193d,ab87895b8c54193d,lab/1011-080828_sweep-1 [base]
+P11,0.71,True,https://arena.tacto.ai/replay/e678f81e209562d2,e678f81e209562d2,lab/1011-080828_sweep-1 [fast_concede]
+P11,0.71,True,https://arena.tacto.ai/replay/311580fccb306e6f,311580fccb306e6f,lab/1011-080828_sweep-1 [slow_concede]
+P11,0.71,True,https://arena.tacto.ai/replay/852fcec5ec782064,852fcec5ec782064,lab/1011-080828_sweep-1 [eager_close]
+P11,0.71,True,https://arena.tacto.ai/replay/a785e29ed2028c6e,a785e29ed2028c6e,lab/1011-081928_sweep-2 [firm_close]
+P11,0.71,True,https://arena.tacto.ai/replay/9ae517763c0df2a5,9ae517763c0df2a5,lab/1011-082724_learned-1 [base]
+P11,0.71,True,https://arena.tacto.ai/replay/684c9427f5e323fb,684c9427f5e323fb,lab/1011-082802_holdout-1 [base]
+P11,0.71,True,https://arena.tacto.ai/replay/0f7531c09b1de183,0f7531c09b1de183,lab/1011-084158_sweep-4 [weight_order]
+P11,0.71,True,https://arena.tacto.ai/replay/402aad9d72e9b951,402aad9d72e9b951,lab/1011-084158_sweep-4 [one_step]
+P11,0.71,True,https://arena.tacto.ai/replay/1e4e339367562688,1e4e339367562688,lab/1011-085057_release-sunday-x2 [base]
+P11,0.71,True,https://arena.tacto.ai/replay/9b1b090d8e82cc2f,9b1b090d8e82cc2f,lab/1011-085057_release-sunday-x2 [base]
+P11,0.71,True,https://arena.tacto.ai/replay/d242a473b0ef5825,d242a473b0ef5825,spec-practice-final
+P11,0.71,True,https://arena.tacto.ai/replay/d67b7923253c2f74,d67b7923253c2f74,spec-practice-verified
+P11,0.71,True,https://arena.tacto.ai/replay/fb5b0e75e31fda9a,fb5b0e75e31fda9a,spec-practice-model
+P11,0.71,True,https://arena.tacto.ai/replay/11f2d984dcce5067,11f2d984dcce5067,spec-v2-a
+P11,0.71,True,https://arena.tacto.ai/replay/fa11d95ba01c917e,fa11d95ba01c917e,spec-practice-code
+P11,0.71,True,https://arena.tacto.ai/replay/8db43a8962eea05d,8db43a8962eea05d,spec-practice-astra-final
+P11,0.71,,https://arena.tacto.ai/replay/313c8a7ef7e8c640,313c8a7ef7e8c640,meso4
+P11,0.71,,https://arena.tacto.ai/replay/ccad4bd7eca94c97,ccad4bd7eca94c97,meso3
+P11,0.672,,https://arena.tacto.ai/replay/9537780fde26f1ff,9537780fde26f1ff,best_replays
+P11,0.626,True,https://arena.tacto.ai/replay/9b4c4ca48b1b61e4,9b4c4ca48b1b61e4,lab/1011-080828_sweep-1 [deep_anchor]
+P11,0.626,True,https://arena.tacto.ai/replay/d4b6002d81b5070c,d4b6002d81b5070c,lab/1011-081928_sweep-2 [deep_fast]
+P11,0.626,True,https://arena.tacto.ai/replay/b6773baf28e6accb,b6773baf28e6accb,lab/1011-081928_sweep-2 [mid_anchor]
+P11,0.626,True,https://arena.tacto.ai/replay/78c54218a6a46f08,78c54218a6a46f08,lab/1011-082432_sweep-3 [firm_deep_fast]
+P11,0.626,True,https://arena.tacto.ai/replay/3a0308a57a622dc6,3a0308a57a622dc6,lab/1011-084158_sweep-4 [date_first]
+P11,0.626,True,https://arena.tacto.ai/replay/2baf2359613f5559,2baf2359613f5559,lab/1011-085252_sweep-5 [deep_one_step]
+P11,0.626,True,https://arena.tacto.ai/replay/12714782b08097b5,12714782b08097b5,spec-practice-fixed
+P11,0.626,True,https://arena.tacto.ai/replay/9c7bf392d8ff4303,9c7bf392d8ff4303,spec-practice-astra-repeat
+P11,0.626,True,https://arena.tacto.ai/replay/9e6f5b8b1664c210,9e6f5b8b1664c210,spec-v1-a
+P11,0.626,,https://arena.tacto.ai/replay/5773da61f2b2e245,5773da61f2b2e245,meso
+P11,0.543,True,https://arena.tacto.ai/replay/fd4181c7e998474a,fd4181c7e998474a,lab/1011-080828_sweep-1 [soft_anchor]
+P11,0.543,,https://arena.tacto.ai/replay/e731d3ad3e6a9a74,e731d3ad3e6a9a74,meso2
+P11,0.307,,https://arena.tacto.ai/replay/238b88bf2a1e7592,238b88bf2a1e7592,baseline
+P18,0.513,True,https://arena.tacto.ai/replay/e49dd56e19f19a55,e49dd56e19f19a55,lab/1011-084158_sweep-4 [one_step]
+P18,0.467,True,https://arena.tacto.ai/replay/87b05d39accf6edd,87b05d39accf6edd,lab/1011-080828_sweep-1 [base]
+P18,0.467,True,https://arena.tacto.ai/replay/3407ed2e4b5466ee,3407ed2e4b5466ee,lab/1011-080828_sweep-1 [fast_concede]
+P18,0.467,True,https://arena.tacto.ai/replay/7571beeb3aa3bab5,7571beeb3aa3bab5,lab/1011-080828_sweep-1 [slow_concede]
+P18,0.467,True,https://arena.tacto.ai/replay/2d988efb14ad966e,2d988efb14ad966e,lab/1011-081928_sweep-2 [firm_close]
+P18,0.467,True,https://arena.tacto.ai/replay/435d9f7205df574a,435d9f7205df574a,lab/1011-082724_learned-1 [base]
+P18,0.467,True,https://arena.tacto.ai/replay/28bf708e32938c4e,28bf708e32938c4e,lab/1011-082802_holdout-1 [fast_concede]
+P18,0.453,True,https://arena.tacto.ai/replay/46bc6235bff7ec37,46bc6235bff7ec37,lab/1011-081928_sweep-2 [deep_fast]
+P18,0.453,True,https://arena.tacto.ai/replay/bcfb850813f99fc7,bcfb850813f99fc7,lab/1011-081928_sweep-2 [mid_anchor]
+P18,0.453,True,https://arena.tacto.ai/replay/72dce606d26e655e,72dce606d26e655e,lab/1011-082432_sweep-3 [firm_deep_fast]
+P18,0.453,,https://arena.tacto.ai/replay/bba38601887578c2,bba38601887578c2,meso3
+P18,0.435,True,https://arena.tacto.ai/replay/84d6a02f42a62395,84d6a02f42a62395,lab/1011-085252_sweep-5 [deep_one_step]
+P18,0.419,,https://arena.tacto.ai/replay/0383509004602959,0383509004602959,best_replays
+P18,0.386,True,https://arena.tacto.ai/replay/03bb138da7ba4dd3,03bb138da7ba4dd3,lab/1011-080828_sweep-1 [deep_anchor]
+P18,0.386,True,https://arena.tacto.ai/replay/454ff95224dd3678,454ff95224dd3678,lab/1011-080828_sweep-1 [eager_close]
+P18,0.386,True,https://arena.tacto.ai/replay/6acf3b772db2e315,6acf3b772db2e315,spec-v2-a
+P18,0.336,True,https://arena.tacto.ai/replay/1e78b3850bec7ab0,1e78b3850bec7ab0,spec-practice-astra-final
+P18,0.319,True,https://arena.tacto.ai/replay/ad329dc9c2d8d932,ad329dc9c2d8d932,lab/1011-084158_sweep-4 [measured_meet]
+P18,0.319,True,https://arena.tacto.ai/replay/77fabe296af401d2,77fabe296af401d2,lab/1011-084158_sweep-4 [no_meet]
+P18,0.319,True,https://arena.tacto.ai/replay/20d9472be6d6d785,20d9472be6d6d785,lab/1011-084158_sweep-4 [measured_firm]
+P18,0.319,True,https://arena.tacto.ai/replay/35191e11c9327b3f,35191e11c9327b3f,spec-practice-model
+P18,0.319,True,https://arena.tacto.ai/replay/dd61fa98ab5fd1e1,dd61fa98ab5fd1e1,spec-practice-code
+P18,0.319,True,https://arena.tacto.ai/replay/e3a7465a322bfd40,e3a7465a322bfd40,spec-v1-a
+P18,0.319,,https://arena.tacto.ai/replay/c7eb3a315c3a8b73,c7eb3a315c3a8b73,meso4
+P18,0.286,True,https://arena.tacto.ai/replay/2d58e8174d1684aa,2d58e8174d1684aa,spec-practice-astra-repeat
+P18,0.27,True,https://arena.tacto.ai/replay/f9756293ba7342bb,f9756293ba7342bb,spec-practice-final
+P18,0.27,True,https://arena.tacto.ai/replay/9218c732cf80e345,9218c732cf80e345,spec-practice-fixed
+P18,0.27,True,https://arena.tacto.ai/replay/0a3a9d9244ef318d,0a3a9d9244ef318d,spec-practice-verified
+P18,0.252,True,https://arena.tacto.ai/replay/47243951901775e5,47243951901775e5,lab/1011-080828_sweep-1 [soft_anchor]
+P18,0.227,,https://arena.tacto.ai/replay/d71241967ad27fee,d71241967ad27fee,baseline
+P18,0.22,,https://arena.tacto.ai/replay/aa67cbaf96bad37e,aa67cbaf96bad37e,meso
+P18,0.059,,https://arena.tacto.ai/replay/8446699071f8ea66,8446699071f8ea66,meso2

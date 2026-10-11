@@ -332,6 +332,7 @@ class SpecAgent:
             replies_c=cs, earlier_used="earlier" in th.flags, repair_used="repair" in th.flags,
             restore_used="restore" in th.flags, last_step_share=step_share,
             at_limit=st["intel"].at_limit, walk_risk=st["intel"].walk_risk, wants_close=st["intel"].wants_close,
+            at_ceiling=bool((st.get("info") or {}).get("at_ceiling")), held="repeat" in th.flags,
         )  # fmt: skip
 
     def views(self, threads):
@@ -442,6 +443,7 @@ class SpecAgent:
                                       "Thank you - we take up the offer you described in your e-mail, as set out on "
                                       "the attached term sheet. Please confirm.")  # fmt: skip
         if close.kind == "repeat":
+            th.flags.add("repeat")
             return self.plain_message(
                 threads, close.sid, th.last_sheets, "Thank you for your reply. Our offer stands as set out below."
             )
@@ -474,6 +476,7 @@ class SpecAgent:
             out, kind, fld = self.build(st, base, c_target, floor_p, asks)
 
             def guard_menu(menu):
+                menu = sheets.drop_refused(menu, st["intel"].refused)
                 menu = sheets.lock_coverage(ctx, menu, cover_values)
                 slack = STEP_SLACK if kind == "step" else 0.0
                 menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets, slack)
@@ -645,27 +648,55 @@ class SpecAgent:
         gap_pct = None
         if st["best"] and move["target"]:
             gap_pct = (st["best"].c - move["target"]) / move["target"] * 100
+        # words match numbers: an argument conceding "+X % is justified" is not cited next to an offer below it
+        offer_price = min((t.get("unit_price") for _, t in move["sheets"] if t.get("unit_price")), default=None)
+        drivers_fit = email.consistent(self.case, intel.cost_impact_pct, offer_price)
+        args = [a for a in args if a.key != "summary:indices" or email.consistent(self.case, a.figure, offer_price)]
         tactic_name, why = tactics.pick(intel, {
             "first": first, "rfq": rfq, "rival_cheaper": bool(extra_claims) or any(a.kind == "rival" for a in args),
             "cash_short": st["cash_short"], "cost_gap_pct": intel.cost_gap_pct,
             "gap_pct": gap_pct,
             "data_claims": sum(1 for a in args if a.ids), "relationship": intel.relationship_style == "relationship",
             "asked_for_terms": bool(move["asks"]), "hold": move["hold"], "supplier_held": intel.unchanged_rounds >= 1,
+            "goal": self.prep.goal,
         })  # fmt: skip
         tactic = tactics.TACTICS[tactic_name]
         if (
-            (s := email.weighted_sentence(intel))
+            (s := email.weighted_sentence(intel, face_value=not drivers_fit))
             and "weighted" not in th.flags
             and (first or tactic_name == "data_argument")
         ):
             analysis.append(s)
             th.flags.add("weighted")
+        if not first:  # keep arguing after round 1: one fresh computed argument per e-mail (never one twice)
+            t0 = th.plan.targets[0] if th.plan.targets else None
+            moved_pct = (move["target"] - t0) / t0 * 100 if t0 else None
+            lines = email.position_lines(self.case, intel, st["ctx"].their_price, moved_pct,
+                                         intel.unchanged_rounds >= 1)  # fmt: skip
+            if pos := next(((k, x) for k, x in lines if f"pos:{k}" not in th.flags), None):
+                analysis.append(pos[1])
+                th.flags.add(f"pos:{pos[0]}")
+        # answer the supplier: refused terms, a request for our figures, an offer of a call
+        sent_terms = [t for _, t in move["sheets"]]
+        for r in intel.refused:
+            if f"refused:{r}" not in th.flags and not any(sheets.refused(t, [r]) for t in sent_terms):
+                if line := email.refusal_line(r):
+                    extras.append(line)
+                th.flags.add(f"refused:{r}")
+        if email.asks_for_data(events) and email.data_attachment(events, "", self.fact):
+            extras.append(email.DATA_LINE)
+        last_body = str(latest(events).get("body") or "") if not first else ""
+        if email.CALL_RE.search(last_body) and "call" not in th.flags:
+            extras.append(email.CALL_LINE)
+            th.flags.add("call")
         if (
             email.VOLUME_ASK.search(str(latest(events).get("body") or ""))
             and "volume" not in th.flags
             and move["sheets"]
         ):
-            if line := email.commitment(move["sheets"][0][1]):  # R13.15: answered by code from our sheet
+            fixed = (self.case.get("fixed_terms") or {}).get("volume_per_year")
+            volume = fixed or self.case["buyer"].get("need_per_year")
+            if line := email.commitment(move["sheets"][0][1], volume):  # R13.15: answered by code from our sheet
                 extras.append(line)
                 th.flags.add("volume")
         if move["lock"]:
@@ -714,7 +745,8 @@ class SpecAgent:
                 log.warning("%s: writer failed (%s) - code e-mail", sid, error)
             took = time.monotonic() - t0
         if not isinstance(parts, dict):
-            parts = email.code_parts(tactic, allowed_q[0] if allowed_q else "")
+            previous = "\n".join(str(m.get("body") or "") for m in events if m.get("from") == "buyer")
+            parts = email.code_parts(tactic, allowed_q[0] if allowed_q else "", previous, len(move["sheets"]) == 1)
         used = self.used_ids(threads, sid)
 
         def known(ref):

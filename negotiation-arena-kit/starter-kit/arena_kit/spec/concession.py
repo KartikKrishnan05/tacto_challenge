@@ -14,6 +14,8 @@ reply, so a hold shows as a zero step).
                with more than 3 rounds left: target = their C - 0.5 x their step (R5.4)
   caps         never above CEILING x their C (R12.5), never above 0.995 x the alternative's C; in an
                RFQ at most 0.99 x the best rival's C and never below the anchor (R5.5)
+  no retreat   never below our own last target: when the ceiling falls under it (`at_ceiling`), the
+               gap is too small to split and the close rules take its offer
 """
 
 import math
@@ -105,16 +107,24 @@ class Plan:
             # behind our own last offer reads as a retreat (judgement call, DESIGN_NOTES)
             target = max(c_theirs - 0.5 * step, self.targets[-1] if self.targets else -math.inf)
             info["kind"] = "still moving"
-        target = min(target, CEILING * c_theirs, ALT_CAP * c_alt)
+        capped = min(target, CEILING * c_theirs, ALT_CAP * c_alt)
+        info["at_ceiling"] = bool(self.targets) and CEILING * c_theirs < self.targets[-1] and capped < target
+        target = capped
         if rfq and rival_best is not None:
             target = max(anchor, min(target, RIVAL_CAP * rival_best))
+        hard = min(ALT_CAP * c_alt, RIVAL_CAP * rival_best if rfq and rival_best is not None else math.inf)
+        if self.targets and target < min(self.targets[-1], hard):
+            # never behind our own last offer (P02: their C came within 0.3 % of our 370.85, the ceiling cut the
+            # next offer to 370.52, "a step backwards" - and a final offer). At the ceiling the gap is too small
+            # to split: the close rules take its offer (closing.decide, at_ceiling)
+            target = min(self.targets[-1], hard)  # the alternative and a cheaper rival bid stay hard caps
         return target, info
 
     def breaker(self, c_theirs):
         """The deadlock-breaking target (R5.3), when a hold would only repeat our last sheets (R13.7)."""
         prev = self.targets[-1] if self.targets else (self.anchor or c_theirs)
         ours = max(self.break_share * max(0.0, c_theirs - prev), MIN_STEP * c_theirs)
-        return min(prev + ours, CEILING * c_theirs)
+        return max(prev, min(prev + ours, CEILING * c_theirs))
 
     def commit(self, target):
         """Record an offer we sent at `target`; a target equal to the last one is a hold."""

@@ -65,6 +65,8 @@ class View:
     at_limit: bool = False  # its latest mail says it has no room left
     walk_risk: float = 0.0  # R11.5
     wants_close: bool = False  # its latest mail asks to close now
+    at_ceiling: bool = False  # its C is within the ceiling (0.3 %) of our last offer: nothing left to split
+    held: bool = False  # we already repeated our last offer once in this thread
 
     @property
     def latest_rows(self):
@@ -213,6 +215,13 @@ def decide(views, sid, must_close=False):
         # high walk risk, mean the table is as good as it gets.
         if (v.at_limit and v.last_step_share < LIMIT_STEP) or v.walk_risk >= WALK_CLOSE:
             return accept(views, "it is at its limit: take the best offer before it walks")
+    if best is not None and v.at_ceiling and covered(v, best) and may_accept and best_sid == sid:
+        # P02: 372.05 against our 370.85 - a counter would have to sit at or behind our last offer. Our offer
+        # stands once (the old run's step back drew a final offer at 371.88; taking 372.05 at once cost 0.02),
+        # then we take it
+        if not v.held and v.left > 1:
+            return Close("repeat", "within 0.3 % of our last offer: our offer stands once", sid)
+        return accept(views, "its offer is within 0.3 % of our last offer")
     if (best is not None and v.sent >= 1 and v.target is not None and v.wants_close and covered(v, best)
             and may_accept and best_sid == sid and best.c <= v.target * (1 + AGREE_GAP)):
         return accept(views, "it asks to close and is within reach of our target")

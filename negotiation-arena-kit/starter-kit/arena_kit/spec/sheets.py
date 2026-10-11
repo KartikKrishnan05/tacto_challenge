@@ -441,3 +441,16 @@ def no_regress(ctx, sheets, supplier_costs):
         return sheets
     best = min(supplier_costs)
     return [(label, t) for label, t in sheets if ctx.c(t) < (1 - REGRESS_TOL) * best]
+
+
+def refused(terms, refusals):
+    """True when a sheet asks for a term value the supplier said it will not give."""
+    return any(key(terms.get(r["field"])) == key(r["value"]) for r in refusals or [])
+
+
+def drop_refused(sheets, refusals):
+    """Answer the supplier: no sheet with a term it refused (P08: "we cannot offer a fixed price over a
+    24-month period", and the next e-mail offered a fixed price again). Keeps the menu when every sheet
+    would go - a refused term then stays our ask rather than leaving nothing to send."""
+    kept = [(label, t) for label, t in sheets if not refused(t, refusals)]
+    return kept or sheets

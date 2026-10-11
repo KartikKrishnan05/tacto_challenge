@@ -1,0 +1,40 @@
+{
+  "batch": "1011-095813_fixes2-model-learned",
+  "label": "fixes2-model-learned",
+  "git_head": "dde8c9d",
+  "source": "a4812b8b4d41",
+  "model_name": "gpt-6-astra",
+  "jobs": {
+    "case:P01": [
+      null
+    ],
+    "case:P02": [
+      null
+    ],
+    "case:P03": [
+      null
+    ],
+    "case:P04": [
+      null
+    ],
+    "case:P05": [
+      null
+    ],
+    "case:P07": [
+      null
+    ],
+    "case:P08": [
+      null
+    ],
+    "case:P10": [
+      null
+    ],
+    "case:P11": [
+      null
+    ],
+    "case:P18": [
+      null
+    ]
+  },
+  "holdout": false
+}
