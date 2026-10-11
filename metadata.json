@@ -3,7 +3,7 @@
   "checkpoint_id": "01M4MX9XSSC8A62X6V0MBHJSN7",
   "strategy": "manual-commit",
   "branch": "feature/spec-agent",
-  "checkpoints_count": 3,
+  "checkpoints_count": 9,
   "files_touched": [
     "negotiation-arena-kit/starter-kit/DESIGN_NOTES.md",
     "negotiation-arena-kit/starter-kit/README.md",
@@ -47,6 +47,8 @@
     "negotiation-arena-kit/starter-kit/runs/lab/1011-085252_sweep-5/P10__deep_one_step__fixed__replay.json",
     "negotiation-arena-kit/starter-kit/runs/lab/1011-085252_sweep-5/P10__firm_one_step__fixed__replay.json",
     "negotiation-arena-kit/starter-kit/runs/lab/1011-085252_sweep-5/metadata.json",
+    "negotiation-arena-kit/starter-kit/runs/spec-practice-astra-final/metadata.json",
+    "negotiation-arena-kit/starter-kit/runs/spec-practice-astra-repeat/metadata.json",
     "negotiation-arena-kit/starter-kit/tests/test_spec_closing.py",
     "negotiation-arena-kit/starter-kit/tests/test_spec_concession.py",
     "negotiation-arena-kit/starter-kit/tests/test_spec_sheets.py",
@@ -66,13 +68,20 @@
       "compact_transcript": "/1/transcript.jsonl",
       "content_hash": "/1/content_hash.txt",
       "prompt": "/1/prompt.txt"
+    },
+    {
+      "metadata": "/2/metadata.json",
+      "transcript": "/2/full.jsonl",
+      "compact_transcript": "/2/transcript.jsonl",
+      "content_hash": "/2/content_hash.txt",
+      "prompt": "/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 196,
-    "cache_creation_tokens": 308375,
-    "cache_read_tokens": 16883522,
-    "output_tokens": 74934,
-    "api_call_count": 97
+    "input_tokens": 234,
+    "cache_creation_tokens": 325349,
+    "cache_read_tokens": 18679060,
+    "output_tokens": 82754,
+    "api_call_count": 114
   }
 }
