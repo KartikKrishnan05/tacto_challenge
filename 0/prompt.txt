@@ -1,0 +1,14 @@
+my claude agent stopped this is missing: Not done yet:
+
+Unit tests for R11.2, R11.8, R11.12, R11.14–R11.15, R12.4, R12.14, R12.17, R13.1–R13.7, R13.9, R13.11, R13.15 and R13.16.
+DESIGN_NOTES.md. The judgement calls so far are written only in code docstrings and need collecting there.
+Playing anything: the sandbox (D01, D02), the local sim, then the 10 hosted practice cases. That means no score table against the targets yet.
+Investigating any case that scores below its target, recording cause and fix, and the final report.
+
+please do it and then double check if everything makes sense
+
+---
+
+<send_user_message_question_reply>
+[{"answer":"Yes, run the configured model","question":"Automatic approval review blocked model-backed runs because it requires explicit permission to send the kit’s public, fictional case data and game emails to your configured OpenAI model. May I send those prompts to finish the simulator and 10 hosted practice runs? API keys remain in request headers and are never included in prompts.","questionItemId":"[\"request_user_input_async\",\"call_2xF83P4R4RLAq8kia0vC1X3N\",0]"}]
+</send_user_message_question_reply>
