@@ -103,6 +103,8 @@ class SpecAgent:
         if self.primed != case.get("case_id"):  # resumed, or no case file before the session: no model
             self.prime(case, timeout=0)
         cash = {sid: p.get("cash_short", False) for sid, p in self.profiles.items()}
+        self.case = case  # hidden-case facts must be available to volatile() during preparation
+        self._volatile.clear()
         self.prep = prep.prepare(case, threads, self.package, self.volatile, seconds_left, cash)
         self.case, self.case_id = self.prep.case, case.get("case_id")
         self.clock = self.prep.clock.open()
@@ -125,8 +127,14 @@ class SpecAgent:
     def volatile(self, series):
         """R13.11: the series moved more than VOLATILE_PCT in its last 12 months."""
         if series not in self._volatile:
-            got = cl.index_change(self.package, getattr(self, "case", {}) or {}, series) if self.package else None
-            self._volatile[series] = abs(got[0]) > VOLATILE_PCT if got else False
+            got = cl.index_change(self.package, getattr(self, "case", {}) or {}, series)
+            if got:
+                a, b = self.fact(got[1]), self.fact(got[2])
+                change = (b["value"] / a["value"] - 1) * 100
+                # Claim sentences round to a tenth; a risk threshold must not round 15.04% away.
+                self._volatile[series] = abs(change) > VOLATILE_PCT + 1e-9
+            else:
+                self._volatile[series] = False
         return self._volatile[series]
 
     # --- clock hooks for the runner -----------------------------------------------------------------
@@ -193,8 +201,8 @@ class SpecAgent:
             out.update(target=None, info={}, base=None, locked={}, c_ref=math.inf, only_price=False)
             return out
         locked = th.steps.locked(ctx, events)
-        for f, v in th.steps.revealed(ctx, latest(events), out["alternatives"]).items():
-            locked.setdefault(f, v)  # R13.5: a term the supplier priced itself
+        # R13.5: actual supplier-priced alternatives supersede an earlier blind menu pick.
+        locked.update(th.steps.revealed(ctx, latest(events), out["alternatives"]))
         out["locked"] = locked
         # the anchor: fixed per thread (R4.4); in an RFQ every bidder is anchored to the lowest price on the
         # table and the anchor may only fall (R4.3, R12.6)
@@ -210,6 +218,7 @@ class SpecAgent:
             anchor_c = ctx.c({**combo, "unit_price": th.anchor_price})
         base = sheets.structure(ctx, th.anchor_price)
         base.update({f: v for f, v in locked.items() if f in base})
+        ctx.locked = dict(locked)
         out["base"] = base
         c_ref = min(ctx.c({**base, "unit_price": ctx.their_price}), best.c)
         th.plan.observe(c_ref, len(replies))
@@ -309,14 +318,17 @@ class SpecAgent:
             return {"supplier_id": sid, "idle": True}
         th = self.t[sid]
         th.analyst.observe(threads[sid])
-        if use_model and self.analyst_complete is not None:  # R11.3: a short grace for the model layer
+        first_rfq = len(self.case["suppliers"]) > 1 and not any(m.get("from") == "buyer" for m in threads[sid])
+        terminal = latest(threads[sid]).get("status") in ("agreed", "final_offer")
+        if use_model and self.analyst_complete is not None and not first_rfq and not terminal:
+            # R11.3: a short grace; R12.14 first RFQ / R13.16 terminal offers go straight to code.
             since = time.monotonic() - self.reply_at.get(sid, time.monotonic())
             th.analyst.wait(min(GRACE_S, max(0.0, clock_mod.MODEL_WINDOW_S - since - 25)))
         with self.lock:
             states, views = self.views(threads)
             st = states[sid]
             close = closing.decide(views, sid, must_close=self.clock.must_close())
-            if close is None and self.clock.late():
+            if close is None and not self.clock.can_counter():
                 close = self.late(states, views, sid)
             if close is not None:
                 d = self.realise(close, states, threads, sid)
@@ -424,26 +436,37 @@ class SpecAgent:
         floor_p = sheets.floor(ctx)
         asks = self.asks(st)
         hold = info.get("kind") == "hold"
-        built = self.build(st, base, target, floor_p, asks)
+        cover_values = {f: base[f] for f in COVERAGE if f in base and f in self.case["negotiable"]}
+        supplier_terms = [r.terms for r in st["rows"]]
+
+        def guarded_build(c_target):
+            out, kind, fld = self.build(st, base, c_target, floor_p, asks)
+
+            def guard_menu(menu):
+                menu = sheets.lock_coverage(ctx, menu, cover_values)
+                menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets)
+                return sheets.no_regress(ctx, menu, [r.c for r in st["rows"] if r.valid])
+
+            out = guard_menu(out)
+            while kind == "step" and len({key(t.get(fld)) for _, t in out}) < 2:
+                # The final guards can remove a choice too: record only the menu actually sent.
+                th.steps.skipped.add(fld)
+                out, kind, fld = self.build(st, base, c_target, floor_p, asks)
+                out = guard_menu(out)
+            return out, kind, fld
+
+        built = guarded_build(target)
         if hold and repeats([t for _, t in built[0]], [t for _, t in th.last_sheets]):
             # R5.3 + R13.7: a hold that would only repeat our sheets becomes the deadlock-breaking step
             target = th.plan.breaker(st["c_ref"])
             info["kind"], hold = "deadlock breaker (no repeat)", False
-            built = self.build(st, base, target, floor_p, asks)
+            built = guarded_build(target)
         out, kind, fld = built
-        cover_values = {f: base[f] for f in COVERAGE if f in base and f in self.case["negotiable"]}
-        out = sheets.lock_coverage(ctx, out, cover_values)
-        supplier_terms = [r.terms for r in st["rows"]]
-        out = sheets.guard(ctx, out, target, supplier_terms, th.last_sheets)
-        out = sheets.no_regress(ctx, out, [r.c for r in st["rows"] if r.valid])
         if (not out or repeats([t for _, t in out], [t for _, t in th.last_sheets])) and not hold:
             # nothing new at this target: one real step instead (R5.3) before the thread counts as done
             target = max(target, th.plan.breaker(st["c_ref"]))
             info["kind"] = "deadlock breaker (nothing new)"
-            out, kind, fld = self.build(st, base, target, floor_p, asks)
-            out = sheets.lock_coverage(ctx, out, cover_values)
-            out = sheets.guard(ctx, out, target, supplier_terms, th.last_sheets)
-            out = sheets.no_regress(ctx, out, [r.c for r in st["rows"] if r.valid])
+            out, kind, fld = guarded_build(target)
         if not out or repeats([t for _, t in out], [t for _, t in th.last_sheets]):  # R12.10 / R13.7
             v = views[sid]
             if (r := closing.earlier_cheaper(v)) is not None:
@@ -451,7 +474,7 @@ class SpecAgent:
                                                   terms=r.terms), states, threads, sid)  # fmt: skip
             if len(views) == 1 and (acc := closing.accept(views, "nothing new to offer")):
                 return self.realise(acc, states, threads, sid)  # R13.7: the thread is done - close
-            if len(views) > 1 and not out:
+            if len(views) > 1:
                 return {"supplier_id": sid, "idle": True}  # RFQ: leave this thread, the others go on
             if not out:
                 out = th.last_sheets or sheets.out_of_reach(ctx, base, floor_p) or sheets.just_under(ctx, base)
@@ -639,6 +662,11 @@ class SpecAgent:
             since = time.monotonic() - self.reply_at.get(sid, time.monotonic())
             others = sum(1 for s, busy in self.inflight.items() if busy and s != sid)
             budget = clock_mod.model_budget(since, others)  # R12.17
+            if budget is not None:
+                budget = min(budget, self.clock.no_counter_at - self.clock.elapsed(),
+                             self.clock.force_close_at - self.clock.elapsed() - self.clock.round_time())
+                if budget < clock_mod.MIN_MODEL_S:
+                    budget = None
         if budget is not None:
             prompt = email.render(self.case, sid, events, plan_text, self.profiles.get(sid, {}), intel,
                                   {k: v for k, v in self.results.items()}, args, allowed_q, tactic,

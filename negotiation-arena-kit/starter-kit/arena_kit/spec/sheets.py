@@ -18,7 +18,7 @@ before it goes out.
 
 import itertools
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..cost import OPS, must_haves_ok, supplier_value
 from . import estimate as est_mod
@@ -43,6 +43,7 @@ class Ctx:
     their: dict  # the supplier's best sheet on the table (R3.1), completed
     playbook: dict
     volatile: object = None  # series -> bool (R13.11)
+    locked: dict = field(default_factory=dict)
 
     def c(self, terms):
         return est_mod.cost(self.case, terms, self.std, self.est)
@@ -60,12 +61,19 @@ class Ctx:
         return self.c(self.their)
 
     def ok(self, terms):
-        return must_haves_ok(self.case, terms, self.std)
+        clause = terms.get("index_clause")
+        if "index_clause" in self.case["negotiable"] and clause and self.volatile and self.volatile(clause["series"]):
+            return False
+        return must_haves_ok(self.case, terms, self.std) and all(
+            terms.get(f) == v for f, v in self.locked.items()
+        )
 
     def allowed(self, field, terms=None):
         """The options of a term we may offer: valid for the must-haves; index clauses as the playbook
         allows (any / deadband >= 3 % / avoid) and never on a volatile series (R13.11)."""
         opts = options(self.case, field, self.std)
+        if field in self.locked:
+            return [self.locked[field]]
         if terms is not None:
             opts = [o for o in opts if self.ok({**terms, field: o})] or opts
         if field != "index_clause":
@@ -76,7 +84,14 @@ class Ctx:
             keep = [o for o in keep if o is None] or keep
         elif stance == "deadband":
             keep = [o for o in keep if o is None or o.get("deadband_pct", 0) >= 3] or keep
-        return keep or opts
+        theirs = self.their.get("index_clause")
+        if theirs:
+            own = [o for o in keep if o and o["series"] == theirs["series"]]
+            if own:
+                best = min(own, key=lambda o: (self.c({**self.their, "index_clause": o}), -o["deadband_pct"]))
+                # R12.8: a demanded index is offered on its cheapest deadband, not a gratuitous 0%.
+                keep = [o for o in keep if o is None or key(o) == key(best)]
+        return keep
 
 
 # --- structure -----------------------------------------------------------------------------------
@@ -165,7 +180,20 @@ def structure(ctx, price):
     would pull a date the supplier already gave us back toward it)."""
     base = base_combo(ctx, repair(ctx.case, ctx.their, ctx.std))
     base = cover(ctx, base, price)
-    return mutual_combo(ctx, {**base, "unit_price": ctx.their_price}, ctx.their_price)
+    base = mutual_combo(ctx, {**base, "unit_price": ctx.their_price}, ctx.their_price)
+    # R12.3: do not request overtime merely because the quote PDF lists a faster lead time.
+    # Relax only to an on-time allowed value, without raising our cost or breaking a must-have.
+    field = "lead_time_days"
+    need = ctx.case["buyer"].get("need_lead_time_days")
+    if field in base and field in ctx.case["negotiable"] and isinstance(need, int | float):
+        on_time = [o for o in ctx.allowed(field, base) if isinstance(o, int | float) and o <= need]
+        if on_time:
+            normal = max(on_time)
+            candidate = {**base, field: normal}
+            if normal > base[field] and ctx.ok(candidate) and ctx.c({**candidate, "unit_price": price}) <= \
+                    ctx.c({**base, "unit_price": price}) + 1:
+                base = candidate
+    return base
 
 
 # --- prices --------------------------------------------------------------------------------------
@@ -215,11 +243,13 @@ def structure_floor(ctx, combo, base, floor_price):
 
 def priced(ctx, combo, target, lo):
     """`combo` at the whole-cent price that costs `target`, if that price is credible: at or above `lo`
-    and under the supplier's price. Else None."""
+    and with lower total cost than the supplier's package. A higher unit price can still be a
+    concession when improved terms lower total cost. Else None."""
     p = pricing.price_for(ctx.case, combo, ctx.std, target, ctx.supplier, ctx.their_price)
-    if p is None or p < lo - 0.005 or p >= ctx.their_price:
+    if p is None or p < lo - 0.005:
         return None
-    return complete(ctx.case, {**combo, "unit_price": p}, ctx.std)
+    sheet = complete(ctx.case, {**combo, "unit_price": p}, ctx.std)
+    return sheet if ctx.c(sheet) < ctx.c_theirs else None
 
 
 # --- price-round sheets (R6) -----------------------------------------------------------------------

@@ -76,6 +76,27 @@ ARENA_URL=http://127.0.0.1:8000 ARENA_API_KEY=<the api_key> uv run arena play ca
 It prints the deal, `c_deal` against `c_open` and `c_best`, the score and a replay link - open it
 in your browser: the result on top, then every e-mail of the negotiation.
 
+## SpecAgent requirements and rehearsals
+
+`--agent spec` uses code for prices, term sheets and closing decisions, with the configured model
+for supplier profiles, extraction and wording. See [DESIGN_NOTES.md](DESIGN_NOTES.md) for precedence
+choices and explicit deviations, and [FINAL_REPORT.md](FINAL_REPORT.md) for tests, scores and remaining
+acceptance gaps.
+
+```bash
+uv run pytest -q
+uv run ruff check arena_kit tests
+uv run python -m arena_kit.spec.evaluate --set sandbox --out runs/my-sandbox
+uv run python -m arena_kit.spec.evaluate --sim --out runs/my-sim
+uv run python -m arena_kit.spec.evaluate --set practice --parallel 5 --out runs/my-practice
+```
+
+Each output directory must be new. Evaluations retain exact scores, sessions, threads, model
+prompts/replies, source fingerprints and timeout/claim audits. Hosted practice consumes your arena
+quota; model-enabled runs send the fictional case material to your configured provider and consume
+model credits. Add `--no-model` for the code-only fallback benchmark, or `--ids P05` for a targeted
+retest. Do not publish logs if you later use this agent with real confidential business data.
+
 ## Try it by hand (Postman, curl)
 
 Feel the API before you put a model in front of it. On the real arena (practice and sandbox) the

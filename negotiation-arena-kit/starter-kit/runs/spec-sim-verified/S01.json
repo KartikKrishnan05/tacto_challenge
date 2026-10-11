@@ -1,0 +1,405 @@
+{
+  "case_id": "case:S01",
+  "case": {
+    "case_id": "case:S01",
+    "set": "practice",
+    "type": "price_increase",
+    "title": "Adapter piece HI: a price increase",
+    "briefing": "Simulator example. You buy part:320050 for Hollerau Pumpenwerke from sup:70270. Need: 6650 pc a year for 1 year(s). The supplier in the simulator is a plain script, not a real bot.",
+    "trigger_doc": null,
+    "parts": [
+      "part:320050"
+    ],
+    "suppliers": [
+      "sup:70270"
+    ],
+    "negotiable": [
+      "unit_price",
+      "payment_days"
+    ],
+    "fixed_terms": {
+      "lead_time_days": 42,
+      "volume_per_year": 6650,
+      "contract_months": 12,
+      "index_clause": null,
+      "incoterm": "FCA",
+      "tooling_eur": 0
+    },
+    "term_options": {
+      "payment_days": [
+        14,
+        30,
+        45,
+        60,
+        90
+      ]
+    },
+    "buyer": {
+      "need_per_year": 6650,
+      "horizon_years": 1,
+      "current_unit_price": 15.88,
+      "fallback_unit_price": 18.26,
+      "interest_rate": 0.08,
+      "reference_payment_days": 60,
+      "need_lead_time_days": 42,
+      "category_goal": "leverage",
+      "fallback_risk_pct": 3,
+      "index_risk_pct": 1,
+      "late_cost_per_day": 200,
+      "cost_per_defect": 50,
+      "freight_eur_per_unit": {
+        "EXW": 0.48,
+        "FCA": 0.32,
+        "DAP": 0.0
+      },
+      "index_paths": {},
+      "must_haves": [],
+      "alternative": {
+        "kind": "none",
+        "ref": null,
+        "terms": {}
+      }
+    },
+    "round_limit": 10,
+    "refs": [
+      "sc:70270@2026Q3",
+      "idx:LCI-C@2025-08",
+      "idx:PPI-C2431@2025-08",
+      "idx:PPI-C2431@2026-08"
+    ],
+    "facts": {
+      "sc:70270@2026Q3": {
+        "colour": "amber",
+        "otd_confirmed_pct": 88.5,
+        "otd_pct": 84.6,
+        "ppm": 1531,
+        "quarter": "2026Q3",
+        "supplier": "sup:70270"
+      },
+      "idx:LCI-C@2025-08": {
+        "month": "2025-08",
+        "series": "LCI-C",
+        "value": 117.0
+      },
+      "idx:PPI-C2431@2025-08": {
+        "month": "2025-08",
+        "series": "PPI-C2431",
+        "value": 115.0
+      },
+      "idx:PPI-C2431@2026-08": {
+        "month": "2026-08",
+        "series": "PPI-C2431",
+        "value": 129.1
+      }
+    },
+    "hosted": true
+  },
+  "result": {
+    "ended": true,
+    "deal": true,
+    "supplier_id": "sup:70270",
+    "offer_id": "offer:70270-1",
+    "terms": {
+      "volume_per_year": 6650,
+      "contract_months": 12,
+      "payment_days": 14,
+      "lead_time_days": 42,
+      "incoterm": "FCA",
+      "index_clause": null,
+      "tooling_eur": 0,
+      "unit_price": 17.12
+    },
+    "c_open": 119491.07,
+    "c_deal": 117139.78,
+    "c_alt": null,
+    "c_best": 105969.08,
+    "score": 0.17388638802424844,
+    "must_haves_ok": true,
+    "cost_breakdown": {
+      "price": 113848.0,
+      "uncovered_need": 0.0,
+      "fallback_risk": 0.0,
+      "payment_terms": 1163.7795555555556,
+      "freight": 2128.0,
+      "late_delivery": 0,
+      "quality": 0.0,
+      "tooling": 0.0,
+      "index_clause": 0.0,
+      "index_risk": 0.0,
+      "relationship": 0.0
+    }
+  },
+  "wall_s": 33.69,
+  "session_id": "sim2",
+  "standard_terms": {
+    "sup:70270": {
+      "payment_days": 14
+    }
+  },
+  "session": {
+    "session_id": "sim2",
+    "case_id": "case:S01",
+    "set": "practice",
+    "status": "ended",
+    "end_reason": "accepted",
+    "threads": {
+      "sup:70270": {
+        "offer_id": "offer:70270-1",
+        "status": "agreed",
+        "closed": "accepted",
+        "offers": 1,
+        "seconds_left": null
+      }
+    },
+    "rounds": 1,
+    "opening": {
+      "sup:70270": {
+        "offer_id": "offer:70270-0",
+        "round": 0,
+        "status": "open",
+        "terms": {
+          "unit_price": 17.47
+        },
+        "missing_fields": [
+          "payment_days"
+        ],
+        "claims": [],
+        "claim_results": [],
+        "signals": {
+          "reply_delay_days": 1,
+          "validity_days": 30
+        },
+        "text": "Simulated supplier. Our quote is attached."
+      }
+    },
+    "moves": [],
+    "result": {
+      "ended": true,
+      "deal": true,
+      "supplier_id": "sup:70270",
+      "offer_id": "offer:70270-1",
+      "terms": {
+        "volume_per_year": 6650,
+        "contract_months": 12,
+        "payment_days": 14,
+        "lead_time_days": 42,
+        "incoterm": "FCA",
+        "index_clause": null,
+        "tooling_eur": 0,
+        "unit_price": 17.12
+      },
+      "c_open": 119491.07,
+      "c_deal": 117139.78,
+      "c_alt": null,
+      "c_best": 105969.08,
+      "score": 0.17388638802424844,
+      "must_haves_ok": true,
+      "cost_breakdown": {
+        "price": 113848.0,
+        "uncovered_need": 0.0,
+        "fallback_risk": 0.0,
+        "payment_terms": 1163.7795555555556,
+        "freight": 2128.0,
+        "late_delivery": 0,
+        "quality": 0.0,
+        "tooling": 0.0,
+        "index_clause": 0.0,
+        "index_risk": 0.0,
+        "relationship": 0.0
+      },
+      "trace": [
+        {
+          "round": 1,
+          "actor": "sup:70270",
+          "move": {
+            "offer_id": "offer:70270-1",
+            "round": 1,
+            "status": "open",
+            "terms": {
+              "unit_price": 17.12
+            },
+            "missing_fields": [
+              "payment_days"
+            ],
+            "claims": [],
+            "claim_results": [
+              {
+                "index": 0,
+                "result": "verified"
+              }
+            ],
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "text": "Simulated supplier. Our counter-offer."
+          },
+          "reasons": [
+            "A fixed script: it concedes the same step per term sheet, down to its floor."
+          ]
+        }
+      ]
+    },
+    "replay_url": "/replay/sim2"
+  },
+  "threads": {
+    "sup:70270": {
+      "supplier_id": "sup:70270",
+      "offer_id": "offer:70270-1",
+      "status": "agreed",
+      "closed": "accepted",
+      "messages": [
+        {
+          "thread_id": "thread:S01:70270",
+          "message_id": "msg:70270-0-1",
+          "in_reply_to": null,
+          "from": "sales@70270",
+          "subject": "Re: Adapter piece HI: a price increase",
+          "body": "Simulated supplier. Our quote is attached.",
+          "refs": [],
+          "action": null,
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70270-0",
+              "terms": {
+                "unit_price": 17.47
+              }
+            }
+          ],
+          "status": "open",
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "claim_results": [],
+          "missing_fields": [
+            "payment_days"
+          ],
+          "attachments": [
+            {
+              "attachment_id": "att:70270-0-quote",
+              "name": "quote.pdf",
+              "type": "pdf",
+              "content_b64": null
+            }
+          ]
+        },
+        {
+          "subject": "Re: Adapter piece HI: a price increase",
+          "body": "Dear colleagues at Obrábění Kraslin s.r.o.,\n\nThank you for your quote and for your earlier support in maintaining the old price. We recognise that rising material and labour costs deserve consideration.\n\nOur demand forecast for this part has changed +13.1% (fc:320050@2026-09).\n\nOur proposal rests on our analysis and pairs a sharper unit price with a choice of payment terms to support the continuing relationship. We are flexible on payment terms; please choose the option that works best for you.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 14.95 per unit, payment 90 days net.\nOption B: EUR 14.70 per unit, payment 14 days net.\nOption C: EUR 14.80 per unit, payment 45 days net.\n\nCould you share a cost breakdown for this part - material, conversion, overhead?\n\nWe appreciate your past support and are committed to doing our part by paying reliably within the agreed terms.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+          "term_sheets": [
+            {
+              "terms": {
+                "unit_price": 14.95,
+                "payment_days": 90
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 14.7,
+                "payment_days": 14
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 14.8,
+                "payment_days": 45
+              }
+            }
+          ],
+          "refs": [
+            "fc:320050@2026-09"
+          ],
+          "from": "buyer"
+        },
+        {
+          "thread_id": "thread:S01:70270",
+          "message_id": "msg:70270-1-2",
+          "in_reply_to": null,
+          "from": "sales@70270",
+          "subject": "Re: Adapter piece HI: a price increase",
+          "body": "Simulated supplier. Our counter-offer.",
+          "refs": [],
+          "action": null,
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70270-1",
+              "terms": {
+                "unit_price": 17.12
+              }
+            }
+          ],
+          "status": "open",
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "claim_results": [
+            {
+              "index": 0,
+              "result": "verified"
+            }
+          ],
+          "missing_fields": [
+            "payment_days"
+          ],
+          "attachments": [
+            {
+              "attachment_id": "att:70270-1-cost-breakdown",
+              "name": "cost-breakdown.xlsx",
+              "type": "xlsx",
+              "content_b64": null
+            }
+          ]
+        },
+        {
+          "thread_id": "thread:S01:70270",
+          "message_id": "msg:70270-1-3",
+          "in_reply_to": null,
+          "from": "sales@70270",
+          "subject": "Re: Adapter piece HI: a price increase",
+          "body": "Simulated supplier. Thank you for your order.",
+          "refs": [],
+          "action": null,
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70270-1",
+              "terms": {
+                "unit_price": 17.12
+              }
+            }
+          ],
+          "status": "agreed",
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "claim_results": [],
+          "missing_fields": [
+            "payment_days"
+          ],
+          "attachments": [
+            {
+              "attachment_id": "att:70270-1-order-confirmation",
+              "name": "order-confirmation.pdf",
+              "type": "pdf",
+              "content_b64": null
+            }
+          ]
+        }
+      ],
+      "timeouts": []
+    }
+  },
+  "audit": {
+    "reply_statuses": [
+      "open",
+      "open",
+      "agreed"
+    ],
+    "contradicted": [],
+    "timeout_mentions": [],
+    "timeouts": [],
+    "buyer_without_company": []
+  }
+}

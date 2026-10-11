@@ -434,7 +434,9 @@ class DataPackage:
                 if not invoice.get("paid_date") or not invoice.get("due_date"):
                     continue
                 try:
-                    late_days.append((date.fromisoformat(invoice["paid_date"]) - date.fromisoformat(invoice["due_date"])).days)
+                    late_days.append(
+                        (date.fromisoformat(invoice["paid_date"]) - date.fromisoformat(invoice["due_date"])).days
+                    )
                 except (TypeError, ValueError):
                     continue
             payment = [{
@@ -503,11 +505,17 @@ class DataPackage:
                 )
                 series.append({"driver": driver, "series": series_info, "recent_values": list(reversed(values))})
             source_rows = {
-                "should_cost": self._select_rows("should_cost", [("part_id", "=", part_id)], ("estimate_date", "DESC"), 3),
-                "historical_prices": self._select_rows("price_conditions", [("part_id", "=", part_id)], ("valid_from", "DESC"), 7),
+                "should_cost": self._select_rows(
+                    "should_cost", [("part_id", "=", part_id)], ("estimate_date", "DESC"), 3
+                ),
+                "historical_prices": self._select_rows(
+                    "price_conditions", [("part_id", "=", part_id)], ("valid_from", "DESC"), 7
+                ),
                 "quotes": self._select_rows("quotes", [("part_id", "=", part_id)], ("quote_date", "DESC"), 7),
                 "rfqs": self._select_rows("rfqs", [("part_id", "=", part_id)], ("rfq_date", "DESC"), 4),
-                "negotiation_history": self._select_rows("negotiation_history", [("part_id", "=", part_id)], ("date", "DESC"), 6),
+                "negotiation_history": self._select_rows(
+                    "negotiation_history", [("part_id", "=", part_id)], ("date", "DESC"), 6
+                ),
                 "cost_drivers_and_indices": series,
             }
             release_documents = self._release_rows(
@@ -572,10 +580,11 @@ class DataPackage:
         key = relative.as_posix()
         if key.startswith(f"{RELEASE}/"):
             source, key = "release", key[len(RELEASE) + 1:]
-        files = (self.master.get(source) or {}).get("text_files", {}) if source == "release" else self.master["package"].get("text_files", {})
+        segment = (self.master.get(source) or {}) if source == "release" else self.master["package"]
+        files = segment.get("text_files", {})
         if key in files:
             return files[key]
-        binary = (self.master.get(source) or {}).get("binary_files_base64", {}) if source == "release" else self.master["package"].get("binary_files_base64", {})
+        binary = segment.get("binary_files_base64", {})
         if key in binary:
             return base64.b64decode(binary[key]).decode("utf-8")
         raise FileNotFoundError(ref)

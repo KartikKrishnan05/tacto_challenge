@@ -310,7 +310,8 @@ def compose(case, events, sheets, theirs, parts, args, material, company_name, e
     q = parts.get("question") if parts.get("fallback") else pick_question(parts.get("question"), allowed_questions)
     question = writing.lint(q, numbers, dropped) if q else ""
     claims_text = " ".join(c.sentence + "".join(" " + e for e in c.extra) for c in picked)
-    hello = writing.salutation(parts.get("salutation"), company_name, material)
+    supplier_words = "\n".join(str(m.get("body") or "") for m in events if m.get("from") != "buyer")
+    hello = writing.salutation(parts.get("salutation"), company_name, supplier_words)
     body = "\n\n".join(p for p in [
         hello, clean["opening"], " ".join(x for x in (*analysis, claims_text) if x),
         " ".join(x for x in (clean["bridge"], *extras) if x), options, question, clean["closing"], SIGNATURE,

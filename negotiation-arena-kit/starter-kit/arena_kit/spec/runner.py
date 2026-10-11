@@ -79,6 +79,13 @@ def case_file(table, case_id):
     return None
 
 
+def wait_for_rivals(inflight, target, reply_at):
+    """Wait for rival replies only within this offer's own reply budget (R13.16)."""
+    limit = reply_at.get(target, time.monotonic()) + ACCEPT_WAIT_S
+    while any(busy for sid, busy in inflight.items() if sid != target) and time.monotonic() < limit:
+        time.sleep(min(0.5, max(0.0, limit - time.monotonic())))
+
+
 def play_case(table, case_id, agent, deadline=None):
     """Play one case to its end with `agent` (a SpecAgent). Returns the result."""
     pre = case_file(table, case_id)
@@ -88,6 +95,7 @@ def play_case(table, case_id, agent, deadline=None):
         except Exception:
             log.exception("%s: prime failed - going on without profiles", case_id)
     case, threads = call(table.open, case_id)
+    opened_at = time.monotonic()
     if getattr(table, "done", None):
         return table.done
     for events in threads.values():
@@ -95,12 +103,13 @@ def play_case(table, case_id, agent, deadline=None):
             safe_documents(table, m)
     lock, close_lock, done, closing = threading.Lock(), threading.Lock(), threading.Event(), threading.Event()
     out, slowest = {}, [0.0]
-    reply_at = {sid: time.monotonic() for sid in threads}
+    reply_at = {sid: opened_at for sid in threads}
     inflight = {sid: False for sid in threads}
     agent.reply_at, agent.inflight = reply_at, inflight
     seconds_left = (deadline() if callable(deadline) else deadline) or None
     seconds_left = seconds_left - time.time() if seconds_left else (pre or {}).get("seconds_left")
     agent.prepare(case, threads, seconds_left)
+    agent.clock.t_open = opened_at
 
     def cap():
         return deadline() if callable(deadline) else deadline
@@ -230,11 +239,7 @@ def play_case(table, case_id, agent, deadline=None):
             if msg.get("action"):
                 if msg["action"].get("type") == "accept" and len(live_threads(view)) > 1:
                     closing.set()  # R12.16: a rival reply may be on its way - but R13.16: inside 60 s
-                    while (
-                        any(busy for s, busy in inflight.items() if s != target)
-                        and time.monotonic() < reply_at.get(target, 0) + ACCEPT_WAIT_S
-                    ):
-                        time.sleep(0.5)
+                    wait_for_rivals(inflight, target, reply_at)
                     with lock:
                         view = copy.deepcopy(threads)
                     d = agent.accept(case, view) or d

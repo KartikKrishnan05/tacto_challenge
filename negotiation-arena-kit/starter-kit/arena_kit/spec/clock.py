@@ -32,7 +32,7 @@ class CaseClock:
         self.now = now
         self.t_open = None
         self.force_close_at, self.no_counter_at = FORCE_CLOSE_AT, NO_NEW_COUNTER_AT
-        if isinstance(seconds_left, int | float) and seconds_left > 0:
+        if isinstance(seconds_left, int | float):
             cap = seconds_left - CAP_MARGIN_S
             if cap < FORCE_CLOSE_AT:
                 self.force_close_at = max(0.0, cap)

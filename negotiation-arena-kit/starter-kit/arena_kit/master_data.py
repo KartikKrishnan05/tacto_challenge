@@ -13,7 +13,7 @@ import logging
 import os
 import sqlite3
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from threading import RLock
@@ -173,7 +173,7 @@ def _verify_csv_export(path, columns, rows, schema, resource_field_types=None):
         raise ValueError(f"CSV export row count disagrees with SQLite for {path}: {len(csv_rows)} vs {len(rows)}")
     types = {field["name"]: field.get("type", "") for field in schema}
     types.update(resource_field_types or {})
-    for index, (csv_row, database_row) in enumerate(zip(csv_rows, rows)):
+    for index, (csv_row, database_row) in enumerate(zip(csv_rows, rows, strict=True)):
         if any(not _same_csv_value(csv_row[column], database_row.get(column), types.get(column)) for column in columns):
             raise ValueError(f"CSV export row {index + 2} disagrees with SQLite for {path}")
 
@@ -301,7 +301,7 @@ def build_master_data(root, release_root=None):
     return {
         "format_version": MASTER_FORMAT_VERSION,
         "source_fingerprint": fingerprint,
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generated_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "package": package,
         "release": release,
     }

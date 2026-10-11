@@ -22,6 +22,16 @@ def leverage_ctx():
     return c, ctx_for(c, {"unit_price": 138.55, "effective_date": "2026-11-01", "payment_days": 30})
 
 
+def test_r12_3_no_unnecessary_expedited_delivery_when_normal_lead_is_cost_neutral():
+    c = case("case:P05")
+    ctx = ctx_for(c, {"unit_price": 36, "payment_days": 60, "lead_time_days": 28})
+    base = sheets.structure(ctx, 30)
+    assert base["lead_time_days"] == 35
+    assert ctx.c({**base, "unit_price": 30}) == ctx.c({**base, "lead_time_days": 28, "unit_price": 30})
+    c["buyer"]["must_haves"] = [{"field": "lead_time_days", "op": "<=", "value": 28}]
+    assert sheets.structure(ctx, 30)["lead_time_days"] == 28
+
+
 # --- R13.8 ------------------------------------------------------------------------------------------
 def test_price_solves_the_target_exactly_without_margin_charge():
     c, ctx = leverage_ctx()
@@ -195,3 +205,29 @@ def test_never_regress_behind_an_offer_the_supplier_already_made():
     supplier_offered = ctx.c(complete(c, {**base, "unit_price": 133.0}))
     out = sheets.no_regress(ctx, [("cheap", cheap), ("dear", dear)], [supplier_offered])
     assert [label for label, _ in out] == ["cheap"]
+
+
+def test_later_effective_date_can_trade_for_higher_price_at_lower_total_cost():
+    c, ctx = leverage_ctx()
+    combo = {**ctx.their, "effective_date": "2027-04-01"}
+    target = ctx.c(ctx.their) * .99
+    t = sheets.priced(ctx, combo, target, 100)
+    assert t and t["unit_price"] > ctx.their_price
+    assert ctx.c(t) < ctx.c_theirs
+
+
+def test_price_round_cannot_undo_settled_payment_or_quality_terms():
+    c, ctx = leverage_ctx()
+    ctx.locked = {"payment_days": 30.0, "effective_date": "2026-11-01"}
+    out = sheets.price_sheets(ctx, ctx.their, ctx.c(ctx.their) * .97, [], 100)
+    assert out
+    assert all(t["payment_days"] == 30 and t["effective_date"] == "2026-11-01" for _, t in out)
+
+
+def test_supplier_insisted_index_menu_uses_best_deadband():
+    c = CASES["case:P08"]
+    zero = next(o for o in c["term_options"]["index_clause"] if o and o["deadband_pct"] == 0)
+    ctx = ctx_for(c, {"unit_price": 5.57, "index_clause": zero, "payment_days": 90, "contract_months": 24})
+    offered = ctx.allowed("index_clause")
+    assert None in offered
+    assert [o["deadband_pct"] for o in offered if o] == [5]

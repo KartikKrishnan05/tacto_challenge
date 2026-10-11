@@ -15,6 +15,7 @@ a signal for the tone and the prose lock-in, never a close rule.
 import copy
 import json
 import logging
+import math
 import re
 import threading
 import time
@@ -202,10 +203,23 @@ def appears(value, text):
         v = float(value)
     except (TypeError, ValueError):
         return False
+    if not math.isfinite(v):
+        return False
     forms = {f"{v:.2f}", f"{v:.1f}", f"{v:g}", f"{v:.2f}".replace(".", ","), f"{v:.1f}".replace(".", ",")}
     if v == int(v):
         forms.add(str(int(v)))
-    return any(re.search(rf"(?<![\d.,]){re.escape(f)}(?![\d])", text or "") for f in forms)
+    return any(re.search(rf"(?<![\d.,-]){re.escape(f)}(?!\d|[.,]\d)", text or "") for f in forms)
+
+
+def stated(value, body):
+    """Validate every leaf of a model-extracted term against the supplier's words."""
+    if isinstance(value, dict):
+        return all(stated(v, body) for v in value.values())
+    if isinstance(value, int | float) and not isinstance(value, bool):
+        return appears(value, body)
+    if isinstance(value, str):
+        return value.lower() in body.lower() or value == prose.parse_date(body)
+    return False
 
 
 def drivers_by_code(body, series_ids=()):
@@ -237,10 +251,10 @@ def clean_extraction(parsed, body, negotiable):
         t = {"unit_price": float(o["unit_price"])}
         if o.get("payment_days") is not None and "payment_days" in negotiable and appears(o["payment_days"], body):
             t["payment_days"] = int(float(o["payment_days"]))
-        if o.get("effective_date") and "effective_date" in negotiable:
+        if o.get("effective_date") and "effective_date" in negotiable and stated(o["effective_date"], body):
             t["effective_date"] = str(o["effective_date"])[:10]
         for f, v in (o.get("other_terms") or {}).items():
-            if f in negotiable and v is not None and (not isinstance(v, int | float) or appears(v, body)):
+            if f in negotiable and v is not None and stated(v, body):
                 t[f] = v
         offers.append({"terms": t, "quote": str(o.get("quote") or "")[:300], "source": "model"})
     out["prose_offers"] = offers
@@ -255,6 +269,13 @@ def clean_extraction(parsed, body, negotiable):
             "quote": str(d.get("quote") or "")[:300], "source": "model",
         })  # fmt: skip
     out["cost_drivers"] = drivers
+    # Free-text constraints and hints can also carry invented numeric demands.
+    def grounded(text):
+        return all(appears(prose.number(n), body) for n in re.findall(r"\d+(?:[.,]\d+)?", str(text)))
+
+    out["constraints"] = [s for s in parsed.get("constraints") or [] if grounded(s)]
+    out["lever_hints"] = [h for h in parsed.get("lever_hints") or []
+                          if isinstance(h, dict) and grounded(h.get("hint") or "")]
     return out
 
 
@@ -400,7 +421,7 @@ class Analyst:
         for i2, _ in sup:
             named |= {s for s in (llm.get(i2) or {}).get("named_indices") or [] if s in self.series_ids}
         for series in sorted(named):
-            got = cl.index_change(self.package, case, series) if self.package else None
+            got = cl.index_change(self.package, case, series)
             if not got:
                 continue
             chg, a, b = got

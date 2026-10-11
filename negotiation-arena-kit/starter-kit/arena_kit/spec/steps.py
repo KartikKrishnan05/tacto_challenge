@@ -30,6 +30,7 @@ class Steps:
         self.weights = {}
         self.history = {}  # index of our message -> the term it varied, "price" or a one-off kind
         self.skipped = set()  # terms that had no credible choice (R13.4)
+        self.revealed_values = {}
 
     # -- ranking ----------------------------------------------------------------------------------
     def rank(self, ctx, base):
@@ -91,7 +92,7 @@ class Steps:
         value that costs us less at the supplier's own prices."""
         sheets = [ts.get("terms") or {} for ts in latest_msg.get("term_sheets") or []]
         if not sheets:
-            return {}
+            return dict(self.revealed_values)
         main = complete(ctx.case, sheets[0], ctx.std)
         best = {}
         for alt in [*sheets[1:], *alternatives]:
@@ -100,10 +101,14 @@ class Steps:
             if len(diff) != 1 or diff[0] in COVERAGE or not ctx.ok(full):
                 continue
             f = diff[0]
-            for c, value in ((ctx.c(main), main[f]), (ctx.c(full), full[f])):
+            choices = [(ctx.c(full), full[f])]
+            if ctx.ok(main):
+                choices.append((ctx.c(main), main[f]))
+            for c, value in choices:
                 if f not in best or c < best[f][0]:
                     best[f] = (c, value)
-        return {f: v for f, (_, v) in best.items()}
+        self.revealed_values.update({f: v for f, (_, v) in best.items()})
+        return dict(self.revealed_values)
 
     def next_field(self, ctx, base, locked, asks=()):
         """The term this message varies: an asked-for step term first, else the next of the order that

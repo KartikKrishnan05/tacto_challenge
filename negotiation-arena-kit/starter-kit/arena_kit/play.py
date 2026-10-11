@@ -30,7 +30,7 @@ MOVE_LIMIT_S = 60
 CLOSE_BEFORE_CAP_S, ROUND_MARGIN_S = 90, 15
 # A supplier reply takes up to about a minute; one the POST has not returned by then is read from
 # the thread, every POLL_S seconds.
-SLOW_REPLY_S, POLL_S = 70, 3
+SLOW_REPLY_S, POLL_S = 3, 3
 SENDER = ThreadPoolExecutor(max_workers=32, thread_name_prefix="send")
 RUNNING = re.compile(r"one session per case in the final: (\S+)")
 # Practice: the case list shows every practice case file; only those marked hosted can be played

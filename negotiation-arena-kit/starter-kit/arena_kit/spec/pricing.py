@@ -68,7 +68,8 @@ def price_for(case, terms, std, target, supplier=None, hint=None):
     p = round((low + high) / 2, 2)
     # whole cents: take the cent closer to the target, never one below the cheapest price
     best = min((p - 0.01, p, p + 0.01), key=lambda q: abs(_c(case, terms, std, supplier, q) - target))
-    return round(max(best, round(cheapest_price(case, terms, std, supplier, hint), 2)), 2)
+    minimum_cent = math.ceil(cheapest_price(case, terms, std, supplier, hint) * 100) / 100
+    return round(max(best, minimum_cent), 2)
 
 
 def c_min_price(case, terms, std, supplier, lo, hi):

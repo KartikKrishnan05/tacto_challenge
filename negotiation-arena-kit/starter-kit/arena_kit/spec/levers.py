@@ -31,7 +31,9 @@ def revealed_slopes(case, messages, extra=None):
             continue
         sheets = [ts.get("terms") or {} for ts in m.get("term_sheets") or []]
         if extra and n < len(extra):
-            sheets += list(extra[n] or [])
+            # Prose names changed terms only; inherit all others from this e-mail's main sheet.
+            main = sheets[0] if sheets else {}
+            sheets += [{**main, **t} for t in extra[n] or []]
         sheets = [t for t in sheets if t.get("unit_price")]
         for a, b in itertools.combinations(sheets, 2):
             diff = [f for f in fields if key(a.get(f)) != key(b.get(f))]

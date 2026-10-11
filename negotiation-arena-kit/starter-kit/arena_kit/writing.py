@@ -91,7 +91,7 @@ def lint(text, allowed_numbers, dropped=None):
         else:
             for n in NUMBER.findall(s):
                 v = n.replace(",", "")
-                if v not in allowed_numbers and not (v.isdigit() and int(v) <= 12):
+                if v not in allowed_numbers:
                     why = f"figure {n}"
                     break
         if why:

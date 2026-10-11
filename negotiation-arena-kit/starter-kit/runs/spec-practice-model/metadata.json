@@ -1,0 +1,19 @@
+{
+  "started": "2026-10-11T05:56:04+0200",
+  "git_head": "4ff0f597003306a6a4483f44a82b0a312357aca7",
+  "source_sha256": "a6a69d62df988c5f29e384fbb61719cdeb82952f2747932222648a3512ec3242",
+  "model": "gpt-6-astra",
+  "provider": "openai",
+  "cases": [
+    "case:P01",
+    "case:P02",
+    "case:P03",
+    "case:P04",
+    "case:P05",
+    "case:P07",
+    "case:P08",
+    "case:P10",
+    "case:P11",
+    "case:P18"
+  ]
+}
