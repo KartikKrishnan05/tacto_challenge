@@ -1,0 +1,50 @@
+{
+  "batch": "1011-085252_sweep-5",
+  "label": "sweep-5",
+  "git_head": "e69a9af",
+  "source": "d24d6ddbe63c",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P02": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P03": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P04": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P05": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P07": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P08": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P10": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P11": [
+      "deep_one_step",
+      "firm_one_step"
+    ],
+    "case:P18": [
+      "deep_one_step",
+      "firm_one_step"
+    ]
+  },
+  "holdout": false
+}

@@ -101,3 +101,40 @@ There is a policy collision between R12.15 (stop writing to a hopeless bidder) a
 "every reply within 60 seconds" acceptance. A deliberately idled, non-selected bidder can receive
 an arena timeout while other negotiations continue. Keep such timeouts visible in the report;
 do not count them as a clean timing pass merely because the chosen deal closes promptly.
+
+## Learning from experiments (`spec.strategy`, `spec.lab`, `knowledge/`)
+
+The anchor depth, the concession pace and the close gap are knobs (`Strategy`) layered over the
+playbook row and section 5's plan. The defaults reproduce the agent exactly (`BASE.row(case)` is the
+playbook row itself). `spec.lab` plays named variants on the hosted practice cases and appends every
+game to `knowledge/experiments.jsonl`. From that sheet it builds `learned_playbook.json` (per case: its
+features and each variant's score gain over base, measured within one mode) and the result sheet
+`EXPERIMENTS.md`. `make()` and `spec.evaluate` load the playbook. `SpecAgent()` without `knowledge` plays
+the defaults, so tests and recorded negotiations are unaffected.
+
+Choosing per case: same case, then type + goal, then goal, then type, then all cases. A variant needs a
+mean gain of at least 0.005 and no loss over 0.05 in the group. Beyond the same case it must also be safe
+in every tested case: firm_deep_fast helped P08 but broke the leverage RFQ P05 by 0.18. A group level
+where nothing beats base passes on to the broader levels. A case's own games saying base stand, because
+they are direct evidence. At the all-cases level a variant must have won two cases and lost none. Ties
+go to the variant closest to base.
+
+Replay (`spec.replay`): the hosted suppliers answer identical e-mails identically, so a code-only game
+whose e-mails match a recorded game is that game. The lab replays every game against the recorded ones
+first and spends a practice session only when the agent sends an e-mail no recorded game sent. Each
+real game joins the book. Validated: 88 of 88 replayable recorded games reproduced their exact score.
+The three-bidder RFQ P05 depends on reply timing and always needs a session.
+
+Findings that changed the agent (details in `knowledge/EXPERIMENTS.md`):
+- `MEET_SHARE` (meet a big supplier jump halfway) overrode every concession setting in P01. Its
+  supplier agreed at once to the halfway offer. measured_meet (20 %) gave 0.808 -> 0.859 on P01 but
+  hurt P05 and P18, so it is case-specific.
+- One term menu, then price rounds (max_steps 1) helped both raw-material cases: P18 0.467 -> 0.513,
+  P08 0.305 -> 0.361 (0.593 with a deep anchor). Holding out for a closer match (close_gap x 0.25)
+  lifted P02 0.390 -> 0.507. Together (firm_one_step) they lost no case, so firm_one_step is what an
+  unseen case gets when its group has no better evidence.
+- Changing the order of the term steps gained nothing. The supplier's own ask (payment days in P01's
+  quote PDF) goes first anyway, and it answers every equal-cost menu in its own favour.
+
+Validation, code-only: base 0.665, the agent's own picks 0.716, leave-one-out picks 0.682. Leave-one-out
+(`lab learned --holdout`) is the honest estimate for hidden cases.

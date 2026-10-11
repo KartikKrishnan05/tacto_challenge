@@ -8,6 +8,7 @@ from spec_support import CASES, PKG, case
 from arena_kit.cost import must_haves_ok, total_cost
 from arena_kit.spec import estimate as est_mod
 from arena_kit.spec import playbook, pricing, sheets
+from arena_kit.spec.steps import Steps
 from arena_kit.spec.terms import complete
 
 
@@ -224,10 +225,12 @@ def test_price_round_cannot_undo_settled_payment_or_quality_terms():
     assert all(t["payment_days"] == 30 and t["effective_date"] == "2026-11-01" for _, t in out)
 
 
-def test_supplier_insisted_index_menu_uses_best_deadband():
+def test_supplier_insisted_index_menu_offers_its_series_not_no_clause():
     c = CASES["case:P08"]
     zero = next(o for o in c["term_options"]["index_clause"] if o and o["deadband_pct"] == 0)
     ctx = ctx_for(c, {"unit_price": 5.57, "index_clause": zero, "payment_days": 90, "contract_months": 24})
     offered = ctx.allowed("index_clause")
-    assert None in offered
-    assert [o["deadband_pct"] for o in offered if o] == [5]
+    assert None not in offered
+    assert sorted(o["deadband_pct"] for o in offered) == [0, 3, 5]
+    # the step menu leads with the deadband that costs us least
+    assert Steps.option_order(ctx, "index_clause", ctx.their)[0]["deadband_pct"] == 5

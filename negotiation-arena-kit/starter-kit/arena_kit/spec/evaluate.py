@@ -23,6 +23,7 @@ from ..cli import load_env
 from ..client import ArenaClient
 from ..data import DataPackage
 from ..play import RemoteTable, hosted, play
+from . import strategy as strat
 
 TARGETS = {"P01": .941, "P02": .507, "P03": .919, "P04": .860, "P05": .781,
            "P07": .773, "P08": .549, "P10": .671, "P11": .710, "P18": .453}
@@ -52,7 +53,7 @@ def audit(threads):
             "buyer_without_company": missing_company}
 
 
-def evaluate(client, cases, out, package, parallel=5, no_model=False):
+def evaluate(client, cases, out, package, parallel=5, no_model=False, learned=True):
     out.mkdir(parents=True, exist_ok=False)  # never replace an earlier experiment
     files = sorted(Path("arena_kit").rglob("*.py"))
     metadata = {
@@ -62,14 +63,17 @@ def evaluate(client, cases, out, package, parallel=5, no_model=False):
         "model": None if no_model else os.environ.get("LLM_MODEL"),
         "provider": None if no_model else os.environ.get("LLM_PROVIDER"),
         "cases": [c["case_id"] for c in cases],
+        "learned_playbook": learned,
     }
+    kb = strat.load() if learned else None
     write_json(out / "metadata.json", metadata)
     results = {}
 
     def one(case):
         cid = case["case_id"]
         table = RemoteTable(client, case)
-        agent = SpecAgent(package=package, log_dir=out / "logs") if no_model else make(package)
+        agent = (SpecAgent(package=package, log_dir=out / "logs", knowledge=kb) if no_model
+                 else make(package, learned=learned))  # fmt: skip
         agent.log_dir = out / "logs"
         started = time.monotonic()
         record = {"case_id": cid, "case": case}
@@ -77,6 +81,8 @@ def evaluate(client, cases, out, package, parallel=5, no_model=False):
             result = play(table, cid, agent)
             record.update(result=result, wall_s=round(time.monotonic() - started, 2), session_id=table.session_id)
             record["standard_terms"] = {s: o.std for s, o in agent.prep.openings.items()}
+            record["strategy"] = {"name": agent.strategy_name, "why": agent.strategy_why,
+                                  "knobs": agent.strategy.knobs()}  # fmt: skip
             if table.session_id:
                 state = client.session(table.session_id)
                 threads = {sid: client.thread(table.session_id, sid) for sid in case["suppliers"]}
@@ -132,6 +138,7 @@ def main():
     ap.add_argument("--parallel", type=int, default=5)
     ap.add_argument("--ids", nargs="*")
     ap.add_argument("--no-model", action="store_true")
+    ap.add_argument("--no-learned", action="store_true", help="play the default strategy, not the learned playbook")
     ap.add_argument("--capture-session", help="capture an existing ended session; requires exactly one --ids case")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
@@ -180,7 +187,7 @@ def main():
                       "audit": audit(threads)}
             write_json(args.out / f"{case['case_id'].split(':')[-1]}.json", record)
         else:
-            evaluate(client, cases, args.out, package, args.parallel, args.no_model)
+            evaluate(client, cases, args.out, package, args.parallel, args.no_model, not args.no_learned)
     finally:
         if server:
             server.should_exit = True

@@ -1,0 +1,2116 @@
+{
+  "built": "2026-10-11T08:56:57",
+  "games": 239,
+  "rules": {
+    "min_gain": 0.005,
+    "max_loss": 0.05
+  },
+  "variants": {
+    "base": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "The agent as designed (control)."
+    },
+    "soft_anchor": {
+      "knobs": {
+        "cut_k": 0.5,
+        "anchor_cost_k": 1.02,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Opening closer to the supplier's price keeps it cooperative and avoids walk-aways in relationship cases (stabilise, secure_supply)."
+    },
+    "deep_anchor": {
+      "knobs": {
+        "cut_k": 1.6,
+        "anchor_cost_k": 0.95,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "A lower opening drags the settlement down where we have leverage (rivals, market data)."
+    },
+    "fast_concede": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": -2,
+        "curve_exp": 1.2,
+        "break_share": 0.25,
+        "reciprocity": 0.75,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Bigger, earlier steps reach a deal before the supplier hardens or issues a final offer."
+    },
+    "slow_concede": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 2,
+        "curve_exp": 2.2,
+        "break_share": 0.08,
+        "reciprocity": 0.35,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Smaller steps and a longer horizon extract more from suppliers that keep moving."
+    },
+    "eager_close": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.75,
+        "close_gap_k": 4.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Accepting once the supplier is within ~2 % of our target avoids losing deals to one counter too many."
+    },
+    "deep_fast": {
+      "knobs": {
+        "cut_k": 1.6,
+        "anchor_cost_k": 0.95,
+        "horizon_delta": -2,
+        "curve_exp": 1.2,
+        "break_share": 0.25,
+        "reciprocity": 0.75,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Deep anchor and fast concession together: the low opening sets the range, the big steps keep the supplier engaged (both helped P08 alone)."
+    },
+    "mid_anchor": {
+      "knobs": {
+        "cut_k": 1.3,
+        "anchor_cost_k": 0.97,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "A moderately deeper anchor keeps deep_anchor's gain (P08) without its loss on P18."
+    },
+    "firm_close": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 0.25,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Since accepting early hurt (eager_close), holding out for a closer match to our target gains more."
+    },
+    "firm_deep_fast": {
+      "knobs": {
+        "cut_k": 1.6,
+        "anchor_cost_k": 0.95,
+        "horizon_delta": -2,
+        "curve_exp": 1.2,
+        "break_share": 0.25,
+        "reciprocity": 0.75,
+        "meet_share": 0.5,
+        "close_gap_k": 0.25,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "firm_close's gain (P02) and deep_fast's gains (P07, P08) add up in one strategy."
+    },
+    "measured_meet": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.2,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "When the supplier jumps further than the gap left, closing only 20 % of the gap (not 50 %) keeps us from overshooting: P01's supplier 'agreed' at once to our half-way offer."
+    },
+    "no_meet": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.0,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Pure reciprocity (half of their step, capped by our curve) without any 'meet it' rule."
+    },
+    "weight_order": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "weight",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "Settling the term worth most EUR first (P01: the start date, EUR 25k) beats always opening with payment days."
+    },
+    "no_reopen": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": false,
+        "max_steps": 3
+      },
+      "hypothesis": "Moving on to the next term instead of a second menu on a locked costly one gets more terms onto the table (P01 re-asked payment days and never offered April)."
+    },
+    "date_first": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "weight",
+        "reopen": false,
+        "max_steps": 3
+      },
+      "hypothesis": "weight_order and no_reopen together."
+    },
+    "one_step": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 1
+      },
+      "hypothesis": "One term menu, then price rounds: fewer rounds spent on terms the supplier answers in its own favour."
+    },
+    "measured_firm": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.2,
+        "close_gap_k": 0.25,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 3
+      },
+      "hypothesis": "measured_meet plus firm_close (the only variant with no loss so far)."
+    },
+    "deep_one_step": {
+      "knobs": {
+        "cut_k": 1.6,
+        "anchor_cost_k": 0.95,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 1.0,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 1
+      },
+      "hypothesis": "deep_anchor's P08 gain and one_step's raw-material gains (P08, P18) add up."
+    },
+    "firm_one_step": {
+      "knobs": {
+        "cut_k": 1.0,
+        "anchor_cost_k": 0.98,
+        "horizon_delta": 0,
+        "curve_exp": 1.6,
+        "break_share": 0.15,
+        "reciprocity": 0.5,
+        "meet_share": 0.5,
+        "close_gap_k": 0.25,
+        "step_order": "payment_first",
+        "reopen": true,
+        "max_steps": 1
+      },
+      "hypothesis": "one_step's raw-material gains plus firm_close's P02 gain, without deep anchoring."
+    }
+  },
+  "cases": {
+    "case:P01": {
+      "type": "price_increase",
+      "goal": "stabilise",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.808469,
+            "n": 2,
+            "best": 0.808469
+          },
+          "soft_anchor": {
+            "mean": 0.781418,
+            "n": 1,
+            "best": 0.781418
+          },
+          "deep_anchor": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "fast_concede": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "slow_concede": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "eager_close": {
+            "mean": 0.719454,
+            "n": 1,
+            "best": 0.719454
+          },
+          "deep_fast": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "mid_anchor": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "firm_close": {
+            "mean": 0.808469,
+            "n": 3,
+            "best": 0.808469
+          },
+          "firm_deep_fast": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "measured_meet": {
+            "mean": 0.859239,
+            "n": 2,
+            "best": 0.859239
+          },
+          "no_meet": {
+            "mean": 0.859239,
+            "n": 1,
+            "best": 0.859239
+          },
+          "weight_order": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "no_reopen": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "date_first": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "one_step": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "measured_firm": {
+            "mean": 0.859239,
+            "n": 1,
+            "best": 0.859239
+          },
+          "deep_one_step": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          },
+          "firm_one_step": {
+            "mean": 0.808469,
+            "n": 1,
+            "best": 0.808469
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.027051,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": -0.089015,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 3
+        },
+        "firm_deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.05077,
+          "n": 2
+        },
+        "no_meet": {
+          "gain": 0.05077,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.05077,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 1
+        }
+      },
+      "base": 0.808469
+    },
+    "case:P02": {
+      "type": "price_increase",
+      "goal": "stabilise",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.389917,
+            "n": 2,
+            "best": 0.389917
+          },
+          "soft_anchor": {
+            "mean": 0.263943,
+            "n": 1,
+            "best": 0.263943
+          },
+          "deep_anchor": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "fast_concede": {
+            "mean": 0.393563,
+            "n": 1,
+            "best": 0.393563
+          },
+          "slow_concede": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "eager_close": {
+            "mean": 0.263943,
+            "n": 1,
+            "best": 0.263943
+          },
+          "deep_fast": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "mid_anchor": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "firm_close": {
+            "mean": 0.506721,
+            "n": 5,
+            "best": 0.506721
+          },
+          "firm_deep_fast": {
+            "mean": 0.506721,
+            "n": 1,
+            "best": 0.506721
+          },
+          "measured_meet": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "no_meet": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "weight_order": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "no_reopen": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "date_first": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "one_step": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "measured_firm": {
+            "mean": 0.506721,
+            "n": 1,
+            "best": 0.506721
+          },
+          "deep_one_step": {
+            "mean": 0.389917,
+            "n": 1,
+            "best": 0.389917
+          },
+          "firm_one_step": {
+            "mean": 0.506721,
+            "n": 2,
+            "best": 0.506721
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.125974,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.003646,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": -0.125974,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.116804,
+          "n": 5
+        },
+        "firm_deep_fast": {
+          "gain": 0.116804,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.116804,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.116804,
+          "n": 2
+        }
+      },
+      "base": 0.389917
+    },
+    "case:P03": {
+      "type": "renewal",
+      "goal": "stabilise",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.919456,
+            "n": 3,
+            "best": 0.919456
+          },
+          "soft_anchor": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "deep_anchor": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "fast_concede": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "slow_concede": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "eager_close": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "deep_fast": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "mid_anchor": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "firm_close": {
+            "mean": 0.919456,
+            "n": 3,
+            "best": 0.919456
+          },
+          "firm_deep_fast": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "measured_meet": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "no_meet": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "weight_order": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "no_reopen": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "date_first": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "one_step": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "measured_firm": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "deep_one_step": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          },
+          "firm_one_step": {
+            "mean": 0.919456,
+            "n": 1,
+            "best": 0.919456
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 3
+        },
+        "firm_deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 1
+        }
+      },
+      "base": 0.919456
+    },
+    "case:P04": {
+      "type": "renewal",
+      "goal": "routine",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.873682,
+            "n": 5,
+            "best": 0.873682
+          },
+          "soft_anchor": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "deep_anchor": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "fast_concede": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "slow_concede": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "eager_close": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "deep_fast": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "mid_anchor": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "firm_close": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "firm_deep_fast": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "measured_meet": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "no_meet": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "weight_order": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "no_reopen": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "date_first": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "one_step": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "measured_firm": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "deep_one_step": {
+            "mean": 0.873682,
+            "n": 1,
+            "best": 0.873682
+          },
+          "firm_one_step": {
+            "mean": 0.873682,
+            "n": 2,
+            "best": 0.873682
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 2
+        }
+      },
+      "base": 0.873682
+    },
+    "case:P05": {
+      "type": "rfq",
+      "goal": "leverage",
+      "rfq": true,
+      "n_suppliers": 3,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.756831,
+            "n": 5,
+            "best": 0.756831
+          },
+          "soft_anchor": {
+            "mean": 0.363219,
+            "n": 1,
+            "best": 0.363219
+          },
+          "deep_anchor": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "fast_concede": {
+            "mean": 0.756831,
+            "n": 3,
+            "best": 0.756831
+          },
+          "slow_concede": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "eager_close": {
+            "mean": 0.661069,
+            "n": 1,
+            "best": 0.661069
+          },
+          "deep_fast": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "mid_anchor": {
+            "mean": 0.676181,
+            "n": 1,
+            "best": 0.676181
+          },
+          "firm_close": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "firm_deep_fast": {
+            "mean": 0.57321,
+            "n": 1,
+            "best": 0.57321
+          },
+          "measured_meet": {
+            "mean": 0.676181,
+            "n": 1,
+            "best": 0.676181
+          },
+          "no_meet": {
+            "mean": 0.624695,
+            "n": 1,
+            "best": 0.624695
+          },
+          "weight_order": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "no_reopen": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "date_first": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "one_step": {
+            "mean": 0.624695,
+            "n": 1,
+            "best": 0.624695
+          },
+          "measured_firm": {
+            "mean": 0.676181,
+            "n": 1,
+            "best": 0.676181
+          },
+          "deep_one_step": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          },
+          "firm_one_step": {
+            "mean": 0.756831,
+            "n": 1,
+            "best": 0.756831
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.393612,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 3
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": -0.095762,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": -0.08065,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": -0.183621,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": -0.08065,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": -0.132136,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": -0.132136,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": -0.08065,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 1
+        }
+      },
+      "base": 0.756831
+    },
+    "case:P07": {
+      "type": "bundling",
+      "goal": "routine",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.753477,
+            "n": 2,
+            "best": 0.753477
+          },
+          "soft_anchor": {
+            "mean": 0.636597,
+            "n": 1,
+            "best": 0.636597
+          },
+          "deep_anchor": {
+            "mean": 0.71687,
+            "n": 1,
+            "best": 0.71687
+          },
+          "fast_concede": {
+            "mean": 0.740491,
+            "n": 1,
+            "best": 0.740491
+          },
+          "slow_concede": {
+            "mean": 0.727504,
+            "n": 1,
+            "best": 0.727504
+          },
+          "eager_close": {
+            "mean": 0.695037,
+            "n": 1,
+            "best": 0.695037
+          },
+          "deep_fast": {
+            "mean": 0.762629,
+            "n": 5,
+            "best": 0.762629
+          },
+          "mid_anchor": {
+            "mean": 0.733997,
+            "n": 1,
+            "best": 0.733997
+          },
+          "firm_close": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "firm_deep_fast": {
+            "mean": 0.762629,
+            "n": 1,
+            "best": 0.762629
+          },
+          "measured_meet": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "no_meet": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "weight_order": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "no_reopen": {
+            "mean": 0.732733,
+            "n": 1,
+            "best": 0.732733
+          },
+          "date_first": {
+            "mean": 0.732733,
+            "n": 1,
+            "best": 0.732733
+          },
+          "one_step": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "measured_firm": {
+            "mean": 0.753477,
+            "n": 1,
+            "best": 0.753477
+          },
+          "deep_one_step": {
+            "mean": 0.71687,
+            "n": 1,
+            "best": 0.71687
+          },
+          "firm_one_step": {
+            "mean": 0.753477,
+            "n": 2,
+            "best": 0.753477
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.11688,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": -0.036607,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": -0.012986,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": -0.025973,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": -0.05844,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.009152,
+          "n": 5
+        },
+        "mid_anchor": {
+          "gain": -0.01948,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": 0.009152,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": -0.020744,
+          "n": 1
+        },
+        "date_first": {
+          "gain": -0.020744,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": -0.036607,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 2
+        }
+      },
+      "base": 0.753477
+    },
+    "case:P08": {
+      "type": "raw_material",
+      "goal": "leverage",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.305218,
+            "n": 2,
+            "best": 0.305218
+          },
+          "soft_anchor": {
+            "mean": 0.440551,
+            "n": 1,
+            "best": 0.440551
+          },
+          "deep_anchor": {
+            "mean": 0.559754,
+            "n": 2,
+            "best": 0.559754
+          },
+          "fast_concede": {
+            "mean": 0.438019,
+            "n": 1,
+            "best": 0.438019
+          },
+          "slow_concede": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "eager_close": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "deep_fast": {
+            "mean": 0.559754,
+            "n": 1,
+            "best": 0.559754
+          },
+          "mid_anchor": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "firm_close": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "firm_deep_fast": {
+            "mean": 0.559754,
+            "n": 1,
+            "best": 0.559754
+          },
+          "measured_meet": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "no_meet": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "weight_order": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "no_reopen": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "date_first": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "one_step": {
+            "mean": 0.360552,
+            "n": 1,
+            "best": 0.360552
+          },
+          "measured_firm": {
+            "mean": 0.305218,
+            "n": 1,
+            "best": 0.305218
+          },
+          "deep_one_step": {
+            "mean": 0.592954,
+            "n": 2,
+            "best": 0.592954
+          },
+          "firm_one_step": {
+            "mean": 0.360552,
+            "n": 2,
+            "best": 0.360552
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": 0.135333,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.254536,
+          "n": 2
+        },
+        "fast_concede": {
+          "gain": 0.132801,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.254536,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": 0.254536,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.055334,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.287736,
+          "n": 2
+        },
+        "firm_one_step": {
+          "gain": 0.055334,
+          "n": 2
+        }
+      },
+      "base": 0.305218
+    },
+    "case:P10": {
+      "type": "capacity",
+      "goal": "secure_supply",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.662905,
+            "n": 4,
+            "best": 0.662905
+          },
+          "soft_anchor": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "deep_anchor": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "fast_concede": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "slow_concede": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "eager_close": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "deep_fast": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "mid_anchor": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "firm_close": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "firm_deep_fast": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "measured_meet": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "no_meet": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "weight_order": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "no_reopen": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "date_first": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "one_step": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "measured_firm": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "deep_one_step": {
+            "mean": 0.662905,
+            "n": 1,
+            "best": 0.662905
+          },
+          "firm_one_step": {
+            "mean": 0.662905,
+            "n": 2,
+            "best": 0.662905
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 2
+        }
+      },
+      "base": 0.662905
+    },
+    "case:P11": {
+      "type": "quality",
+      "goal": "quality_first",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.709896,
+            "n": 6,
+            "best": 0.709896
+          },
+          "soft_anchor": {
+            "mean": 0.542665,
+            "n": 1,
+            "best": 0.542665
+          },
+          "deep_anchor": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "fast_concede": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "slow_concede": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "eager_close": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "deep_fast": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "mid_anchor": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "firm_close": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "firm_deep_fast": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "measured_meet": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "no_meet": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "weight_order": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "no_reopen": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "date_first": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "one_step": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "measured_firm": {
+            "mean": 0.709896,
+            "n": 1,
+            "best": 0.709896
+          },
+          "deep_one_step": {
+            "mean": 0.626281,
+            "n": 1,
+            "best": 0.626281
+          },
+          "firm_one_step": {
+            "mean": 0.709896,
+            "n": 2,
+            "best": 0.709896
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.167231,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "measured_firm": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": -0.083615,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.0,
+          "n": 2
+        }
+      },
+      "base": 0.709896
+    },
+    "case:P18": {
+      "type": "raw_material",
+      "goal": "leverage",
+      "rfq": false,
+      "n_suppliers": 1,
+      "scores": {
+        "code": {
+          "base": {
+            "mean": 0.466961,
+            "n": 2,
+            "best": 0.466961
+          },
+          "soft_anchor": {
+            "mean": 0.252113,
+            "n": 1,
+            "best": 0.252113
+          },
+          "deep_anchor": {
+            "mean": 0.386079,
+            "n": 1,
+            "best": 0.386079
+          },
+          "fast_concede": {
+            "mean": 0.466961,
+            "n": 3,
+            "best": 0.466961
+          },
+          "slow_concede": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "eager_close": {
+            "mean": 0.386079,
+            "n": 1,
+            "best": 0.386079
+          },
+          "deep_fast": {
+            "mean": 0.453061,
+            "n": 1,
+            "best": 0.453061
+          },
+          "mid_anchor": {
+            "mean": 0.453061,
+            "n": 1,
+            "best": 0.453061
+          },
+          "firm_close": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "firm_deep_fast": {
+            "mean": 0.453061,
+            "n": 1,
+            "best": 0.453061
+          },
+          "measured_meet": {
+            "mean": 0.319096,
+            "n": 1,
+            "best": 0.319096
+          },
+          "no_meet": {
+            "mean": 0.319096,
+            "n": 1,
+            "best": 0.319096
+          },
+          "weight_order": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "no_reopen": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "date_first": {
+            "mean": 0.466961,
+            "n": 1,
+            "best": 0.466961
+          },
+          "one_step": {
+            "mean": 0.512819,
+            "n": 2,
+            "best": 0.512819
+          },
+          "measured_firm": {
+            "mean": 0.319096,
+            "n": 1,
+            "best": 0.319096
+          },
+          "deep_one_step": {
+            "mean": 0.434608,
+            "n": 1,
+            "best": 0.434608
+          },
+          "firm_one_step": {
+            "mean": 0.512819,
+            "n": 1,
+            "best": 0.512819
+          }
+        }
+      },
+      "gains": {
+        "soft_anchor": {
+          "gain": -0.214848,
+          "n": 1
+        },
+        "deep_anchor": {
+          "gain": -0.080882,
+          "n": 1
+        },
+        "fast_concede": {
+          "gain": 0.0,
+          "n": 3
+        },
+        "slow_concede": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "eager_close": {
+          "gain": -0.080882,
+          "n": 1
+        },
+        "deep_fast": {
+          "gain": -0.0139,
+          "n": 1
+        },
+        "mid_anchor": {
+          "gain": -0.0139,
+          "n": 1
+        },
+        "firm_close": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "firm_deep_fast": {
+          "gain": -0.0139,
+          "n": 1
+        },
+        "measured_meet": {
+          "gain": -0.147865,
+          "n": 1
+        },
+        "no_meet": {
+          "gain": -0.147865,
+          "n": 1
+        },
+        "weight_order": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "no_reopen": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "date_first": {
+          "gain": 0.0,
+          "n": 1
+        },
+        "one_step": {
+          "gain": 0.045858,
+          "n": 2
+        },
+        "measured_firm": {
+          "gain": -0.147865,
+          "n": 1
+        },
+        "deep_one_step": {
+          "gain": -0.032353,
+          "n": 1
+        },
+        "firm_one_step": {
+          "gain": 0.045858,
+          "n": 1
+        }
+      },
+      "base": 0.466961
+    }
+  }
+}

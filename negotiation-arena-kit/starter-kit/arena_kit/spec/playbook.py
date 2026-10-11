@@ -9,7 +9,7 @@ Choice: the cut is the DEEPER of the two (leverage 15 %, routine 10 %, quality_f
 6 %, secure_supply 5 %). Both held up in their best runs (MESO's 0.85 for P18's 0.453, TeamAgent's
 14 % + 4 for P05's 0.781), and the anchor never stands alone: R4.1 still takes the lowest of this
 cut, the current price (price increases) and the fair price, and R4.2 then lifts it to the
-credibility limits - at most 25 % under the supplier's price, never under its full cost x 1.01,
+credibility limits - at most 25 % under the supplier's price, never under its full cost x 0.98,
 never under the price at which C stops falling. That last limit IS MESO's "margin-optimal price" for
 stabilise (and secure_supply), so MESO's stabilise anchor is kept as a floor rather than a cut.
 An RFQ adds RFQ_EXTRA (R12.6). The anchor is set once per thread (R4.4); in an RFQ it may only fall.
@@ -100,6 +100,7 @@ def horizon(case):
     return RFQ_HORIZON if len(case.get("suppliers") or []) > 1 else row(case)["horizon"]
 
 
-def anchor_cut(case):
-    """The share off the best quote: the merged table, plus RFQ_EXTRA in an RFQ (R12.6)."""
-    return row(case)["cut"] + (RFQ_EXTRA if len(case.get("suppliers") or []) > 1 else 0.0)
+def anchor_cut(case, row_=None):
+    """The share off the best quote: the merged table (or `row_`, a strategy's row), plus RFQ_EXTRA in an
+    RFQ (R12.6)."""
+    return (row_ or row(case))["cut"] + (RFQ_EXTRA if len(case.get("suppliers") or []) > 1 else 0.0)

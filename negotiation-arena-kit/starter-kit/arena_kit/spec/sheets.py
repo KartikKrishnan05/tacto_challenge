@@ -88,9 +88,10 @@ class Ctx:
         if theirs:
             own = [o for o in keep if o and o["series"] == theirs["series"]]
             if own:
-                best = min(own, key=lambda o: (self.c({**self.their, "index_clause": o}), -o["deadband_pct"]))
-                # R12.8: a demanded index is offered on its cheapest deadband, not a gratuitous 0%.
-                keep = [o for o in keep if o is None or key(o) == key(best)]
+                # R12.8: the supplier insists on its index - the menu is its series at the deadbands, not
+                # "no clause" again (P08/P18: a no-clause sheet against a demanded index drew holds and a
+                # final offer above the last one; conceding the clause and pushing price got 5.60 -> 5.40)
+                keep = own
         return keep
 
 
@@ -241,11 +242,11 @@ def structure_floor(ctx, combo, base, floor_price):
     return max(FLOOR_PRICE_K * ctx.their_price, min(floor_price, p))
 
 
-def priced(ctx, combo, target, lo):
+def priced(ctx, combo, target, lo, slack=0.0):
     """`combo` at the whole-cent price that costs `target`, if that price is credible: at or above `lo`
     and with lower total cost than the supplier's package. A higher unit price can still be a
     concession when improved terms lower total cost. Else None."""
-    p = pricing.price_for(ctx.case, combo, ctx.std, target, ctx.supplier, ctx.their_price)
+    p = pricing.price_for(ctx.case, combo, ctx.std, target, ctx.supplier, ctx.their_price, slack)
     if p is None or p < lo - 0.005:
         return None
     sheet = complete(ctx.case, {**combo, "unit_price": p}, ctx.std)
@@ -412,7 +413,7 @@ def lock_coverage(ctx, sheets, cover_values):
     return out
 
 
-def guard(ctx, sheets, target, supplier_sheets, last_sheets=None):
+def guard(ctx, sheets, target, supplier_sheets, last_sheets=None, slack=0.0):
     """R11.11 / R6.7, code's last word on every sheet: it costs us at most the target (within the
     whole-cent tolerance), is cheaper for us than the supplier's standing offer, is not one of the
     supplier's own sheets and keeps the must-haves. If nothing survives: our last sheets."""
@@ -423,7 +424,7 @@ def guard(ctx, sheets, target, supplier_sheets, last_sheets=None):
             continue
         c = ctx.c(t)
         tol = pricing.tolerance(ctx.case, t, ctx.std)
-        if not math.isfinite(c) or c > target + tol or c >= c_theirs:
+        if not math.isfinite(c) or c > target * (1 + slack) + tol or c >= c_theirs:
             continue
         if any(same(t, s) for s in own) or not ctx.ok(t):
             continue

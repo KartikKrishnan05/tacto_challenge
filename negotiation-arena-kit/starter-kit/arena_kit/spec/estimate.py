@@ -108,7 +108,11 @@ def estimate(case, package, events=None, opening=None, cash_short=False, reveale
                 if (fc := breakdown_cost(att["text"])) is not None:
                     return Estimate(fc, fc, "breakdown", rate, usual, opening)
     sc = should_cost(package, case)
-    if sc is not None and not (market_low and sc >= market_low):
+    # The full cost (should-cost / K), not the should-cost itself, is what a price can never go under:
+    # P02's should-cost 374.95 sits above its 370.96 quote, but its full cost 367.60 is exactly what the
+    # arena's margin charge implies (deal 371.88 at 90 days) - dropping it made the floor 337 and the
+    # agent pushed until the supplier walked.
+    if sc is not None and not (market_low and sc / FULL_COST_K >= market_low):
         return Estimate(round(sc / FULL_COST_K, 2), sc, "should-cost", rate, usual, opening)
     price = (
         min(p for p in (opening.get("unit_price"), market_low) if p)

@@ -1,0 +1,26 @@
+{
+  "batch": "1011-085057_release-sunday-x2",
+  "label": "release-sunday-x2",
+  "git_head": "e69a9af",
+  "source": "6a443e996b91",
+  "model_name": null,
+  "jobs": {
+    "case:P02": [
+      null,
+      null
+    ],
+    "case:P05": [
+      null,
+      null
+    ],
+    "case:P07": [
+      null,
+      null
+    ],
+    "case:P11": [
+      null,
+      null
+    ]
+  },
+  "holdout": false
+}

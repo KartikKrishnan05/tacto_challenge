@@ -27,10 +27,15 @@ from . import estimate as est_mod
 from . import levers, playbook, pricing
 from .clock import CaseClock
 from .sheets import Ctx, cover, floor, repair
+from .strategy import BASE
 from .terms import COVERAGE, complete, uncovered_units
 
 log = logging.getLogger("arena")
 
+# R4.2's credibility limit, below the full cost: the supplier never sells under its floor, so an anchor a
+# little under it is safe, and the best runs opened there (P01 at 124 against a full cost of 130, P02 at
+# 345 against 368); at x 1.01 a should-cost close to the quote left no anchor at all (P02).
+ANCHOR_COST_K = 0.98
 TERM_FIELDS = {
     "unit_price", "payment_days", "lead_time_days", "volume_per_year", "contract_months", "effective_date",
     "index_clause", "incoterm", "tooling_eur", "ppm_commitment", "chargeback_eur_per_complaint",
@@ -226,9 +231,9 @@ def anchor_price(case, ctx, their_price, best_quote, combo):
     """R4.1 + R4.2 + R13.12: the lowest of the goal's cut off the best quote, the current price (no
     increase at all in a price increase / raw material case), the fair price (should-cost / (1 -
     margin)) - lifted to the credibility limits: at most 25 % under its price, never under its full
-    cost x 1.01, never under the price at which C stops falling."""
-    b, row = case["buyer"], playbook.row(case)
-    cands = [best_quote * (1 - playbook.anchor_cut(case))]
+    cost x ANCHOR_COST_K, never under the price at which C stops falling."""
+    b, row = case["buyer"], getattr(ctx, "playbook", None) or playbook.row(case)
+    cands = [best_quote * (1 - playbook.anchor_cut(case, row))]
     current = b.get("current_unit_price")
     if case.get("type") in ("price_increase", "raw_material") and current and current < their_price:
         cands.append(current)
@@ -239,28 +244,30 @@ def anchor_price(case, ctx, their_price, best_quote, combo):
             cands.append(est.point / (1 - margin))
     p = max(min(cands), their_price * (1 - playbook.MAX_ANCHOR_CUT))
     if est and est.full_cost and est.source in ("should-cost", "breakdown"):
-        p = max(p, est.full_cost * 1.01)
+        p = max(p, est.full_cost * row.get("anchor_cost_k", ANCHOR_COST_K))
     p = max(p, pricing.c_min_price(case, combo, ctx.std, ctx.supplier, p, their_price))
     return round(min(p, their_price), 2)
 
 
-def prepare(case, threads=None, package=None, volatile=None, seconds_left=None, cash_short=None):
+def prepare(case, threads=None, package=None, volatile=None, seconds_left=None, cash_short=None, strategy=None):
     """Section 0.7 for a case: with `threads` (the opening e-mails, quote PDFs read) every supplier's
     opening is priced; without them (before the session) a notional opening at the current price is
-    used, so the preparation runs on the case file alone."""
+    used, so the preparation runs on the case file alone. `strategy` (spec.strategy) adjusts the
+    playbook row and the horizon; None plays the defaults."""
+    strategy = strategy or BASE
     try:
-        return _prepare(case, threads, package, volatile, seconds_left, cash_short or {})
+        return _prepare(case, threads, package, volatile, seconds_left, cash_short or {}, strategy)
     except Exception as e:  # a case file we cannot prepare must not cost the case: log and go minimal
         log.exception("%s: preparation failed (%s) - minimal defaults", (case or {}).get("case_id"), e)
         c, w = normalise(case)
         return Prep(c, [*w, f"preparation failed: {e}"], c["buyer"].get("category_goal") or "routine",
-                    playbook.row(c), playbook.type_levers(c), playbook.horizon(c), c_alternative(c), {}, math.inf,
+                    strategy.row(c), playbook.type_levers(c), strategy.horizon(c), c_alternative(c), {}, math.inf,
                     CaseClock(seconds_left))  # fmt: skip
 
 
-def _prepare(case, threads, package, volatile, seconds_left, cash_short):
+def _prepare(case, threads, package, volatile, seconds_left, cash_short, strategy=BASE):
     c, warnings = normalise(case)
-    b, row = c["buyer"], playbook.row(c)
+    b, row = c["buyer"], strategy.row(c)
     goal = b.get("category_goal") if b.get("category_goal") in playbook.PLAYBOOK else playbook.DEFAULT_GOAL
     c_alt = c_alternative(c)
     if threads:
@@ -297,7 +304,7 @@ def _prepare(case, threads, package, volatile, seconds_left, cash_short):
         op.floor = round(floor(ctx), 2)
         openings[sid] = op
     valid = [o.c for o in openings.values() if o.keeps_must_haves]
-    return Prep(c, warnings, goal, row, playbook.type_levers(c), playbook.horizon(c), c_alt, openings,
+    return Prep(c, warnings, goal, row, playbook.type_levers(c), strategy.horizon(c), c_alt, openings,
                 min(valid, default=math.inf), CaseClock(seconds_left))  # fmt: skip
 
 

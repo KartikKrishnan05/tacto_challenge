@@ -1,0 +1,40 @@
+{
+  "batch": "1011-085641_learned-2",
+  "label": "learned-2",
+  "git_head": "e69a9af",
+  "source": "09d973225baf",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      null
+    ],
+    "case:P02": [
+      null
+    ],
+    "case:P03": [
+      null
+    ],
+    "case:P04": [
+      null
+    ],
+    "case:P05": [
+      null
+    ],
+    "case:P07": [
+      null
+    ],
+    "case:P08": [
+      null
+    ],
+    "case:P10": [
+      null
+    ],
+    "case:P11": [
+      null
+    ],
+    "case:P18": [
+      null
+    ]
+  },
+  "holdout": false
+}

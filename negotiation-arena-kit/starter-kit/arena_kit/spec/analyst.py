@@ -43,6 +43,23 @@ WITHDRAW = re.compile(
     r"not continue|step back from)\b",
     re.I,
 )
+# "no more room" without "goodbye" (P02: "the ongoing copper cost pressure limits our flexibility for
+# further reductions" - one more low counter and it withdrew)
+LIMIT = re.compile(
+    r"\b(limits? (?:our|any|the) (?:flexibility|room|scope|leeway)|limited (?:flexibility|room|scope|leeway)|"
+    r"(?:little|no|not much) (?:more |further )?(?:room|flexibility|scope|leeway)|"
+    r"(?:reached|at) (?:our|the) (?:limit|minimum|floor)|as far as we can go|absolute minimum|bottom line|"
+    r"(?:cannot|can't|can ?not|unable to|not able to) (?:go|move|reduce|lower|come down)(?: (?:the|our) price)?"
+    r" (?:any )?(?:further|lower))",
+    re.I,
+)
+# it wants to close now (P05: "Let's agree on this and get the machines running", then it withdrew on our
+# 4-cent counter)
+AGREE = re.compile(
+    r"\b(let'?s (?:agree|close|finali[sz]e|conclude|sign|shake hands)|ready to (?:sign|close|conclude)|"
+    r"agree on this|close (?:this|the deal) (?:now|today)|shake hands on)\b",
+    re.I,
+)
 POSITIVE = re.compile(
     r"\b(happy|pleased|glad|appreciate\w*|fair point|thank\w*|value|welcome|good cooperation)\b", re.I
 )
@@ -128,6 +145,8 @@ class Intel:
     tone: float | None = None
     relationship_style: str | None = None
     withdraw_language: bool = False
+    at_limit: bool = False  # its latest mail says it has no room left (LIMIT) or withdraws
+    wants_close: bool = False  # its latest mail asks to close now (AGREE)
     questions: list = field(default_factory=list)
     walk_risk: float = 0.0
     walk_signals: dict = field(default_factory=dict)
@@ -372,6 +391,8 @@ class Analyst:
         intel.unchanged_rounds = unchanged(history)
         intel.walk_risk, intel.walk_signals = walk_risk(history)
         intel.tone, intel.withdraw_language = history[-1].tone, history[-1].withdraw
+        intel.at_limit = history[-1].withdraw or bool(LIMIT.search(body))
+        intel.wants_close = bool(AGREE.search(body))
         intel.cash_ask = bool(CASH_ASK.search(body))
 
         # offers stated only in prose (R11.8) and the "Alternatively" lines (R13.6)

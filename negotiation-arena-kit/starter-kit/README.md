@@ -97,6 +97,32 @@ quota; model-enabled runs send the fictional case material to your configured pr
 model credits. Add `--no-model` for the code-only fallback benchmark, or `--ids P05` for a targeted
 retest. Do not publish logs if you later use this agent with real confidential business data.
 
+### Learning from experiments (`spec.lab`)
+
+The SpecAgent's strategy knobs - anchor depth, concession pace, when to close - are tuned by experiment,
+not by hand. `spec.lab` plays named variants (`arena_kit/spec/strategy.py`: `VARIANTS`, each with a
+hypothesis) on the hosted practice cases and writes every game to the experiment sheet in
+`knowledge/`. From it, it builds `knowledge/learned_playbook.json` and the result sheet
+`knowledge/EXPERIMENTS.md`. When the agent prepares a case (`--agent spec`, `spec.evaluate`), it reads the
+playbook and plays the variant with the best evidence. It looks for the same case first, then the same
+type and goal, then the same goal, then the same type, and falls back to the defaults when nothing
+comparable has been tested.
+
+```bash
+uv run python -m arena_kit.spec.lab run --parallel 8 --label sweep-2                # every variant x every case
+uv run python -m arena_kit.spec.lab run --variants base deep_anchor --ids P05 P18   # a targeted test
+uv run python -m arena_kit.spec.lab learned --holdout --label holdout                # the playbook on "unseen" cases
+uv run python -m arena_kit.spec.lab build                                            # rebuild sheet + playbook
+```
+
+Without `--model`, games are code-only: no model credits, and repeatable. The suppliers answer identical
+e-mails identically, so the lab first replays each game against the recorded ones (`spec.replay`). A
+practice session is used only when the agent sends an e-mail no recorded game sent. Cap the number of real
+sessions with `--sessions N`; `--sessions 0` is a free dry run that shows which games would need one. To
+test a new idea, add a variant to `VARIANTS` and `HYPOTHESES` and run it. At the start of each case the
+agent logs the lessons the playbook holds for its goal and type (`spec.strategy.briefing`).
+`spec.evaluate --no-learned` plays the defaults.
+
 ## Try it by hand (Postman, curl)
 
 Feel the API before you put a model in front of it. On the real arena (practice and sandbox) the

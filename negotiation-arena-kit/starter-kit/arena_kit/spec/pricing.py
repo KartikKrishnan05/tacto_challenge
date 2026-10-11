@@ -42,9 +42,11 @@ def cheapest_price(case, terms, std, supplier, hint):
     return (lo + hi) / 2
 
 
-def price_for(case, terms, std, target, supplier=None, hint=None):
+def price_for(case, terms, std, target, supplier=None, hint=None, slack=0.0):
     """The whole-cent unit price at which `terms` cost `target`, or None if no price does.
-    `hint`: the supplier's price (the search window with a margin charge)."""
+    `hint`: the supplier's price (the search window with a margin charge). `slack`: a structure whose
+    cheapest C misses the target by at most this share is priced at its cheapest price instead (a menu
+    keeps its 90-day option when the margin charge puts that structure's minimum just above target)."""
     if supplier is None:
         c0 = _c(case, terms, std, None, 0.0)
         c1 = _c(case, terms, std, None, 1.0)
@@ -54,7 +56,10 @@ def price_for(case, terms, std, target, supplier=None, hint=None):
         return round(p, 2) if p > 0 else None
     hint = hint or terms.get("unit_price") or 1.0
     low = cheapest_price(case, terms, std, supplier, hint)
-    if _c(case, terms, std, supplier, low) > target + tolerance(case, terms, std):
+    c_low = _c(case, terms, std, supplier, low)
+    if c_low > target + tolerance(case, terms, std):
+        if slack and c_low <= target * (1 + slack):
+            return round(math.ceil(low * 100) / 100, 2)
         return None  # out of reach: even the cheapest price costs more
     high = 1.5 * hint
     if _c(case, terms, std, supplier, high) <= target:

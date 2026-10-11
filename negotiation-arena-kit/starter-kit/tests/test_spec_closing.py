@@ -157,3 +157,31 @@ def test_clock_forces_the_close():
     assert decide(one(view(target=500_000)), "sup:1", must_close=True).kind == "accept"
     v = view(rows=[row("offer:1-1", 1_200_000, valid=False)])
     assert decide(one(v), "sup:1", must_close=True).kind == "walk"
+
+
+# --- a supplier at its limit --------------------------------------------------------------------------
+def test_supplier_at_its_limit_with_crumbs_is_accepted_before_it_walks():
+    """P02: 373.88 -> 372.88 -> 371.88 and "limits our flexibility" - one more counter and it walked."""
+    v = view(sent=3, rows=[row("offer:1-3", 1_000_000)], target=950_000, at_limit=True, last_step_share=0.0027)
+    c = decide(one(v), "sup:1")
+    assert c.kind == "accept" and "limit" in c.reason
+
+
+def test_limit_language_alone_does_not_close_while_it_still_moves_or_early():
+    moving = view(sent=3, rows=[row("offer:1-3", 1_000_000)], target=950_000, at_limit=True, last_step_share=0.01)
+    assert decide(one(moving), "sup:1") is None
+    early = view(sent=2, rows=[row("offer:1-2", 1_000_000)], target=950_000, at_limit=True, last_step_share=0.0)
+    assert decide(one(early), "sup:1") is None
+
+
+def test_high_walk_risk_takes_the_table():
+    v = view(sent=3, rows=[row("offer:1-3", 1_000_000)], target=950_000, walk_risk=0.65, last_step_share=0.02)
+    assert decide(one(v), "sup:1").kind == "accept"
+
+
+def test_supplier_asking_to_close_near_our_target_is_accepted():
+    """P05: "Let's agree on this" at 28.00, 1.8 % over our target - our counter made it withdraw."""
+    v = view(sent=2, rows=[row("offer:1-2", 1_018_000)], target=1_000_000, wants_close=True)
+    assert decide(one(v), "sup:1").kind == "accept"
+    far = view(sent=2, rows=[row("offer:1-2", 1_050_000)], target=1_000_000, wants_close=True)
+    assert decide(one(far), "sup:1") is None

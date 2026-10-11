@@ -75,7 +75,10 @@ def test_r13_5_revealed_term_chooses_cheapest_at_actual_supplier_prices():
     main = {**ctx.their, "payment_days": 60, "unit_price": 138}
     alt = {"payment_days": 30, "unit_price": 134}
     msg = opening(sid, main)
-    assert Steps().revealed(ctx, msg, [alt]) == {"payment_days": 30}
+    # 4 EUR for 30 days is a 35 % cost of money: on its own slope 14 days is cheaper still for us
+    assert Steps().revealed(ctx, msg, [alt]) == {"payment_days": 14}
+    # 0.50 EUR for 30 days is 4.3 % - cheaper money than ours (8 %): pay later at its slope (P03: 90 days)
+    assert Steps().revealed(ctx, msg, [{**alt, "unit_price": 137.5}]) == {"payment_days": 90}
     assert Steps().revealed(ctx, msg, [{**alt, "unit_price": 140}]) == {"payment_days": 60}
     assert Steps().revealed(ctx, msg, [{**alt, "effective_date": "2027-04-01"}]) == {}
 

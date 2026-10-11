@@ -89,3 +89,16 @@ def test_rfq_anchor_only_falls():
     q.set_anchor(900_000, rfq=True)
     assert q.set_anchor(950_000, rfq=True) == 900_000
     assert q.set_anchor(850_000, rfq=True) == 850_000
+
+
+def test_a_big_supplier_move_is_met_halfway_not_with_a_token_step():
+    """P05: it dropped 30.50 -> 28.00, past most of the gap; a 0.4 % answer read as an insult."""
+    from arena_kit.spec.concession import Plan
+
+    p = Plan()
+    p.set_anchor(100.0)
+    p.observe(130.0, 1)
+    p.commit(100.0)
+    p.observe(104.0, 2)  # it moved 26, only 4 left between us
+    target, info = p.next_target(104.0, 5)
+    assert info["kind"] == "reciprocal" and target >= 102.0 - 1e-9
