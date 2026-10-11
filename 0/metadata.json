@@ -1,0 +1,69 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4MBCWZ3R36DM7CTGF4PFT6R",
+  "session_id": "1d06817f-32b5-495d-80b9-ce87dc2c966b",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-11T02:06:50.526242Z",
+  "branch": "feature/meso-agent",
+  "checkpoints_count": 8,
+  "save_step_count": 4,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/NEW_AGENT_REQUIREMENTS.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "c15e6b8adccf",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 134,
+    "cache_creation_tokens": 284756,
+    "cache_read_tokens": 14669565,
+    "output_tokens": 86377,
+    "api_call_count": 67
+  },
+  "session_metrics": {
+    "turn_count": 8
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-11T02:06:50.357065Z",
+    "agent_lines": 730,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 730,
+    "total_lines_changed": 730,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 184,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 300,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 442,
+      "agent_lines_removed": 0
+    }
+  ]
+}

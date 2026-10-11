@@ -1,0 +1,29 @@
+explain the whole process with no specific case exactly and visually please
+
+---
+
+currently the best runs came from team agent and the current agent right? answer with yes and no only
+
+---
+
+give me an visual overview of how the team agent did the work
+
+---
+
+which aspects where the best in buyer
+
+---
+
+create a new requirements for a new agent. Please add everything which worked perfect in buyeragent into this new requirements file
+
+---
+
+ok now lets take a look at the good parts of the dual agent and take the good parts from there and add it to the new agent requirements page
+
+---
+
+now do the same for the teamagent?
+
+---
+
+now also add the positive parts of MESO agent (probably the correct calculations and the offerings maybe)
