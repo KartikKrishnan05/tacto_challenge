@@ -1,0 +1,35 @@
+01:39:21 session aa67cbaf96bad37e
+01:39:21 case:P18 sup:70740 steps: index_clause (4,554 EUR), contract_months (4,106 EUR), payment_days (2,442 EUR)
+01:39:21 case:P18 sup:70740 step 1/3 index_clause, locked {}, target C 283,531: {"unit_price": 5.61, "index_clause": null} | {"unit_price": 5.51, "index_clause": {"series": "AS-14404", "material_share": 0.45, "deadband_pct": 3, "base_month": "2026-08"}} | {"unit_price": 5.56, "index_clause": {"series": "AS-14404", "material_share": 0.45, "deadband_pct": 5, "base_month": "2026-08"}}
+01:39:44 sup:70740 open {'unit_price': 5.8, 'payment_days': 30, 'index_clause': {'series': 'AS-14404', 'material_share': 0.45, 'deadband_pct': 5.0, 'base_month': '2026-08'}, 'contract_months': 12}
+01:39:44 case:P18 sup:70740 step 2/3 contract_months, locked {"index_clause": {"series": "AS-14404", "material_share": 0.45, "deadband_pct": 5.0, "base_month": "2026-08"}}, target C 285,633: {"unit_price": 5.8, "contract_months": 24} | {"unit_price": 5.65, "contract_months": 12} | {"unit_price": 5.8, "contract_months": 36}
+01:40:15 sup:70740 agreed {'unit_price': 5.8, 'payment_days': 30, 'index_clause': {'series': 'AS-14404', 'material_share': 0.45, 'deadband_pct': 5.0, 'base_month': '2026-08'}, 'contract_months': 24}
+01:40:15 sup:70740 {'type': 'accept', 'term_sheet_id': 'offer:70740-2'}
+{
+  "deal": true,
+  "supplier_id": "sup:70740",
+  "terms": {
+    "payment_days": 30,
+    "lead_time_days": 14,
+    "volume_per_year": 23700,
+    "contract_months": 24,
+    "effective_date": "2027-01-01",
+    "index_clause": {
+      "series": "AS-14404",
+      "material_share": 0.45,
+      "deadband_pct": 5.0,
+      "base_month": "2026-08"
+    },
+    "incoterm": "DAP",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 70,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 5.8
+  },
+  "c_open": 295173.23,
+  "c_deal": 279227.08,
+  "c_best": 222651.27,
+  "score": 0.21988029556840394
+}
+replay: https://arena.tacto.ai/replay/aa67cbaf96bad37e
+practice sessions left today: 369

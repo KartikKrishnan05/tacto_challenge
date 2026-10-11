@@ -1,0 +1,20 @@
+01:39:21 session 9d08f85a631df9df
+01:39:21 case:P05 sup:70210 steps: payment_days (5,107 EUR), lead_time_days (1,400 EUR)
+01:39:21 case:P05 sup:70240 steps: payment_days (4,469 EUR), lead_time_days (1,400 EUR)
+01:39:21 case:P05 sup:70250 steps: payment_days (5,462 EUR), lead_time_days (1,400 EUR)
+01:39:21 case:P05 sup:70240 step 1/2 payment_days, locked {}, target C 244,749: {"unit_price": 29.17, "payment_days": 90} | {"unit_price": 28.98, "payment_days": 60} | {"unit_price": 28.88, "payment_days": 45}
+01:40:03 sup:70240 open {'unit_price': 32.5, 'payment_days': 45, 'lead_time_days': 35}
+01:40:03 case:P05 sup:70210 step 1/2 payment_days, locked {}, target C 279,337: {"unit_price": 33.34, "payment_days": 90} | {"unit_price": 33.12, "payment_days": 60} | {"unit_price": 33.01, "payment_days": 45}
+01:40:34 sup:70210 open {'unit_price': 33.5, 'payment_days': 30, 'lead_time_days': 35}
+01:40:34 case:P05 sup:70250 step 1/2 payment_days, locked {}, target C 298,092: {"unit_price": 35.66, "payment_days": 90} | {"unit_price": 35.42, "payment_days": 60} | {"unit_price": 35.3, "payment_days": 45}
+01:41:00 sup:70250 open {'unit_price': 36.0, 'payment_days': 30, 'lead_time_days': 35}
+01:41:00 case:P05 sup:70240 step 2/2 lead_time_days, locked {"payment_days": 45}, target C 251,494: {"unit_price": 29.68, "lead_time_days": 28} | {"unit_price": 29.68, "lead_time_days": 35} | {"unit_price": 29.52, "lead_time_days": 42}
+01:41:53 sup:70240 open {'unit_price': 32.5, 'payment_days': 45, 'lead_time_days': 35}
+01:41:53 case:P05 sup:70210 step 2/2 lead_time_days, locked {"payment_days": 30}, target C 281,834: {"unit_price": 33.2, "lead_time_days": 28} | {"unit_price": 33.2, "lead_time_days": 35} | {"unit_price": 33.03, "lead_time_days": 42}
+01:42:23 sup:70210 final_offer {'unit_price': 33.5, 'payment_days': 30, 'lead_time_days': 35}
+01:42:23 case:P05 sup:70250 step 2/2 lead_time_days, locked {"payment_days": 30}, target C 301,057: {"unit_price": 35.54, "lead_time_days": 28} | {"unit_price": 35.54, "lead_time_days": 35} | {"unit_price": 35.37, "lead_time_days": 42}
+01:43:04 sup:70250 final_offer {'unit_price': 36.0, 'payment_days': 30, 'lead_time_days': 35}
+01:43:04 case:P05 sup:70240 price, locked {"payment_days": 45, "lead_time_days": 35}, target C 256,241: {"unit_price": 30.25}
+01:43:23 sup:70240 walked_away {}
+01:43:23 sup:70210 {'type': 'accept', 'term_sheet_id': 'offer:70210-3'}
+HTTP 422: not a standing offer in this session

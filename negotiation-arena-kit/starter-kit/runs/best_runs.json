@@ -1,0 +1,298 @@
+{
+ "case:P01": {
+  "session": "8ffc168595182655",
+  "created": 1791658223.636967,
+  "score": 0.941,
+  "rounds": 5,
+  "supplier": "sup:70110",
+  "c_open": 1153779.74,
+  "c_deal": 1100186.73,
+  "c_best": 1096815.78,
+  "terms": {
+   "payment_days": 60,
+   "lead_time_days": 42,
+   "volume_per_year": 8150,
+   "contract_months": 12,
+   "effective_date": "2027-04-01",
+   "index_clause": null,
+   "incoterm": "FCA",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 900,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 135.2
+  },
+  "breakdown": {
+   "price": 1072647.85,
+   "freight": 15485.0,
+   "quality": 1584.36,
+   "relationship": 10469.52
+  }
+ },
+ "case:P02": {
+  "session": "136d81f9aa6fc78b",
+  "created": 1791669489.1853383,
+  "score": 0.507,
+  "rounds": 5,
+  "supplier": "sup:70510",
+  "c_open": 2282867.49,
+  "c_deal": 2258872.49,
+  "c_best": 2235514.05,
+  "terms": {
+   "payment_days": 90,
+   "lead_time_days": 35,
+   "volume_per_year": 6110,
+   "contract_months": 12,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 250,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 371.88
+  },
+  "breakdown": {
+   "price": 2272186.8,
+   "payment_terms": -15147.91,
+   "quality": 1191.45,
+   "relationship": 642.15
+  }
+ },
+ "case:P03": {
+  "session": "c7767a0427aae84f",
+  "created": 1791658718.914084,
+  "score": 0.919,
+  "rounds": 4,
+  "supplier": "sup:70530",
+  "c_open": 4246314.02,
+  "c_deal": 3936208.14,
+  "c_best": 3909043.1,
+  "terms": {
+   "payment_days": 90,
+   "lead_time_days": 49,
+   "volume_per_year": 4580,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 350,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 432.29
+  },
+  "breakdown": {
+   "price": 3959776.4,
+   "payment_terms": -26398.51,
+   "quality": 2000.54,
+   "relationship": 829.7
+  }
+ },
+ "case:P04": {
+  "session": "acd908a2f74f5ff2",
+  "created": 1791648177.2886026,
+  "score": 0.86,
+  "rounds": 3,
+  "supplier": "sup:70620",
+  "c_open": 198846.33,
+  "c_deal": 196852.67,
+  "c_best": 196529.32,
+  "terms": {
+   "payment_days": 90,
+   "lead_time_days": 7,
+   "volume_per_year": 20000,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 150,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 4.94
+  },
+  "breakdown": {
+   "price": 197600.0,
+   "payment_terms": -1317.33,
+   "quality": 570.0
+  }
+ },
+ "case:P05": {
+  "session": "7a0d2f4fe874bd57",
+  "created": 1791648759.109183,
+  "score": 0.781,
+  "rounds": 7,
+  "supplier": "sup:70210",
+  "c_open": 305544.96,
+  "c_deal": 241448.48,
+  "c_best": 223424.17,
+  "terms": {
+   "payment_days": 30,
+   "lead_time_days": 35,
+   "volume_per_year": 4200,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 1200,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 28.42
+  },
+  "breakdown": {
+   "price": 238728.0,
+   "payment_terms": 1591.52,
+   "quality": 1128.96
+  }
+ },
+ "case:P07": {
+  "session": "c0d536a599a46f42",
+  "created": 1791675204.2525976,
+  "score": 0.773,
+  "rounds": 5,
+  "supplier": "sup:70610",
+  "c_open": 391027.4,
+  "c_deal": 320080.8,
+  "c_best": 299241.49,
+  "terms": {
+   "payment_days": 90,
+   "lead_time_days": 5,
+   "volume_per_year": 30000,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 80,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 5.37
+  },
+  "breakdown": {
+   "price": 322200.0,
+   "payment_terms": -2148.0,
+   "quality": 28.8
+  }
+ },
+ "case:P08": {
+  "session": "0e69ff6b63b35cd8",
+  "created": 1791649307.2947688,
+  "score": 0.549,
+  "rounds": 4,
+  "supplier": "sup:70710",
+  "c_open": 1135887.28,
+  "c_deal": 1039531.93,
+  "c_best": 960309.33,
+  "terms": {
+   "payment_days": 90,
+   "lead_time_days": 10,
+   "volume_per_year": 94800,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": {
+    "series": "AS-14404",
+    "material_share": 0.45,
+    "deadband_pct": 5.0,
+    "base_month": "2026-08"
+   },
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 50,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 5.47
+  },
+  "breakdown": {
+   "price": 1037112.0,
+   "payment_terms": -6914.08,
+   "index_clause": 4667.0,
+   "index_risk": 4667.0
+  }
+ },
+ "case:P10": {
+  "session": "b05f015f822ea7e1",
+  "created": 1791669315.186792,
+  "score": 0.671,
+  "rounds": 3,
+  "supplier": "sup:70410",
+  "c_open": 1932492.18,
+  "c_deal": 1527674.4,
+  "c_best": 1328926.89,
+  "terms": {
+   "payment_days": 30,
+   "lead_time_days": 56,
+   "volume_per_year": 23400,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 300,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 31.6
+  },
+  "breakdown": {
+   "price": 1478880.0,
+   "payment_terms": 9859.2,
+   "late_delivery": 33600.0,
+   "quality": 5335.2
+  }
+ },
+ "case:P11": {
+  "session": "9537780fde26f1ff",
+  "created": 1791661763.4163852,
+  "score": 0.672,
+  "rounds": 6,
+  "supplier": "sup:70140",
+  "c_open": 817578.0,
+  "c_deal": 753660.0,
+  "c_best": 722500.02,
+  "terms": {
+   "payment_days": 60,
+   "lead_time_days": 56,
+   "volume_per_year": 15900,
+   "contract_months": 12,
+   "effective_date": "2027-01-01",
+   "index_clause": null,
+   "incoterm": "FCA",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 800,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 45.5
+  },
+  "breakdown": {
+   "price": 723450.0,
+   "freight": 24486.0,
+   "quality": 5724.0
+  }
+ },
+ "case:P18": {
+  "session": "0383509004602959",
+  "created": 1791650499.7459753,
+  "score": 0.419,
+  "rounds": 5,
+  "supplier": "sup:70740",
+  "c_open": 295173.23,
+  "c_deal": 264784.3,
+  "c_best": 222651.27,
+  "terms": {
+   "payment_days": 30,
+   "lead_time_days": 14,
+   "volume_per_year": 23700,
+   "contract_months": 24,
+   "effective_date": "2027-01-01",
+   "index_clause": {
+    "series": "AS-14404",
+    "material_share": 0.45,
+    "deadband_pct": 5.0,
+    "base_month": "2026-08"
+   },
+   "incoterm": "DAP",
+   "tooling_eur": 0.0,
+   "ppm_commitment": 70,
+   "chargeback_eur_per_complaint": 0.0,
+   "unit_price": 5.5
+  },
+  "breakdown": {
+   "price": 260700.0,
+   "payment_terms": 1738.0,
+   "index_clause": 1173.15,
+   "index_risk": 1173.15
+  }
+ }
+}

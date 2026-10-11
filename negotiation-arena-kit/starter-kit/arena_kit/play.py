@@ -14,6 +14,7 @@ import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeout
 
 from .client import ArenaError
 from .cost import must_haves_ok, total_cost
@@ -27,6 +28,10 @@ MOVE_LIMIT_S = 60
 # In the Live Final, close this long before the wave's cap - or the slowest round of the case so far
 # (your decision plus a supplier reply of up to about a minute) plus a margin, if that is longer.
 CLOSE_BEFORE_CAP_S, ROUND_MARGIN_S = 90, 15
+# A supplier reply takes up to about a minute; one the POST has not returned by then is read from
+# the thread, every POLL_S seconds.
+SLOW_REPLY_S, POLL_S = 70, 3
+SENDER = ThreadPoolExecutor(max_workers=32, thread_name_prefix="send")
 RUNNING = re.compile(r"one session per case in the final: (\S+)")
 # Practice: the case list shows every practice case file; only those marked hosted can be played
 # (a session on another is a 403). Without the marker every listed case counts as hosted.
@@ -61,8 +66,28 @@ class RemoteTable:
             self.done = self.result()
         return self.case, {s: self.client.thread(session_id, s)["messages"] for s in state["threads"]}
 
+    def refresh(self, supplier_id):
+        """The thread as the arena has it now, e.g. after a timeout replaced the standing offer."""
+        return self.client.thread(self.session_id, supplier_id)["messages"]
+
     def send(self, supplier_id, message):
-        return self.client.send_message(self.session_id, supplier_id, message)
+        """Send and return the supplier's reply. A reply the POST has not returned after
+        SLOW_REPLY_S is read from the thread instead: the arena counts our 60 seconds from the
+        reply, not from when the POST returns (P05, 11 Oct: replies held back 4.5 minutes, three
+        timeouts per thread, every supplier walked away with two of them agreed)."""
+        before = len(self.refresh(supplier_id))
+        pending = SENDER.submit(self.client.send_message, self.session_id, supplier_id, message)
+        try:
+            return pending.result(timeout=SLOW_REPLY_S)
+        except FuturesTimeout:
+            log.warning("%s: no reply after %ss - reading the thread", supplier_id, SLOW_REPLY_S)
+        while True:
+            if pending.done():
+                return pending.result()
+            messages = self.refresh(supplier_id)
+            if len(messages) > before + 1 and messages[-1].get("from") != "buyer":
+                return messages[-1]
+            time.sleep(POLL_S)
 
     def close(self, supplier_id, message):
         reply = self.client.send_message(self.session_id, supplier_id, message)
@@ -148,6 +173,8 @@ def play(table, case_id, agent, deadline=None):
     for events in threads.values():
         for m in events:
             fetch_documents(table, m)
+    if len(threads) > 1 and hasattr(agent, "decide_thread"):
+        return play_parallel(table, case_id, case, threads, agent, deadline)
     slowest = 0.0  # the longest round so far: decision + the supplier's reply
     while live_threads(threads):
         t0 = time.monotonic()
@@ -166,6 +193,10 @@ def play(table, case_id, agent, deadline=None):
                 return table.close(sid, msg)
             reply = table.send(sid, msg)
         except ArenaError as e:
+            if e.status == 422 and msg.get("action") and hasattr(table, "refresh"):
+                log.info("%s: %s - reloading the thread", sid, e.detail)  # e.g. a timeout replaced the offer
+                threads[sid] = [fetch_documents(table, m) for m in table.refresh(sid)]
+                continue
             if e.status != 409:
                 raise
             log.info("%s: %s", sid, e.detail)
@@ -179,6 +210,79 @@ def play(table, case_id, agent, deadline=None):
         slowest = max(slowest, time.monotonic() - t0)
         log.info("%s %s %s", sid, reply.get("status"), standing(threads[sid])[1])
     return table.result()
+
+
+def play_parallel(table, case_id, case, threads, agent, deadline=None):
+    """An RFQ: every supplier thread runs in its own worker, so no thread sits idle into the
+    60-second rule while another supplier is answering. A worker stops when the agent has nothing
+    more to win in its thread (`agent.done`) - or takes a final offer at once when the agent says
+    so (`accept_now`). Once every worker has stopped, the agent closes the case."""
+    lock, closed = threading.Lock(), {}
+
+    def near_cap():
+        cap = deadline() if callable(deadline) else deadline
+        return cap and time.time() > cap - CLOSE_BEFORE_CAP_S
+
+    def finish(sid, msg):
+        """Close the case once (under the lock); reload the thread if the offer has moved on."""
+        with lock:
+            if closed:
+                return
+            try:
+                closed["result"] = table.close(sid, msg)
+            except ArenaError as e:
+                if e.status != 422 or not hasattr(table, "refresh"):
+                    raise
+                log.info("%s: %s - reloading the thread", sid, e.detail)
+                threads[sid] = [fetch_documents(table, m) for m in table.refresh(sid)]
+
+    def worker(sid):
+        while not closed and sid in live_threads(threads) and not near_cap():
+            t0 = time.monotonic()
+            if agent.done(case, threads, sid):
+                return
+            decision = agent.decide_thread(case, threads, sid)
+            if (took := time.monotonic() - t0) > MOVE_LIMIT_S * 0.75:
+                log.warning("decision took %.1fs - the limit is %ss per message", took, MOVE_LIMIT_S)
+            msg = decision["message"]
+            try:
+                reply = table.send(sid, msg)
+            except ArenaError as e:
+                if closed:  # another thread closed the case meanwhile
+                    return
+                if e.status != 409:
+                    raise
+                log.info("%s: %s", sid, e.detail)
+                reply = table.missed(sid, e)
+            if "result" in reply:  # the case has ended
+                with lock:
+                    closed.setdefault("result", reply["result"])
+                return
+            with lock:
+                threads[sid] += [{**msg, "from": "buyer"}, fetch_documents(table, reply)]
+            log.info("%s %s %s", sid, reply.get("status"), standing(threads[sid])[1])
+            if take := agent.accept_now(case, threads, sid):
+                log.info("%s %s (final offer, best on the table)", sid, take["message"]["action"])
+                finish(sid, take["message"])
+                return
+
+    def guarded(sid):  # one broken thread must not stop the others
+        try:
+            worker(sid)
+        except Exception:
+            log.exception("%s: thread %s failed", case_id, sid)
+
+    with ThreadPoolExecutor(max_workers=len(threads)) as pool:
+        list(pool.map(guarded, list(threads)))
+    for _ in range(3):  # close: accept the best sheet or walk away (a reload may need a retry)
+        if closed:
+            return closed["result"]
+        if not live_threads(threads):
+            break
+        decision = agent.close(case, threads) if hasattr(agent, "close") else closing_move(case, threads)
+        log.info("%s %s", decision["supplier_id"], decision["message"]["action"])
+        finish(decision["supplier_id"], decision["message"])
+    return closed.get("result") or table.result()
 
 
 def hosted(cases):

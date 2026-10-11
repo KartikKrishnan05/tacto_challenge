@@ -1,0 +1,32 @@
+01:39:21 session 463864f7e10f3d8a
+01:39:21 case:P04 sup:70620 steps: payment_days (1,675 EUR), contract_months (1,446 EUR)
+01:39:21 case:P04 sup:70620 step 1/2 payment_days, locked {}, target C 190,857: {"unit_price": 4.62, "payment_days": 90} | {"unit_price": 4.56, "payment_days": 30} | {"unit_price": 4.58, "payment_days": 45}
+01:39:48 sup:70620 open {'unit_price': 4.98, 'payment_days': 45, 'contract_months': 12}
+01:39:48 case:P04 sup:70620 step 2/2 contract_months, locked {"payment_days": 45}, target C 192,226: {"unit_price": 4.65, "contract_months": 12} | {"unit_price": 4.78, "contract_months": 24} | {"unit_price": 4.78, "contract_months": 36}
+01:40:06 sup:70620 open {'unit_price': 4.9, 'payment_days': 45, 'contract_months': 24}
+01:40:06 case:P04 sup:70620 price, locked {"payment_days": 45, "contract_months": 24}, target C 192,295: {"unit_price": 4.78}
+01:40:22 sup:70620 final_offer {'unit_price': 4.9, 'payment_days': 45, 'contract_months': 24}
+01:40:22 sup:70620 {'type': 'accept', 'term_sheet_id': 'offer:70620-3'}
+{
+  "deal": true,
+  "supplier_id": "sup:70620",
+  "terms": {
+    "payment_days": 45,
+    "lead_time_days": 7,
+    "volume_per_year": 20000,
+    "contract_months": 24,
+    "effective_date": "2027-01-01",
+    "index_clause": null,
+    "incoterm": "DAP",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 150,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 4.9
+  },
+  "c_open": 198846.33,
+  "c_deal": 197223.33,
+  "c_best": 196529.32,
+  "score": 0.7004717286502924
+}
+replay: https://arena.tacto.ai/replay/463864f7e10f3d8a
+practice sessions left today: 370

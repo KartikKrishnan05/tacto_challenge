@@ -1,0 +1,28 @@
+01:39:21 session c590408ec9c260f6
+01:39:21 case:P07 sup:70610 steps: contract_months (44,303 EUR), payment_days (2,908 EUR)
+01:39:21 case:P07 sup:70610 step 1/2 contract_months, locked {}, target C 377,160: {"unit_price": 5.74, "contract_months": 24} | {"unit_price": 5.28, "contract_months": 12} | {"unit_price": 5.74, "contract_months": 36}
+01:39:40 sup:70610 agreed {'unit_price': 5.74, 'payment_days': 30, 'contract_months': 24}
+01:39:40 sup:70610 {'type': 'accept', 'term_sheet_id': 'offer:70610-1'}
+{
+  "deal": true,
+  "supplier_id": "sup:70610",
+  "terms": {
+    "payment_days": 30,
+    "lead_time_days": 5,
+    "volume_per_year": 30000,
+    "contract_months": 24,
+    "effective_date": "2027-01-01",
+    "index_clause": null,
+    "incoterm": "DAP",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 80,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 5.74
+  },
+  "c_open": 391027.4,
+  "c_deal": 346724.8,
+  "c_best": 299241.49,
+  "score": 0.48267321204311225
+}
+replay: https://arena.tacto.ai/replay/c590408ec9c260f6
+practice sessions left today: 374
