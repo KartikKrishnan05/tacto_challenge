@@ -196,7 +196,7 @@ def decide(views, sid, must_close=False):
     may_accept = bool(cands) and (not rfq or heard)
 
     if must_close:  # R11.14: closed by the clock
-        return accept(views, "case clock: close", force=True) or walk(views, "case clock: nothing acceptable")
+        return accept(views, "case clock: close") or walk(views, "case clock: nothing acceptable")
 
     if v.status == "final_offer":  # R12.12: its last word - accept at once, anything more makes it walk
         if cands and (not rfq or best_sid == sid or all(ends(x) for x in views.values())):
