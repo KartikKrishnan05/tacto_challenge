@@ -56,6 +56,7 @@ in words. Read it, improve your agent, play again. Next steps, the LLM agent and
 | API docs | [brief/api.md](brief/api.md) |
 | Starter kit: client, example agents, Live Final runner, local simulator, MCP server | [starter-kit/](starter-kit/) |
 | Submission and pitch | [brief/submission.md](brief/submission.md) |
+| Pitch outline | [brief/pitch.md](brief/pitch.md) |
 | Practice build page: every team's quota, records and highlights | https://arena.tacto.ai/live |
 | Live Final results, team by team and case by case | https://arena.tacto.ai/results |
 | Questions | Discord https://discord.gg/hPwFfbWRV · the Tacto table |
@@ -96,6 +97,18 @@ All rules: [brief, section 7](brief/brief.md#7-rules).
 - **Slides** for the pitch. The top 10 pitch from 13:00.
 
 Details: [brief/submission.md](brief/submission.md).
+
+For a local final rehearsal, start the simulator in its two-wave mode and then run the same
+SpecAgent runner used for the hosted final:
+
+```bash
+cd starter-kit
+uv run arena-sim serve --final-rehearsal --data ../data
+# in another terminal, from starter-kit:
+ARENA_DATA=../data uv run arena run --set final --agent spec --waves 2 --parallel 10
+```
+
+The rehearsal is local only. It never calls `arena.tacto.ai`.
 
 ## Prizes
 

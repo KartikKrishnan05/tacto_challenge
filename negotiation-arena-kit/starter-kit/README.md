@@ -83,6 +83,25 @@ for supplier profiles, extraction and wording. See [DESIGN_NOTES.md](DESIGN_NOTE
 choices and explicit deviations, and [FINAL_REPORT.md](FINAL_REPORT.md) for tests, scores and remaining
 acceptance gaps.
 
+The final runner reads these environment variables. Set values locally in the ignored `.env` file;
+the repository contains only `.env.example` with empty placeholders:
+
+| Variable | Purpose |
+|---|---|
+| `ARENA_URL` | Hosted Arena or local simulator base URL |
+| `ARENA_API_KEY` | Team key, supplied by the organisers or the local simulator |
+| `ARENA_DATA` | Data package directory, normally `data/package` |
+| `SPEC_LLM` | Set to `1` to enable optional model wording and extraction; default is code-only |
+| `LLM_PROVIDER`, `LLM_MODEL`, `LLM_EFFORT` | Optional model provider configuration |
+| `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` | Optional Anthropic credential |
+| `LLM_BASE_URL`, `LLM_API_KEY` | Optional OpenAI-compatible endpoint and credential |
+
+Hosted final command:
+
+```bash
+uv run arena run --set final --agent spec --parallel 10
+```
+
 ```bash
 uv run pytest -q
 uv run ruff check arena_kit tests
@@ -194,6 +213,26 @@ and the client waits up to 180 seconds for a reply. The client paces itself belo
 limit of 10 calls per second and retries dropped connections with the same `X-Move-Id`, so a
 retry never sends a message twice. Rehearse with `arena run --set practice --parallel 10` (it counts against your quota) before
 Sunday, from the machine and network you will use: every case should end well inside 8 minutes.
+
+### Local two-wave rehearsal
+
+The simulator can expose the final runner contract without using hosted Arena sessions. In one
+terminal, from `starter-kit`, run:
+
+```bash
+uv run arena-sim serve --final-rehearsal --data ../data
+```
+
+In another terminal, run the same agent with two short local waves:
+
+```bash
+ARENA_DATA=../data uv run arena run --set final --agent spec --waves 2 --parallel 10
+```
+
+The simulator returns `403` until wave 1 opens, provides `seconds_left`, closes each wave, and
+then opens wave 2. This rehearsal never contacts the hosted Arena. The checked-in `../data` package
+keeps this rehearsal offline; use `uv run arena data` only when you intentionally want a fresh hosted
+data release.
 
 ## Your own agent
 

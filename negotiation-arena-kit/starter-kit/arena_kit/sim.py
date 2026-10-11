@@ -8,8 +8,10 @@ final offer from round 5 and walks away if you push after that. It checks cited 
 whether the ID exists. The simulator teaches the contract; the real suppliers think for themselves.
 
     arena-sim serve [--port 8000] [--data <data package>] [--event-code sim] [--no-clock]
+    arena-sim serve --final-rehearsal [--port 8000] [--data <data package>]
 
 --no-clock switches the 60-second rule off (threads wait forever) to try the API by hand.
+--final-rehearsal exposes two short local final waves and never contacts the hosted arena.
 """
 
 import argparse
@@ -31,6 +33,7 @@ CASES = Path(__file__).parent / "sim_cases"
 MOVE_S, MAX_OPEN, MAX_CALLS, MAX_BODY = 60, 10, 10, 64_000
 PRACTICE_LIMIT, DAY_S, REMAINING = 200, 86_400, "X-Practice-Remaining"  # the arena's practice quota
 OPEN_UP, STEP, FLOOR, FINAL_ROUND = 0.10, 0.02, 0.90, 5
+REHEARSAL_PRESTART_S, REHEARSAL_WAVE_S, REHEARSAL_GAP_S = 5, 30, 5
 ID_RE = re.compile(r"\b(?:idx|quote|offer|sc|qn|po|cost|fc|news|doc|ctr):[\w.:@#/-]*\w")
 LATE = "late: more than 60 s after the supplier's last move, so it counted as a timeout"
 NAMES = {field: label for label, field in LABELS.items()}
@@ -107,11 +110,41 @@ class Fail(Exception):
 class Sim:
     """The arena's state and its one scripted supplier. One lock serialises every call."""
 
-    def __init__(self, cases, facts=None, event_code="sim", clock=time.time, no_clock=False):
+    def __init__(self, cases, facts=None, event_code="sim", clock=time.time, no_clock=False,
+                 final_rehearsal=False):
         self.cases, self.facts, self.code, self.clock = cases, facts or {}, event_code, clock
         self.no_clock = no_clock  # no 60-second rule: to try the API by hand
+        self.final_rehearsal = final_rehearsal
+        self.rehearsal_started = self.clock() if final_rehearsal else None
         self.teams, self.sessions, self.replies, self.calls = {}, {}, {}, {}
         self.ids, self.lock = itertools.count(1), threading.Lock()
+
+    def final_cases(self, _team=None):
+        """Return two short local waves with the same fields as the hosted final."""
+        if not self.final_rehearsal:
+            raise Fail(403, "the final window is not open")
+        elapsed = max(0, self.clock() - self.rehearsal_started)
+        starts = [REHEARSAL_PRESTART_S, REHEARSAL_PRESTART_S + REHEARSAL_WAVE_S + REHEARSAL_GAP_S]
+        active = [i + 1 for i, start in enumerate(starts) if elapsed >= start]
+        wave = max(active, default=None)
+        if wave is None:
+            raise Fail(403, "the final window is not open")
+        start = starts[wave - 1]
+        elapsed_in_wave = elapsed - start
+        open_ = elapsed_in_wave < REHEARSAL_WAVE_S
+        seconds_left = max(0, REHEARSAL_WAVE_S - elapsed_in_wave)
+        case_ids = sorted(self.cases)
+        if wave > len(case_ids):
+            return []
+        case = self.cases[case_ids[wave - 1]]
+        return [{
+            "case_id": case["case_id"],
+            "set": "final",
+            "wave": wave,
+            "theme": "local final rehearsal",
+            "open": open_,
+            "seconds_left": seconds_left,
+        }]
 
     # -- the scripted supplier -----------------------------------------------------------------
     def _mail(self, s, th, status, stated, text, files=()):
@@ -571,7 +604,7 @@ def create_app(sim):
     @app.get("/v1/cases")
     def cases(request: Request, set: str = "practice"):
         if set == "final":
-            raise Fail(403, "the final window is not open")
+            return read(request, sim.final_cases)
         return read(request, lambda t: [{**c, "hosted": True} for c in sim.cases.values()])
 
     @app.post("/v1/sessions")
@@ -709,6 +742,8 @@ def main(argv=None):
     ap.add_argument("--data", help="data package folder: cited IDs are checked against it")
     ap.add_argument("--event-code", default="sim")
     ap.add_argument("--no-clock", action="store_true", help="no 60-second rule: threads wait forever (by hand)")
+    ap.add_argument("--final-rehearsal", action="store_true",
+                    help="serve two short local final waves; never contacts the hosted arena")
     a = ap.parse_args(argv)
     facts = {}
     if a.data:
@@ -721,5 +756,6 @@ def main(argv=None):
         print("arena-sim: --no-clock - no 60-second rule, threads wait forever (the arena keeps the rule)", flush=True)
     else:
         print("arena-sim: the 60-second rule is on, as on the arena (--no-clock switches it off)", flush=True)
-    app = create_app(Sim(load_cases(), facts, a.event_code, no_clock=a.no_clock))
+    app = create_app(Sim(load_cases(), facts, a.event_code, no_clock=a.no_clock,
+                         final_rehearsal=a.final_rehearsal))
     uvicorn.run(app, host=a.host, port=a.port)

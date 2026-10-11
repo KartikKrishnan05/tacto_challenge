@@ -20,7 +20,7 @@ The code freeze and the Live Final start together, so start your agent before 12
 running:
 
 ```bash
-uv run arena run --set final --agent llm --parallel 10
+uv run arena run --set final --agent spec --parallel 10
 ```
 
 Or your own runner that polls `GET /v1/cases?set=final`. The kit's runner waits for wave 1, plays each
@@ -36,6 +36,28 @@ Checklist for 11:30:
 - `uv run arena me` answers with your team: the key works.
 - LLM credits and rate limits for about an hour of parallel play.
 - The runner is started and logs to a file; the laptop is on power and does not sleep.
+
+### Approach summary
+
+SpecAgent prepares a dossier for each case before the clock starts. It reads the case, buyer
+alternative, must-haves, supplier and product records, contracts, historic transactions, quotes,
+payment history, quality scorecards, call notes, market indices, cost drivers and company context.
+The analyst extracts the supplier's latest terms, stated constraints and cited evidence from every
+reply. Python calculates total cost, filters invalid term sheets and sets the target and shrinking
+concession curve. The agent sends up to three code-generated packages while the model, when enabled,
+only helps write the email around those numbers. It accepts the cheapest valid standing offer that
+beats the buyer's alternative, or walks away when no acceptable offer remains before the cap.
+
+For a local rehearsal, use the simulator's two-wave mode:
+
+```bash
+uv run arena-sim serve --final-rehearsal --data ../data
+ARENA_DATA=../data uv run arena run --set final --agent spec --waves 2 --parallel 10
+```
+
+The final runner waits through the pre-wave `403`, resumes an already-open session after a `409`,
+uses `seconds_left`, waits up to 180 seconds for replies, retries transient `429` rate limits, and
+closes 90 seconds before the wave cap. The rehearsal is local and does not consume hosted sessions.
 
 ## The pitch
 
