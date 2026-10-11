@@ -1,0 +1,379 @@
+{
+  "case_id": "case:P01",
+  "variant": "soft_anchor",
+  "chosen_by": "fixed",
+  "why": "fixed for this run",
+  "knobs": {
+    "cut_k": 0.5,
+    "anchor_cost_k": 1.02,
+    "horizon_delta": 0,
+    "curve_exp": 1.6,
+    "break_share": 0.15,
+    "reciprocity": 0.5,
+    "meet_share": 0.5,
+    "close_gap_k": 1.0
+  },
+  "result": {
+    "ended": true,
+    "deal": true,
+    "supplier_id": "sup:70110",
+    "offer_id": "offer:70110-3",
+    "terms": {
+      "payment_days": 30,
+      "lead_time_days": 42,
+      "volume_per_year": 8150,
+      "contract_months": 12,
+      "effective_date": "2027-04-01",
+      "index_clause": null,
+      "incoterm": "FCA",
+      "tooling_eur": 0.0,
+      "ppm_commitment": 900,
+      "chargeback_eur_per_complaint": 0.0,
+      "unit_price": 137.59
+    },
+    "c_open": 1153779.74,
+    "c_deal": 1109267.06,
+    "c_alt": 1176178.02,
+    "c_best": 1096815.78,
+    "score": 0.7814182862286956,
+    "must_haves_ok": true,
+    "cost_breakdown": {
+      "price": 1084068.12,
+      "uncovered_need": 0.0,
+      "fallback_risk": 0.0,
+      "payment_terms": 7227.12,
+      "freight": 15485.0,
+      "late_delivery": 0.0,
+      "quality": 1584.36,
+      "tooling": 0.0,
+      "index_clause": 0.0,
+      "index_risk": 0.0,
+      "relationship": 902.46
+    }
+  },
+  "session_id": "52f74e213be9c0d3",
+  "threads": {
+    "sup:70110": {
+      "supplier_id": "sup:70110",
+      "offer_id": "offer:70110-3",
+      "status": "agreed",
+      "closed": null,
+      "messages": [
+        {
+          "thread_id": "thread:P01:70110",
+          "message_id": "msg:70110-0-0",
+          "in_reply_to": null,
+          "from": "sales@70110",
+          "from_name": "Owner, Gießerei Brandlhuber GmbH & Co. KG",
+          "to": "Hollerau Pumpenwerke GmbH",
+          "subject": "Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Guten Tag,\n\nThank you for your enquiry. Please find our Angebot below.\n\nFor generations, our foundry has taken great pride in supplying our regional partners with the utmost care and quality. To continue serving you with the craftsmanship you expect from us, we must account for our rising expenses. Over the past twelve months, LCI-C rose 2.7 % in twelve months and is 30 % of our cost. Furthermore, PPI-C241 rose 6.5 % in twelve months and is 24 % of our cost.\n\nTaking these developments into consideration, we are pleased to present our offer for a price of €138.55 per unit, valid from 1 November 2026. This offer remains valid for 30 days.\n\nWe value our long-standing relationship deeply and look forward to continuing our successful cooperation.\n\nViele Grüße aus der Gießerei\nThomas Brandlhuber\nOwner, Gießerei Brandlhuber GmbH & Co. KG",
+          "attachments": [
+            {
+              "attachment_id": "att:70110-0-quote",
+              "name": "quote-offer-70110-0.pdf",
+              "type": "pdf",
+              "content_b64": null
+            }
+          ],
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70110-0",
+              "terms": {
+                "unit_price": 138.55,
+                "effective_date": "2026-11-01"
+              }
+            }
+          ],
+          "refs": [],
+          "action": null,
+          "status": "open",
+          "signals": {
+            "reply_delay_days": 2,
+            "validity_days": 30
+          },
+          "missing_fields": [
+            "payment_days"
+          ],
+          "claim_results": []
+        },
+        {
+          "from": "buyer",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Dear colleagues at Gießerei Brandlhuber GmbH & Co. KG,\n\nThank you for your letter and for setting out your position.\n\nBy the figures you gave us - LCI-C +2.7% at 30% of your cost, PPI-C241 +6.5% at 24% of your cost - the weighted effect on the price is about +2.4%, not the 9.5% you ask for. Your letter gives us only 51 days of notice (doc:20260911-70110-P01, ctr:4600070110). Our contract requires 90 days. The German labour cost index for manufacturing changed +2.7% from 2025-06 to 2026-06 (idx:LCI-C@2025-06, idx:LCI-C@2026-06).\n\nThe data does not support your price as it stands; the options below follow from it.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 133.52 per unit, payment 90 days net, new price from 2026-11-01.\nOption B: EUR 131.77 per unit, payment 30 days net, new price from 2026-11-01.\nOption C: EUR 132.20 per unit, payment 45 days net, new price from 2026-11-01.\n\nCould you share a cost breakdown for this part - material, conversion, overhead?\n\nWe are happy to go through the figures together.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+          "term_sheets": [
+            {
+              "terms": {
+                "unit_price": 133.52,
+                "effective_date": "2026-11-01",
+                "payment_days": 90
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 131.77,
+                "effective_date": "2026-11-01",
+                "payment_days": 30
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 132.2,
+                "effective_date": "2026-11-01",
+                "payment_days": 45
+              }
+            }
+          ],
+          "refs": [
+            "doc:20260911-70110-P01",
+            "ctr:4600070110",
+            "idx:LCI-C@2025-06",
+            "idx:LCI-C@2026-06"
+          ]
+        },
+        {
+          "thread_id": "thread:P01:70110",
+          "message_id": "msg:70110-1-2",
+          "in_reply_to": null,
+          "from": "sales@70110",
+          "from_name": "Owner, Gießerei Brandlhuber GmbH & Co. KG",
+          "to": "Hollerau Pumpenwerke GmbH",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Guten Tag,\n\nWe have reviewed your offer and can adjust our Angebot as follows. Your figures confirm our case: that driver rose. We checked the notice period data you cited; it holds and we took it into account. We did not know that - a fair point. We acknowledge your points regarding the notice period and the indices, though the weighted effect does not capture all our operational realities. \n\nPlease understand that as a privately held family foundry, we do not disclose internal cost breakdowns. Our costs move with LCI-C, PPI-C241, PPI-D351; the figures stay with us.\n\nIn exchange for maintaining the 1 November 2026 effective date and 30-day payment terms, we are prepared to reduce our price to EUR 135.90 per unit. For our offer, we state a price of €135.90 per unit, Zahlungsziel 30 days net, valid from 1 November 2026. This offer is valid for 30 days.\n\nWe are happy to discuss this in a call; until then our offer stands.\n\nViele Grüße aus der Gießerei\nThomas Brandlhuber\nOwner, Gießerei Brandlhuber GmbH & Co. KG",
+          "attachments": [],
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70110-1",
+              "terms": {
+                "unit_price": 135.9,
+                "payment_days": 30,
+                "effective_date": "2026-11-01"
+              }
+            }
+          ],
+          "refs": [],
+          "action": null,
+          "status": "open",
+          "signals": {
+            "reply_delay_days": 2,
+            "validity_days": 30
+          },
+          "missing_fields": [],
+          "claim_results": [
+            {
+              "index": 0,
+              "result": "verified"
+            },
+            {
+              "index": 1,
+              "result": "verified"
+            }
+          ]
+        },
+        {
+          "from": "buyer",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Dear colleagues at Gießerei Brandlhuber GmbH & Co. KG,\n\nThank you for your message - it is always a pleasure to hear from you.\n\nYour on-time delivery over the last four quarters was 85.2% (sc:70110@2026Q3). German producer prices for electric power generation, transmission and distribution changed -3.7% from 2025-08 to 2026-08 (idx:PPI-D351@2025-08, idx:PPI-D351@2026-08).\n\nWe would rather spend our time making good pumps together than exchanging e-mails about cents, so we have tried to make the options below easy to say yes to.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 134.91 per unit, payment 90 days net, new price from 2026-11-01.\nOption B: EUR 133.13 per unit, payment 30 days net, new price from 2026-11-01.\nOption C: EUR 133.57 per unit, payment 45 days net, new price from 2026-11-01.\n\nWhich cost elements of this part have actually risen since our last price agreement?\n\nWe look forward to your reply and to many more years of good cooperation.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+          "term_sheets": [
+            {
+              "terms": {
+                "unit_price": 134.91,
+                "effective_date": "2026-11-01",
+                "payment_days": 90
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 133.13,
+                "effective_date": "2026-11-01",
+                "payment_days": 30
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 133.57,
+                "effective_date": "2026-11-01",
+                "payment_days": 45
+              }
+            }
+          ],
+          "refs": [
+            "sc:70110@2026Q3",
+            "idx:PPI-D351@2025-08",
+            "idx:PPI-D351@2026-08"
+          ]
+        },
+        {
+          "thread_id": "thread:P01:70110",
+          "message_id": "msg:70110-2-4",
+          "in_reply_to": null,
+          "from": "sales@70110",
+          "from_name": "Owner, Gießerei Brandlhuber GmbH & Co. KG",
+          "to": "Hollerau Pumpenwerke GmbH",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Guten Tag,\nThank you for your letter - it is always good to hear from you, and I answer it myself, as I do for all the customers we have known for a long time.\nWe have reviewed your offer and can adjust our Angebot as follows.\nOur terms: a price of €133.50 per unit, Zahlungsziel 30 days net, valid from 1 November 2026.\nA few words from the foundry on this.\nWe checked the index change data you cited; it holds and we took it into account.\nWe checked the delivery record data you cited; it holds and we took it into account.\nWe did not know that - a fair point.\nLCI-C rose 2.7 % in twelve months and is 30 % of our cost. That remains.\nPPI-C241 rose 6.5 % in twelve months and is 24 % of our cost. That remains.\nAs a family business, we keep our detailed cost breakdowns internal, but we assure you that labor and specific material costs have increased.\nBuilding on your 30-day payment option, we can offer a revised price of €133.50 per unit.\nOur price reflects our costs; our calculation stays internal.\nOur Lieferzeit is 42 days.\nPlease give my regards to your colleagues - a good relationship has always mattered more to us than a single order, and I hope it stays that way.\nViele Grüße aus der Gießerei\nThomas Brandlhuber\nOwner, Gießerei Brandlhuber GmbH & Co. KG",
+          "attachments": [
+            {
+              "attachment_id": "att:70110-2-delivery_schedule",
+              "name": "delivery-schedule.xlsx",
+              "type": "xlsx",
+              "content_b64": null
+            }
+          ],
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70110-2",
+              "terms": {
+                "unit_price": 133.5,
+                "payment_days": 30,
+                "effective_date": "2026-11-01"
+              }
+            }
+          ],
+          "refs": [],
+          "action": null,
+          "status": "open",
+          "signals": {
+            "reply_delay_days": 2,
+            "validity_days": 30
+          },
+          "missing_fields": [],
+          "claim_results": [
+            {
+              "index": 0,
+              "result": "verified"
+            },
+            {
+              "index": 1,
+              "result": "verified"
+            }
+          ]
+        },
+        {
+          "from": "buyer",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Dear colleagues at Gießerei Brandlhuber GmbH & Co. KG,\n\nThank you for your reply and for the steps you have made - we appreciate it.\n\nWe are close now; the options below are a fair way to close the remaining gap.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 137.59 per unit, new price from 2027-04-01, payment 30 days net.\nOption B: EUR 133.01 per unit, new price from 2026-11-01, payment 30 days net.\nOption C: EUR 134.32 per unit, new price from 2027-01-01, payment 30 days net.\n\nWe would be glad to finalise on this basis.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+          "term_sheets": [
+            {
+              "terms": {
+                "unit_price": 137.59,
+                "effective_date": "2027-04-01",
+                "payment_days": 30
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 133.01,
+                "effective_date": "2026-11-01",
+                "payment_days": 30
+              }
+            },
+            {
+              "terms": {
+                "unit_price": 134.32,
+                "effective_date": "2027-01-01",
+                "payment_days": 30
+              }
+            }
+          ]
+        },
+        {
+          "thread_id": "thread:P01:70110",
+          "message_id": "msg:70110-3-6",
+          "in_reply_to": null,
+          "from": "sales@70110",
+          "from_name": "Owner, Gießerei Brandlhuber GmbH & Co. KG",
+          "to": "Hollerau Pumpenwerke GmbH",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Guten Tag,\n\nThank you for your latest options and your commitment to our long-standing relationship. It is always a pleasure to work with a valued partner. \n\nWe can accept your terms and await your order. For complete clarity, our Angebot stands at a price of €137.59 per unit, Zahlungsziel 30 days net, valid from 1 April 2027. This offer remains valid for 30 days.\n\nViele Grüße aus der Gießerei\nThomas Brandlhuber\nOwner, Gießerei Brandlhuber GmbH & Co. KG",
+          "attachments": [
+            {
+              "attachment_id": "att:70110-3-quote",
+              "name": "quote-offer-70110-3.pdf",
+              "type": "pdf",
+              "content_b64": null
+            }
+          ],
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70110-3",
+              "terms": {
+                "unit_price": 137.59,
+                "payment_days": 30,
+                "effective_date": "2027-04-01"
+              }
+            }
+          ],
+          "refs": [],
+          "action": null,
+          "status": "agreed",
+          "signals": {
+            "reply_delay_days": 2,
+            "validity_days": 30
+          },
+          "missing_fields": [],
+          "claim_results": []
+        },
+        {
+          "from": "buyer",
+          "action": {
+            "type": "accept",
+            "term_sheet_id": "offer:70110-3"
+          }
+        },
+        {
+          "thread_id": "thread:P01:70110",
+          "message_id": "msg:70110-3-8",
+          "in_reply_to": null,
+          "from": "sales@70110",
+          "from_name": "Owner, Gießerei Brandlhuber GmbH & Co. KG",
+          "to": "Hollerau Pumpenwerke GmbH",
+          "subject": "Re: Quote from Gießerei Brandlhuber GmbH & Co. KG: Brandlhuber announces +9.5 % on HN volute casings",
+          "body": "Guten Tag,\n\nThank you for your order. Our order confirmation is attached. It is always a pleasure to serve Hollerau Pumpenwerke GmbH and to continue our long-standing business relationship. Our foundry takes great pride in delivering the quality you expect from us.\n\nViele Grüße aus der Gießerei\nThomas Brandlhuber\nOwner, Gießerei Brandlhuber GmbH & Co. KG",
+          "attachments": [
+            {
+              "attachment_id": "att:70110-3-order_confirmation",
+              "name": "order-confirmation-offer-70110-3.pdf",
+              "type": "pdf",
+              "content_b64": null
+            }
+          ],
+          "term_sheets": [
+            {
+              "term_sheet_id": "offer:70110-3",
+              "terms": {
+                "unit_price": 137.59,
+                "payment_days": 30,
+                "effective_date": "2027-04-01"
+              }
+            }
+          ],
+          "refs": [],
+          "action": null,
+          "status": "agreed",
+          "signals": {
+            "reply_delay_days": 2,
+            "validity_days": 30
+          },
+          "missing_fields": [],
+          "claim_results": []
+        }
+      ],
+      "timeouts": []
+    }
+  },
+  "audit": {
+    "reply_statuses": [
+      "open",
+      "open",
+      "open",
+      "agreed",
+      "agreed"
+    ],
+    "contradicted": [],
+    "timeout_mentions": [],
+    "timeouts": [],
+    "buyer_without_company": []
+  },
+  "wall_s": 113.6
+}

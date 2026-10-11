@@ -22,6 +22,10 @@ MOVING_ROUNDS = 3  # R5.4 / R7.3
 HOPELESS_SHARE, HOPELESS_MOVE = 0.08, 0.01  # R12.15
 DEAR_SHARE = 0.25  # R8.2
 STALL_TOL = 0.001
+LIMIT_SENT = 3  # a supplier at its limit after 3+ of our offers: take its best offer before it walks
+LIMIT_STEP = 0.005  # ... when its last step was under 0.5 % of C
+WALK_CLOSE = 0.6  # ... or when its walk risk (R11.5) is this high
+AGREE_GAP = 0.02  # it asks to close and is within 2 % of our next target: take it
 
 
 @dataclass
@@ -60,6 +64,11 @@ class View:
     last_step_share: float = 0.0  # how far it moved in its last reply, share of C
     current_round: int | None = None  # buyer messages already sent in this thread, when agent supplied it
     ideal_price: float | None = None  # code-calculated unit-price target for early-accept checks
+    at_limit: bool = False  # its latest mail says it has no room left
+    walk_risk: float = 0.0  # R11.5
+    wants_close: bool = False  # its latest mail asks to close now
+    at_ceiling: bool = False  # its C is within the ceiling (0.3 %) of our last offer: nothing left to split
+    held: bool = False  # we already repeated our last offer once in this thread
 
     @property
     def latest_rows(self):
@@ -222,6 +231,22 @@ def decide(views, sid, must_close=False):
             return Close("offer_back", "stalled: back to its own earlier, cheaper offer", sid, r.id, terms=r.terms)
 
     best = v.best
+    if best is not None and v.sent >= LIMIT_SENT and covered(v, best) and may_accept and best_sid == sid:
+        # P02: 373.88 -> 372.88 -> 371.88 with "limits our flexibility", one more counter 16 EUR below it
+        # and it walked (score 0; accepting was the best run, 0.507). Crumbs plus a stated limit, or a
+        # high walk risk, mean the table is as good as it gets.
+        if (v.at_limit and v.last_step_share < LIMIT_STEP) or v.walk_risk >= WALK_CLOSE:
+            return accept(views, "it is at its limit: take the best offer before it walks")
+    if best is not None and v.at_ceiling and covered(v, best) and may_accept and best_sid == sid:
+        # P02: 372.05 against our 370.85 - a counter would have to sit at or behind our last offer. Our offer
+        # stands once (the old run's step back drew a final offer at 371.88; taking 372.05 at once cost 0.02),
+        # then we take it
+        if not v.held and v.left > 1:
+            return Close("repeat", "within 0.3 % of our last offer: our offer stands once", sid)
+        return accept(views, "its offer is within 0.3 % of our last offer")
+    if (best is not None and v.sent >= 1 and v.target is not None and v.wants_close and covered(v, best)
+            and may_accept and best_sid == sid and best.c <= v.target * (1 + AGREE_GAP)):
+        return accept(views, "it asks to close and is within reach of our target")
     if best is not None and v.sent >= 1 and v.target is not None:
         meets = best.c <= v.target * (1 + TARGET_TOL) and not (v.moving and v.left > MOVING_ROUNDS)
         if meets and not covered(v, best):  # R11.17

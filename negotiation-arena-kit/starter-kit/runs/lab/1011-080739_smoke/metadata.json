@@ -1,0 +1,13 @@
+{
+  "batch": "1011-080739_smoke",
+  "label": "smoke",
+  "git_head": "e69a9af",
+  "source": "9d70d1ce2d70",
+  "model_name": null,
+  "jobs": {
+    "case:P04": [
+      "base"
+    ]
+  },
+  "holdout": false
+}

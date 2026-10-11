@@ -15,6 +15,7 @@ import re
 
 from .. import writing
 from .prose import sentences
+from .tactics import fresh
 
 ID_RE = re.compile(r"\b(?:idx|quote|offer|sc|qn|po|cost|fc|news|doc|ctr):[\w.:@#/-]*\w")
 COMPANY_RE = re.compile(
@@ -228,8 +229,11 @@ def stance(first, hold, moved_pct):
 
 
 # --- code sentences --------------------------------------------------------------------------------
-def weighted_sentence(intel):
-    """R11.4: the cost-share arithmetic by the supplier's own figures, or None."""
+def weighted_sentence(intel, face_value=False):
+    """R11.4: the cost-share arithmetic by the supplier's own figures, or None. `face_value`: our offer is
+    below what the figure would justify, so the sentence takes it as an upper bound, not as fair (P08: the
+    argument moved the supplier, dropping it cost 0.09; "+7.5 % is justified" next to an offer under today's
+    price did not match our numbers)."""
     if intel is None:
         return None
     shared = [d for d in intel.cost_drivers if d.get("share_pct") is not None]
@@ -237,13 +241,75 @@ def weighted_sentence(intel):
         return None
     items = ", ".join(f"{d.get('series') or d['name']} {d['change_pct']:+.1f}% at {d['share_pct']:g}% of your cost"
                       for d in shared)  # fmt: skip
+    if face_value:
+        return (f"Even taken at face value, the figures you gave us - {items} - explain at most about "
+                f"{intel.cost_impact_pct:+.1f}% on the price, not the {intel.asked_pct:g}% you ask for.")  # fmt: skip
     return (f"By the figures you gave us - {items} - the weighted effect on the price is about "
             f"{intel.cost_impact_pct:+.1f}%, not the {intel.asked_pct:g}% you ask for.")  # fmt: skip
 
 
-def commitment(sheet):
-    """R13.15: our answer to "which volume can you commit to?", from our own sheet."""
-    v, m = sheet.get("volume_per_year"), sheet.get("contract_months")
+def justified_price(case, impact_pct):
+    """Today's price moved by the cost effect an argument concedes, or None."""
+    cur = (case.get("buyer") or {}).get("current_unit_price")
+    if not cur or impact_pct is None:
+        return None
+    return cur * (1 + impact_pct / 100)
+
+
+def consistent(case, impact_pct, offer_price):
+    """Words match numbers: an argument that concedes "+X % is justified" is only cited when our own offer is
+    not below that price (P08: "the weighted effect is about +7.5 %" next to an offer 15 % under today's
+    price - the argument then argues for more than we offer, and the supplier ignored it)."""
+    j = justified_price(case, impact_pct)
+    return j is None or offer_price is None or offer_price >= j * (1 - 0.005)
+
+
+def position_lines(case, intel, their_price, our_move_pct=None, held=False):
+    """Arguments code computes fresh every round from the thread, with no data ID - so they never come back
+    `duplicate` and the e-mail keeps arguing after the checked arguments are used up: [(key, sentence)],
+    strongest first, each key once per thread. `our_move_pct`: how far our offers have moved in C since our
+    first. Only what the supplier can check itself (today's price, our own offers): claims it cannot check
+    drew "please provide the data behind your target price" and a stalled round (fixes-code-learned P08,
+    P18 - the price risk of an index clause, the value of our volume)."""
+    b = case.get("buyer") or {}
+    cur = b.get("current_unit_price")
+    out = []
+    if their_price and cur and case.get("type") in ("price_increase", "raw_material") and their_price > cur * 1.001:
+        ask = (their_price / cur - 1) * 100
+        out.append(("ask_left", f"Your latest offer is still {ask:.1f}% above today's price of EUR {cur:,.2f}."))
+    if held and our_move_pct and our_move_pct >= 0.1:
+        out.append(("our_steps", f"Our offers have moved {our_move_pct:.1f}% toward you since our first one; "
+                                 "we now need a step from your side."))  # fmt: skip
+    return out
+
+
+CALL_RE = re.compile(r"\b(?:a call|call with|phone|meeting|meet (?:you|in person)|discuss (?:this|it) in person)\b",
+                     re.I)  # fmt: skip
+CALL_LINE = "We would like to settle this in writing; the options below are our complete proposal."
+DATA_LINE = "The figures we refer to are in the attached file."
+
+
+def refusal_line(refusal):
+    """Acknowledge a term the supplier refused - the options already respect it."""
+    f, v = refusal["field"], refusal["value"]
+    if f == "index_clause" and v is None:
+        return "We have taken your point on a fixed price: every option below includes an index clause."
+    if f == "payment_days":
+        return f"We have taken your point on {v}-day payment: the options below do not ask for it."
+    if f == "contract_months":
+        return f"We have taken your point on a {v}-month term: the options below do not ask for it."
+    return None
+
+
+def asks_for_data(events):
+    last = next((m for m in reversed(events) if m.get("from") != "buyer"), {})
+    return bool(ASK_DATA.search(str(last.get("body") or "")))
+
+
+def commitment(sheet, volume=None):
+    """R13.15: our answer to "which volume can you commit to?", from our own sheet (`volume`: the case's
+    volume when the sheet does not carry it - P18: "We can commit to over 24 months")."""
+    v, m = sheet.get("volume_per_year") or volume, sheet.get("contract_months")
     if v is None and m is None:
         return None
     parts = [f"{v:,} units per year" if v else None, f"over {m} months" if m else None]
@@ -262,8 +328,9 @@ def render(case, sid, events, plan, profile, intel, feedback, args, allowed_ques
     prof = {k: profile.get(k) for k in ("persona", "tone", "pressures", "wants", "avoid", "angle") if profile.get(k)}
     view = {}
     if intel is not None:
-        view = {"constraints": intel.constraints, "lever_hints": intel.lever_hints, "their_questions": intel.questions,
+        view = {"constraints": intel.constraints, "lever_hints": intel.lever_hints, "refused_terms": intel.refused,
                 "relationship_style": intel.relationship_style}  # fmt: skip
+    asked = list(intel.questions) if intel is not None else []
     attachments = "\n".join(
         f"[their attachment {a.get('name')}]\n{(a.get('text') or '')[:1200]}"
         for a in last.get("attachments") or []
@@ -280,6 +347,10 @@ def render(case, sid, events, plan, profile, intel, feedback, args, allowed_ques
         f"THEIR LAST E-MAIL (from {last.get('from')}, status {last.get('status')}, subject {last.get('subject')!r}):\n"
         f"{(last.get('body') or '')[:2500]}",
         attachments,
+        "THEIR QUESTIONS TO US (the opening must answer each one in a few words - or say which option or code "
+        "sentence answers it; never promise documents, calls or meetings):\n" + "\n".join(f"- {q}" for q in asked)
+        if asked
+        else "",
         f"HOW OUR ARGUMENTS CHECKED OUT SO FAR: {json.dumps(feedback)}" if feedback else "",
         "OUR LAST E-MAILS (oldest first):\n" + "\n---\n".join((m.get("body") or "")[:700] for m in ours[-2:])
         if ours
@@ -294,9 +365,12 @@ def render(case, sid, events, plan, profile, intel, feedback, args, allowed_ques
 
 
 # --- assembly ---------------------------------------------------------------------------------------
-def code_parts(tactic, question):
-    return {"salutation": "", "opening": tactic.opening, "claims": None, "bridge": tactic.bridge,
-            "question": question or "", "closing": tactic.closing, "fallback": True}  # fmt: skip
+def code_parts(tactic, question, previous="", single=False):
+    """The tactic's code-written lines, none already sent in this thread (`previous`: our earlier e-mails);
+    `single`: one sheet, so no line that speaks of choosing between options."""
+    opening, bridge, closing = fresh(tactic, previous, single)
+    return {"salutation": "", "opening": opening, "claims": None, "bridge": bridge,
+            "question": question or "", "closing": closing, "fallback": True}  # fmt: skip
 
 
 def pick_claims(parts, args, first=False, n_fallback=2):

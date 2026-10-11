@@ -13,6 +13,7 @@ payment probe of R12.7 and message 1 varies a single term as R13.1 asks.
 
 from collections import Counter
 
+from .estimate import RATE_BOUNDS
 from .sheets import priced, structure_floor
 from .terms import COVERAGE, complete, distance, key
 
@@ -20,6 +21,7 @@ MAX_STEPS = 3
 MIN_WEIGHT = 0.002  # R13.1: a term that moves C by less than 0.2 % is not worth a round
 REOPEN_SHARE = 0.01  # R13.3: a lock costing us 1 % of C against the term's best option is stepped again
 MAX_PER_TERM = 2
+STEP_SLACK = 0.004  # a package whose cheapest C is within 0.4 % of the target still counts as a choice
 
 
 class Steps:
@@ -39,7 +41,8 @@ class Steps:
             return self.order
         price = ctx.their_price
         c_base = ctx.c({**base, "unit_price": price})
-        first = list((ctx.playbook or {}).get("first") or [])
+        row = ctx.playbook or {}
+        first = list(row.get("first") or [])
         weights = []
         for f in ctx.case["negotiable"]:
             if f == "unit_price" or f in COVERAGE:
@@ -52,8 +55,12 @@ class Steps:
             if w >= MIN_WEIGHT * c_base:
                 weights.append((w, f))
                 self.weights[f] = w
-        weights.sort(key=lambda x: (x[1] != "payment_days", first.index(x[1]) if x[1] in first else len(first), -x[0]))
-        self.order = [f for _, f in weights[:MAX_STEPS]]
+        if row.get("step_order", "payment_first") == "weight":  # strategy knob: the heaviest term first
+            weights.sort(key=lambda x: -x[0])
+        else:
+            weights.sort(key=lambda x: (x[1] != "payment_days", first.index(x[1]) if x[1] in first else len(first),
+                                        -x[0]))  # fmt: skip
+        self.order = [f for _, f in weights[: row.get("max_steps", MAX_STEPS)]]
         return self.order
 
     # -- what is settled --------------------------------------------------------------------------
@@ -80,7 +87,11 @@ class Steps:
         counts = self.counts()
         t = complete(ctx.case, {**ctx.their, **out}, ctx.std)
         c_t = ctx.c(t)
-        for field in [f for f in out if counts[f] == 1]:
+        # an index clause is not reopened: the supplier that answers a deadband menu with its own clause
+        # insists on it, and a second index menu drew holds and a final offer (P08, P18) - the rounds go
+        # to price instead (MESO's P18: clause taken, price 5.60 -> 5.40)
+        reopen = (ctx.playbook or {}).get("reopen", True)  # strategy knob
+        for field in [f for f in out if reopen and counts[f] == 1 and f != "index_clause"]:
             costs = [ctx.c({**t, field: o}) for o in ctx.allowed(field, t)]
             if costs and c_t - min(costs) > REOPEN_SHARE * c_t:
                 del out[field]
@@ -104,6 +115,7 @@ class Steps:
             choices = [(ctx.c(full), full[f])]
             if ctx.ok(main):
                 choices.append((ctx.c(main), main[f]))
+            choices += extrapolated(ctx, f, main, full)
             for c, value in choices:
                 if f not in best or c < best[f][0]:
                     best[f] = (c, value)
@@ -151,13 +163,49 @@ class Steps:
         out = []
         for o in self.option_order(ctx, field, base, asked):
             combo = {**base, field: o}
-            sheet = priced(ctx, combo, target, structure_floor(ctx, combo, base, floor_price))
+            sheet = priced(ctx, combo, target, structure_floor(ctx, combo, base, floor_price), STEP_SLACK)
             if sheet and ctx.ok(sheet) and all(sheet != s for _, s in out):
                 out.append((f"{field}={o if not isinstance(o, dict) else o.get('deadband_pct')}", sheet))
         return out if len(out) >= 2 else []
 
     def record(self, k, kind):
         self.history[k] = kind
+
+
+def payment_slope(main, alt):
+    """The supplier's own price of a payment day, relative per day, from two of its packages that differ
+    in payment days only - its cost of money / 360, clamped to RATE_BOUNDS. None if they do not."""
+    va, vb, pa, pb = main.get("payment_days"), alt.get("payment_days"), main.get("unit_price"), alt.get("unit_price")
+    if not all(isinstance(v, int | float) and not isinstance(v, bool) for v in (va, vb, pa, pb)) or va == vb or not pa:
+        return None
+    rate = (pb / pa - 1) / (vb - va) * 360
+    if rate <= 0:  # dearer for paying earlier: no cost of money to read from it
+        return None
+    lo, hi = RATE_BOUNDS
+    return min(max(rate, lo), hi) / 360
+
+
+def implied_price(main, terms, slope):
+    """The price the supplier's own payment slope puts on `terms` (its package `main` re-timed)."""
+    days = terms.get("payment_days")
+    if slope is None or not isinstance(days, int | float) or not isinstance(main.get("payment_days"), int | float):
+        return main.get("unit_price")
+    return round(main["unit_price"] * (1 + slope * (days - main["payment_days"])), 2)
+
+
+def extrapolated(ctx, field, main, alt):
+    """R13.5 beyond the two packages shown: the supplier prices payment days linearly at its cost of
+    money (P03: 430.09 at 45 days and 429.36 at 30 put 90 days at 432.28 - the best run's 432.29), so
+    every allowed payment term is priced on its slope. [(C, value)]."""
+    if field != "payment_days" or (slope := payment_slope(main, alt)) is None:
+        return []
+    out = []
+    for o in ctx.allowed(field, main):
+        t = {**main, field: o}
+        t["unit_price"] = implied_price(main, t, slope)
+        if ctx.ok(t):
+            out.append((ctx.c(t), o))
+    return out
 
 
 def repeats(new_sheets, last_sheets):

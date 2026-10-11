@@ -1,0 +1,100 @@
+{
+  "batch": "1011-084158_sweep-4",
+  "label": "sweep-4",
+  "git_head": "e69a9af",
+  "source": "6a443e996b91",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P02": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P03": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P04": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P05": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P07": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P08": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P10": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P11": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ],
+    "case:P18": [
+      "measured_meet",
+      "no_meet",
+      "weight_order",
+      "no_reopen",
+      "date_first",
+      "one_step",
+      "measured_firm"
+    ]
+  },
+  "holdout": false
+}

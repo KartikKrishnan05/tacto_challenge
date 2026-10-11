@@ -1,0 +1,90 @@
+{
+  "batch": "1011-080828_sweep-1",
+  "label": "sweep-1",
+  "git_head": "e69a9af",
+  "source": "9d70d1ce2d70",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P02": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P03": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P04": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P05": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P07": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P08": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P10": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P11": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ],
+    "case:P18": [
+      "base",
+      "soft_anchor",
+      "deep_anchor",
+      "fast_concede",
+      "slow_concede",
+      "eager_close"
+    ]
+  },
+  "holdout": false
+}

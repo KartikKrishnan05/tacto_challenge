@@ -1,0 +1,60 @@
+{
+  "batch": "1011-081928_sweep-2",
+  "label": "sweep-2",
+  "git_head": "e69a9af",
+  "source": "d5e8a024ffd7",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P02": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P03": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P04": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P05": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P07": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P08": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P10": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P11": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ],
+    "case:P18": [
+      "deep_fast",
+      "mid_anchor",
+      "firm_close"
+    ]
+  },
+  "holdout": false
+}

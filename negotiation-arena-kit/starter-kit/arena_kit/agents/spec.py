@@ -10,6 +10,9 @@ writes words only, and every model call has a code-written fallback.
                      are open (`spec.steps`) and section 6's sheets after (`spec.sheets`), guarded -
                      and an e-mail around them (`spec.email`) in one tactic's words (`spec.tactics`)
   runner             one worker per supplier thread (`spec.runner`)
+  strategy           the knobs (anchor depth, concession pace, close gap) this case is played with: given
+                     explicitly (the lab's experiments) or chosen from the learned playbook that earlier
+                     experiments built (`spec.strategy`, `knowledge/`)
 
     uv run arena play case:P01 --agent spec -v
 """
@@ -34,10 +37,11 @@ from ..play import latest, live_threads, moves_left
 from ..spec import clock as clock_mod
 from ..spec import closing, dossier, email, levers, prep, sheets, tactics
 from ..spec import estimate as est_mod
+from ..spec import strategy as strat
 from ..spec.analyst import GRACE_S, Analyst
 from ..spec.concession import Plan
 from ..spec.prose import prose_alternatives
-from ..spec.steps import Steps, repeats
+from ..spec.steps import STEP_SLACK, Steps, implied_price, repeats
 from ..spec.terms import COVERAGE, complete, key
 
 log = logging.getLogger("arena")
@@ -64,8 +68,13 @@ class Thread:
 
 
 class SpecAgent:
-    def __init__(self, complete=None, package=None, analyst_complete=None, prep_complete=None, log_dir=None):
+    def __init__(self, complete=None, package=None, analyst_complete=None, prep_complete=None, log_dir=None,
+                 strategy=None, knowledge=None):  # fmt: skip
+        """`strategy`: play every case with these knobs (spec.strategy.Strategy). Else `knowledge`, the
+        learned playbook (spec.strategy.load()), picks them per case; with neither, the defaults."""
         self.complete, self.package = complete, package
+        self.fixed_strategy, self.knowledge = strategy, knowledge
+        self.strategy, self.strategy_name, self.strategy_why = strat.BASE, "base", "defaults"
         self.analyst_complete = analyst_complete if analyst_complete is not None else complete
         self.prep_complete = prep_complete if prep_complete is not None else complete
         self.log_dir = Path(log_dir or os.environ.get("SPEC_LOG_DIR", "runs/spec-logs"))
@@ -105,13 +114,15 @@ class SpecAgent:
         cash = {sid: p.get("cash_short", False) for sid, p in self.profiles.items()}
         self.case = case  # hidden-case facts must be available to volatile() during preparation
         self._volatile.clear()
-        self.prep = prep.prepare(case, threads, self.package, self.volatile, seconds_left, cash)
+        self.choose_strategy(case)
+        self.prep = prep.prepare(case, threads, self.package, self.volatile, seconds_left, cash, self.strategy)
         self.case, self.case_id = self.prep.case, case.get("case_id")
         self.clock = self.prep.clock.open()
         self.ledger, self.results = cl.Ledger(), {}
         self.t = {}
         for sid in self.case["suppliers"]:
             self.t[sid] = Thread(
+                plan=Plan(**self.strategy.plan_kwargs()),
                 analyst=Analyst(
                     self.case,
                     sid,
@@ -123,6 +134,21 @@ class SpecAgent:
             )
         log.info("%s", prep.summary(self.prep))
         self.record("prepare", summary=prep.summary(self.prep), warnings=self.prep.warnings)
+
+    def choose_strategy(self, case):
+        """The knobs for this case: the fixed strategy, else the learned playbook's pick, else defaults."""
+        if self.fixed_strategy is not None:
+            name = next((n for n, v in strat.VARIANTS.items() if v == self.fixed_strategy), "custom")
+            self.strategy, self.strategy_name, self.strategy_why = self.fixed_strategy, name, "fixed for this run"
+        else:
+            self.strategy, self.strategy_name, self.strategy_why = strat.choose(case, self.knowledge)
+        log.info("%s strategy %s (%s): %s", case.get("case_id"), self.strategy_name,
+                 strat.describe(self.strategy), self.strategy_why)  # fmt: skip
+        brief = strat.briefing(case, self.knowledge)
+        for line in brief:
+            log.info("%s lesson: %s", case.get("case_id"), line)
+        self.record("strategy", name=self.strategy_name, why=self.strategy_why, knobs=self.strategy.knobs(),
+                    lessons=brief)  # fmt: skip
 
     def volatile(self, series):
         """R13.11: the series moved more than VOLATILE_PCT in its last 12 months."""
@@ -245,7 +271,11 @@ class SpecAgent:
         base.update({f: v for f, v in locked.items() if f in base})
         ctx.locked = dict(locked)
         out["base"] = base
-        c_ref = min(ctx.c({**base, "unit_price": ctx.their_price}), best.c)
+        # the supplier's offer re-timed to our structure at its own payment slope: 90 days it has not
+        # offered yet is not 90 days at its 45-day price
+        rate = levers.revealed_rate(slopes)
+        slope = min(max(rate, est_mod.RATE_BOUNDS[0]), est_mod.RATE_BOUNDS[1]) / 360 if rate else None
+        c_ref = min(ctx.c({**base, "unit_price": implied_price(ctx.their, base, slope)}), best.c)
         th.plan.observe(c_ref, len(replies))
         if anchor_c is not None and (th.plan.anchor is None or rfq):
             th.plan.set_anchor(min(anchor_c, c_ref), rfq)
@@ -340,6 +370,8 @@ class SpecAgent:
             replies_c=cs, earlier_used="earlier" in th.flags, repair_used="repair" in th.flags,
             restore_used="restore" in th.flags, last_step_share=step_share,
             current_round=st["sent"], ideal_price=ideal_price,
+            at_limit=st["intel"].at_limit, walk_risk=st["intel"].walk_risk, wants_close=st["intel"].wants_close,
+            at_ceiling=bool((st.get("info") or {}).get("at_ceiling")), held="repeat" in th.flags,
         )  # fmt: skip
 
     def views(self, threads):
@@ -450,6 +482,7 @@ class SpecAgent:
                                       "Thank you - we take up the offer you described in your e-mail, as set out on "
                                       "the attached term sheet. Please confirm.")  # fmt: skip
         if close.kind == "repeat":
+            th.flags.add("repeat")
             return self.plain_message(
                 threads, close.sid, th.last_sheets, "Thank you for your reply. Our offer stands as set out below."
             )
@@ -494,7 +527,9 @@ class SpecAgent:
             def guard_menu(menu):
                 nonlocal guard_errors
                 notice_days, notice_date = self.contractual_notice()
+                menu = sheets.drop_refused(menu, st["intel"].refused)
                 menu = sheets.lock_coverage(ctx, menu, cover_values)
+                slack = STEP_SLACK if kind == "step" else 0.0
                 menu = sheets.repair_menu(
                     ctx,
                     menu,
@@ -503,7 +538,7 @@ class SpecAgent:
                     minimum_notice_days=notice_days,
                     current_date=notice_date,
                 )
-                menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets)
+                menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets, slack)
                 menu = sheets.no_regress(ctx, menu, [r.c for r in st["rows"] if r.valid])
                 errors = sheets.validate_menu(
                     ctx,
@@ -524,7 +559,7 @@ class SpecAgent:
                         minimum_notice_days=notice_days,
                         current_date=notice_date,
                     )
-                    repaired = sheets.guard(ctx, repaired, c_target, supplier_terms, th.last_sheets)
+                    repaired = sheets.guard(ctx, repaired, c_target, supplier_terms, th.last_sheets, slack)
                     repaired = sheets.no_regress(ctx, repaired, [r.c for r in st["rows"] if r.valid])
                     retry_errors = sheets.validate_menu(
                         ctx,
@@ -748,27 +783,55 @@ class SpecAgent:
         gap_pct = None
         if st["best"] and move["target"]:
             gap_pct = (st["best"].c - move["target"]) / move["target"] * 100
+        # words match numbers: an argument conceding "+X % is justified" is not cited next to an offer below it
+        offer_price = min((t.get("unit_price") for _, t in move["sheets"] if t.get("unit_price")), default=None)
+        drivers_fit = email.consistent(self.case, intel.cost_impact_pct, offer_price)
+        args = [a for a in args if a.key != "summary:indices" or email.consistent(self.case, a.figure, offer_price)]
         tactic_name, why = tactics.pick(intel, {
             "first": first, "rfq": rfq, "rival_cheaper": bool(extra_claims) or any(a.kind == "rival" for a in args),
             "cash_short": st["cash_short"], "cost_gap_pct": intel.cost_gap_pct,
             "gap_pct": gap_pct,
             "data_claims": sum(1 for a in args if a.ids), "relationship": intel.relationship_style == "relationship",
             "asked_for_terms": bool(move["asks"]), "hold": move["hold"], "supplier_held": intel.unchanged_rounds >= 1,
+            "goal": self.prep.goal,
         })  # fmt: skip
         tactic = tactics.TACTICS[tactic_name]
         if (
-            (s := email.weighted_sentence(intel))
+            (s := email.weighted_sentence(intel, face_value=not drivers_fit))
             and "weighted" not in th.flags
             and (first or tactic_name == "data_argument")
         ):
             analysis.append(s)
             th.flags.add("weighted")
+        if not first:  # keep arguing after round 1: one fresh computed argument per e-mail (never one twice)
+            t0 = th.plan.targets[0] if th.plan.targets else None
+            moved_pct = (move["target"] - t0) / t0 * 100 if t0 else None
+            lines = email.position_lines(self.case, intel, st["ctx"].their_price, moved_pct,
+                                         intel.unchanged_rounds >= 1)  # fmt: skip
+            if pos := next(((k, x) for k, x in lines if f"pos:{k}" not in th.flags), None):
+                analysis.append(pos[1])
+                th.flags.add(f"pos:{pos[0]}")
+        # answer the supplier: refused terms, a request for our figures, an offer of a call
+        sent_terms = [t for _, t in move["sheets"]]
+        for r in intel.refused:
+            if f"refused:{r}" not in th.flags and not any(sheets.refused(t, [r]) for t in sent_terms):
+                if line := email.refusal_line(r):
+                    extras.append(line)
+                th.flags.add(f"refused:{r}")
+        if email.asks_for_data(events) and email.data_attachment(events, "", self.fact):
+            extras.append(email.DATA_LINE)
+        last_body = str(latest(events).get("body") or "") if not first else ""
+        if email.CALL_RE.search(last_body) and "call" not in th.flags:
+            extras.append(email.CALL_LINE)
+            th.flags.add("call")
         if (
             email.VOLUME_ASK.search(str(latest(events).get("body") or ""))
             and "volume" not in th.flags
             and move["sheets"]
         ):
-            if line := email.commitment(move["sheets"][0][1]):  # R13.15: answered by code from our sheet
+            fixed = (self.case.get("fixed_terms") or {}).get("volume_per_year")
+            volume = fixed or self.case["buyer"].get("need_per_year")
+            if line := email.commitment(move["sheets"][0][1], volume):  # R13.15: answered by code from our sheet
                 extras.append(line)
                 th.flags.add("volume")
         if move["lock"]:
@@ -817,7 +880,8 @@ class SpecAgent:
                 log.warning("%s: writer failed (%s) - code e-mail", sid, error)
             took = time.monotonic() - t0
         if not isinstance(parts, dict):
-            parts = email.code_parts(tactic, allowed_q[0] if allowed_q else "")
+            previous = "\n".join(str(m.get("body") or "") for m in events if m.get("from") == "buyer")
+            parts = email.code_parts(tactic, allowed_q[0] if allowed_q else "", previous, len(move["sheets"]) == 1)
         used = self.used_ids(threads, sid)
 
         def known(ref):
@@ -955,10 +1019,12 @@ def _parse(text):
     return parse_json(text)
 
 
-def make(package=None):
-    """The agent with the model from the environment (`spec.llm.from_env`)."""
+def make(package=None, strategy=None, learned=True):
+    """The agent with the model from the environment (`spec.llm.from_env`). It plays `strategy` if given,
+    else the learned playbook's pick per case (`learned=False`: the defaults)."""
     from ..spec import llm
 
     writer = llm.from_env(WRITE_TIMEOUT_S)
     return SpecAgent(writer, package, analyst_complete=llm.from_env(GRACE_S + 15) if writer else None,
-                     prep_complete=llm.from_env(dossier.PROFILE_TIMEOUT_S) if writer else None)  # fmt: skip
+                     prep_complete=llm.from_env(dossier.PROFILE_TIMEOUT_S) if writer else None, strategy=strategy,
+                     knowledge=strat.load() if learned and strategy is None else None)  # fmt: skip

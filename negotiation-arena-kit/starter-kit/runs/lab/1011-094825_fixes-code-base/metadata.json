@@ -1,0 +1,40 @@
+{
+  "batch": "1011-094825_fixes-code-base",
+  "label": "fixes-code-base",
+  "git_head": "dde8c9d",
+  "source": "d9efa87c80f1",
+  "model_name": null,
+  "jobs": {
+    "case:P01": [
+      "base"
+    ],
+    "case:P02": [
+      "base"
+    ],
+    "case:P03": [
+      "base"
+    ],
+    "case:P04": [
+      "base"
+    ],
+    "case:P05": [
+      "base"
+    ],
+    "case:P07": [
+      "base"
+    ],
+    "case:P08": [
+      "base"
+    ],
+    "case:P10": [
+      "base"
+    ],
+    "case:P11": [
+      "base"
+    ],
+    "case:P18": [
+      "base"
+    ]
+  },
+  "holdout": false
+}

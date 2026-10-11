@@ -43,6 +43,23 @@ WITHDRAW = re.compile(
     r"not continue|step back from)\b",
     re.I,
 )
+# "no more room" without "goodbye" (P02: "the ongoing copper cost pressure limits our flexibility for
+# further reductions" - one more low counter and it withdrew)
+LIMIT = re.compile(
+    r"\b(limits? (?:our|any|the) (?:flexibility|room|scope|leeway)|limited (?:flexibility|room|scope|leeway)|"
+    r"(?:little|no|not much) (?:more |further )?(?:room|flexibility|scope|leeway)|"
+    r"(?:reached|at) (?:our|the) (?:limit|minimum|floor)|as far as we can go|absolute minimum|bottom line|"
+    r"(?:cannot|can't|can ?not|unable to|not able to) (?:go|move|reduce|lower|come down)(?: (?:the|our) price)?"
+    r" (?:any )?(?:further|lower))",
+    re.I,
+)
+# it wants to close now (P05: "Let's agree on this and get the machines running", then it withdrew on our
+# 4-cent counter)
+AGREE = re.compile(
+    r"\b(let'?s (?:agree|close|finali[sz]e|conclude|sign|shake hands)|ready to (?:sign|close|conclude)|"
+    r"agree on this|close (?:this|the deal) (?:now|today)|shake hands on)\b",
+    re.I,
+)
 POSITIVE = re.compile(
     r"\b(happy|pleased|glad|appreciate\w*|fair point|thank\w*|value|welcome|good cooperation)\b", re.I
 )
@@ -84,12 +101,19 @@ Return ONE JSON object and nothing else:
  "relationship_style": "relationship | formal | transactional",
  "withdraw_language": false,
  "questions_to_us": ["questions they asked us"],
+ "refused_terms": [{"field": "a negotiable field", "value": "the option they will not give; null = fixed price"}],
+ "at_limit": false,
+ "wants_close": false,
  "missing_info": ["what we still do not know that would help us"]}
 
 - prose_offers: every price the supplier offers in the text with the terms it is tied to, including
   alternatives ("Alternatively, with 30 days net: EUR 137.00"). Not prices we offered, not old prices.
   effective_date as YYYY-MM-DD.
-- tone: -2 (hostile) .. +2 (warm). withdraw_language: true only if they threaten to end the talks."""
+- tone: -2 (hostile) .. +2 (warm). withdraw_language: true only if they threaten to end the talks.
+- refused_terms: only term values they clearly say they will not give (e.g. "we cannot offer a fixed price
+  for 24 months" -> {"field": "index_clause", "value": null}). Not what they merely prefer.
+- at_limit: true only if they say they have no room left to lower the price (not just "it is our offer").
+- wants_close: true only if they ask to agree or sign now."""
 
 
 @dataclass
@@ -128,6 +152,9 @@ class Intel:
     tone: float | None = None
     relationship_style: str | None = None
     withdraw_language: bool = False
+    at_limit: bool = False  # its latest mail says it has no room left (LIMIT, or the model) or withdraws
+    wants_close: bool = False  # its latest mail asks to close now (AGREE, or the model)
+    refused: list = field(default_factory=list)  # [{field, value}] it says it will not give; our sheets drop them
     questions: list = field(default_factory=list)
     walk_risk: float = 0.0
     walk_signals: dict = field(default_factory=dict)
@@ -223,19 +250,57 @@ def stated(value, body):
 
 
 def drivers_by_code(body, series_ids=()):
+    """Every driver the supplier names, with the cost share that follows it in the same sentence - several
+    per sentence (P18: "LCI-C rose 2.7 % ... 5 % of our cost, while PPI-C2431 rose 12.3 % ... 38 % of our
+    cost" - reading only the first left PPI out and our weighted figure came out at +2.8 % instead of +7.5 %)."""
     out = []
     for s in prose.sentences(re.sub(r"\s*\n\s*", " ", body or "")):
-        verb, share = DRIVER_VERB.search(s), SHARE.search(s)
-        if not verb:
-            continue
-        chg = prose.number(verb.group("chg").lstrip("+"))
-        if verb.group("verb").lower() in ("fell", "dropped", "decreased", "went down", "declined"):
-            chg = -abs(chg)
-        name = verb.group("name").split()[-1]
-        series = next((i for i in series_ids if i.lower() == name.lower()), None)
-        out.append({"name": name, "series": series, "change_pct": chg,
-                    "share_pct": prose.number(share.group("share")) if share else None,
-                    "quote": s.strip(), "source": "code"})  # fmt: skip
+        verbs = list(DRIVER_VERB.finditer(s))
+        for n, verb in enumerate(verbs):
+            end = verbs[n + 1].start() if n + 1 < len(verbs) else len(s)
+            share = SHARE.search(s, verb.end(), end)
+            chg = prose.number(verb.group("chg").lstrip("+"))
+            if verb.group("verb").lower() in ("fell", "dropped", "decreased", "went down", "declined"):
+                chg = -abs(chg)
+            name = verb.group("name").split()[-1]
+            series = next((i for i in series_ids if i.lower() == name.lower()), None)
+            out.append({"name": name, "series": series, "change_pct": chg,
+                        "share_pct": prose.number(share.group("share")) if share else None,
+                        "quote": s.strip(), "source": "code"})  # fmt: skip
+    return out
+
+
+# Terms the supplier refuses in its own words (P08: "we cannot offer a fixed price over a 24-month period",
+# and our next e-mail still offered a fixed price)
+NO_FIXED = re.compile(
+    r"(?:cannot|can ?not|can't|unable to|not able to|no longer)\s+(?:offer|agree to|accept|give|hold|keep|commit to)"
+    r"\s+(?:a\s+|the\s+)?fixed[- ]price|(?:must|need to|have to)\s+include\s+(?:an?\s+)?[\w-]*\s*"
+    r"(?:index|indexation|price adjustment|escalation)\s+clause|fixed price is not (?:possible|an option)",
+    re.I,
+)
+NO_NUMBER = re.compile(
+    r"(?:cannot|can ?not|can't|unable to|not able to)\s+(?:offer|accept|agree to|grant|commit to|go to)\s+"
+    r"(?:a\s+|an\s+)?(?P<n>\d+)[- ]?(?P<unit>days?|months?)",
+    re.I,
+)
+
+
+def refused_by_code(body, negotiable):
+    """[{field, value}] of term values the supplier says it will not give (value None = no index clause)."""
+    out = []
+    if "index_clause" in negotiable and NO_FIXED.search(body or ""):
+        out.append({"field": "index_clause", "value": None})
+    for m in NO_NUMBER.finditer(body or ""):
+        near = (body or "")[max(0, m.start() - 40): m.end() + 40].lower()
+        if m.group("unit").lower().startswith("day"):
+            # days are payment days only when the e-mail says so - not a lead time
+            if not re.search(r"payment|net\b|zahlungsziel", near) or re.search(r"lead|deliver|liefer", near):
+                continue
+            field_ = "payment_days"
+        else:
+            field_ = "contract_months"
+        if field_ in negotiable:
+            out.append({"field": field_, "value": int(m.group("n"))})
     return out
 
 
@@ -273,6 +338,19 @@ def clean_extraction(parsed, body, negotiable):
     def grounded(text):
         return all(appears(prose.number(n), body) for n in re.findall(r"\d+(?:[.,]\d+)?", str(text)))
 
+    refused = []
+    for r in parsed.get("refused_terms") or []:
+        if not isinstance(r, dict) or r.get("field") not in negotiable or r.get("field") == "unit_price":
+            continue
+        v = r.get("value")
+        if v is None and r["field"] != "index_clause":
+            continue
+        if v is not None and (isinstance(v, dict) or not appears(v, body)):
+            continue  # R11.2: a refused value must be one the e-mail names
+        refused.append({"field": r["field"], "value": None if v is None else int(float(v))})
+    out["refused_terms"] = refused
+    out["at_limit"] = parsed.get("at_limit") is True
+    out["wants_close"] = parsed.get("wants_close") is True
     out["constraints"] = [s for s in parsed.get("constraints") or [] if grounded(s)]
     out["lever_hints"] = [h for h in parsed.get("lever_hints") or []
                           if isinstance(h, dict) and grounded(h.get("hint") or "")]
@@ -372,6 +450,15 @@ class Analyst:
         intel.unchanged_rounds = unchanged(history)
         intel.walk_risk, intel.walk_signals = walk_risk(history)
         intel.tone, intel.withdraw_language = history[-1].tone, history[-1].withdraw
+        intel.at_limit = history[-1].withdraw or bool(LIMIT.search(body)) or bool(x.get("at_limit"))
+        intel.wants_close = bool(AGREE.search(body)) or bool(x.get("wants_close"))
+        # refused terms from every e-mail, by code and by the model - unless its latest sheets offer it again
+        offered = [s.get("terms") or {} for s in sheets]
+        for i2, m in sup:
+            for r in [*refused_by_code(m.get("body"), negotiable), *((llm.get(i2) or {}).get("refused_terms") or [])]:
+                if r in intel.refused or any(r["field"] in t and t[r["field"]] == r["value"] for t in offered):
+                    continue
+                intel.refused.append(r)
         intel.cash_ask = bool(CASH_ASK.search(body))
 
         # offers stated only in prose (R11.8) and the "Alternatively" lines (R13.6)
