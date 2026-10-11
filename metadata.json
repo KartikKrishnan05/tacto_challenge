@@ -3,9 +3,29 @@
   "checkpoint_id": "01M4N0T8XTZP7CDV9YW8JFPFXZ",
   "strategy": "manual-commit",
   "branch": "feature/spec-agent",
-  "checkpoints_count": 1,
+  "checkpoints_count": 13,
   "files_touched": [
-    "negotiation-arena-kit/starter-kit/runs/all_replays.csv"
+    "negotiation-arena-kit/starter-kit/DESIGN_NOTES.md",
+    "negotiation-arena-kit/starter-kit/README.md",
+    "negotiation-arena-kit/starter-kit/arena_kit/agents/spec.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/analyst.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/closing.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/concession.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/email.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/lab.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/sheets.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/tactics.py",
+    "negotiation-arena-kit/starter-kit/knowledge/EXPERIMENTS.md",
+    "negotiation-arena-kit/starter-kit/knowledge/experiments.csv",
+    "negotiation-arena-kit/starter-kit/knowledge/experiments.jsonl",
+    "negotiation-arena-kit/starter-kit/knowledge/learned_playbook.json",
+    "negotiation-arena-kit/starter-kit/runs/all_replays.csv",
+    "negotiation-arena-kit/starter-kit/runs/lab/1011-094431_fixes-code-learned/P04__base__learned.json",
+    "negotiation-arena-kit/starter-kit/runs/lab/1011-094431_fixes-code-learned/P10__base__learned.json",
+    "negotiation-arena-kit/starter-kit/runs/lab/1011-094431_fixes-code-learned/metadata.json",
+    "negotiation-arena-kit/starter-kit/runs/lab/1011-095439_fixes2-code-learned/P05__firm_close__learned.json",
+    "negotiation-arena-kit/starter-kit/runs/lab/1011-095439_fixes2-code-learned/metadata.json",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_listening.py"
   ],
   "sessions": [
     {
@@ -14,13 +34,20 @@
       "compact_transcript": "/0/transcript.jsonl",
       "content_hash": "/0/content_hash.txt",
       "prompt": "/0/prompt.txt"
+    },
+    {
+      "metadata": "/1/metadata.json",
+      "transcript": "/1/full.jsonl",
+      "compact_transcript": "/1/transcript.jsonl",
+      "content_hash": "/1/content_hash.txt",
+      "prompt": "/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 16,
-    "cache_creation_tokens": 38729,
-    "cache_read_tokens": 505582,
-    "output_tokens": 5574,
-    "api_call_count": 8
+    "input_tokens": 252,
+    "cache_creation_tokens": 314655,
+    "cache_read_tokens": 24695854,
+    "output_tokens": 110864,
+    "api_call_count": 124
   }
 }

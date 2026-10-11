@@ -1,0 +1,69 @@
+how does this cheatsheat look like and how is the knowledge passed onto the agent?=
+
+---
+
+explain it in more simpler terms
+
+---
+
+ok and how much are we using the case json we get in the beginning how much does tha agent take a look at that?
+
+---
+
+I have a feeling our agent doesn't care about the given information and also the information recieved from past emails
+
+---
+
+what does this mean: All 239 practice games ran in “code-only” mode, with no AI model at all ?
+
+---
+
+please add the llm to the numbers too if it makes sense? other than that fix this too: 
+
+<pasted_content id="3330">
+1. Fix the backwards step. The agent should never offer less than its last offer. It’s a small code fix and clearly costs points.
+2. Make the words match the numbers. Either justify the low offer with the cost estimate (“our cost analysis puts this part at about €X”), or stop citing a “justified increase” that sits above our own offer.
+3. Answer the supplier. If they ask a question or reject a term, the next email must respond to it, and options they ruled out (like a fixed price) shouldn’t be offered again.
+4. Keep arguing after round 1. Use the competing quote, market data or a new argument each round instead of repeating the same sentence.
+5. Run the practice games with the model switched on to see whether the email-reading parts already fix some of this, then rebuild the cheatsheet from those games.
+</pasted_content id="3330">
+
+---
+
+<task-notification>
+<task-id>by61xj9s6</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/307cff40-cecd-4848-9931-17a4b500aa98/tasks/by61xj9s6.output</output-file>
+<status>completed</status>
+<summary>Background command "Run code-only practice games with the new code" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+ok but now our agent does use the pre gained information for all emails and not only for the first right? dont run new test I only have a few left so I have to be carefull from now on
+
+---
+
+let these exsisting sessions run to the end
+
+---
+
+why are we even doing code only games? I though tht ai version is better ?
+
+---
+
+please dont run code only anymore only run llm model please set the llm model to openai astra
+
+---
+
+why is it taing this long?
+
+---
+
+<task-notification>
+<task-id>b0vplwbvt</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-kartikkrishnan-github-tacto-challenge/307cff40-cecd-4848-9931-17a4b500aa98/tasks/b0vplwbvt.output</output-file>
+<status>completed</status>
+<summary>Background command "Run revised code-only games, then model-mode learned and base games" completed (exit code 0)</summary>
+</task-notification>
