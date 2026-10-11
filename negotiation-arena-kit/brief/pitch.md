@@ -2,7 +2,7 @@
 
 Final slide deck for the Tacto track pitch (5 min + 2 min Q&A). The slide sources are in
 [`slides/`](slides/) (`deck.json` + one HTML file per slide, Slides artifact format); an exported
-PPTX/PDF can be added next to them. Speaker notes below, one block per slide.
+PDF: [Promptly-Done-Pitch.pdf](Promptly-Done-Pitch.pdf). Speaker notes below, one block per slide.
 
 ## 1. Numbers from code. Words from the model.
 
