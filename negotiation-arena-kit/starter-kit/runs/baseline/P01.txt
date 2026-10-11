@@ -1,0 +1,23 @@
+{
+  "deal": true,
+  "supplier_id": "sup:70110",
+  "terms": {
+    "payment_days": 14,
+    "lead_time_days": 42,
+    "volume_per_year": 8150,
+    "contract_months": 12,
+    "effective_date": "2027-04-01",
+    "index_clause": null,
+    "incoterm": "FCA",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 900,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 135.3
+  },
+  "c_open": 1153779.74,
+  "c_deal": 1103947.01,
+  "c_best": 1096815.78,
+  "score": 0.8748115475117955
+}
+replay: https://arena.tacto.ai/replay/b775dc4741937f96
+practice sessions left today: 385

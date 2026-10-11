@@ -1,0 +1,1741 @@
+{
+  "case:S02": {
+    "case_id": "case:S02",
+    "case": {
+      "case_id": "case:S02",
+      "set": "practice",
+      "type": "rfq",
+      "title": "Motor bracket HB: two quotes",
+      "briefing": "Simulator example. You buy part:330030 for Hollerau Pumpenwerke from sup:70340, sup:70360. Need: 18790 pc a year for 2 year(s). The supplier in the simulator is a plain script, not a real bot.",
+      "trigger_doc": null,
+      "parts": [
+        "part:330030"
+      ],
+      "suppliers": [
+        "sup:70340",
+        "sup:70360"
+      ],
+      "negotiable": [
+        "unit_price",
+        "payment_days",
+        "lead_time_days"
+      ],
+      "fixed_terms": {
+        "volume_per_year": 18790,
+        "contract_months": 24,
+        "index_clause": null,
+        "incoterm": "DAP",
+        "tooling_eur": 0
+      },
+      "term_options": {
+        "payment_days": [
+          14,
+          30,
+          45,
+          60,
+          90
+        ],
+        "lead_time_days": [
+          21,
+          28,
+          35,
+          42,
+          49
+        ]
+      },
+      "buyer": {
+        "need_per_year": 18790,
+        "horizon_years": 2,
+        "current_unit_price": 15.63,
+        "fallback_unit_price": 17.97,
+        "interest_rate": 0.08,
+        "reference_payment_days": 60,
+        "need_lead_time_days": 42,
+        "category_goal": "leverage",
+        "fallback_risk_pct": 3,
+        "index_risk_pct": 1,
+        "late_cost_per_day": 200,
+        "cost_per_defect": 50,
+        "freight_eur_per_unit": {
+          "EXW": 0.47,
+          "FCA": 0.31,
+          "DAP": 0.0
+        },
+        "index_paths": {},
+        "must_haves": [],
+        "alternative": {
+          "kind": "none",
+          "ref": null,
+          "terms": {}
+        }
+      },
+      "round_limit": 10,
+      "refs": [
+        "sc:70340@2026Q3",
+        "sc:70360@2026Q3",
+        "idx:PPI-C241@2025-08",
+        "idx:PPI-C241@2026-08",
+        "idx:LCI-C@2025-08"
+      ],
+      "facts": {
+        "sc:70340@2026Q3": {
+          "colour": "green",
+          "otd_confirmed_pct": 90.4,
+          "otd_pct": 88.5,
+          "ppm": 489,
+          "quarter": "2026Q3",
+          "supplier": "sup:70340"
+        },
+        "sc:70360@2026Q3": {
+          "colour": "amber",
+          "otd_confirmed_pct": 84.0,
+          "otd_pct": 76.0,
+          "ppm": 762,
+          "quarter": "2026Q3",
+          "supplier": "sup:70360"
+        },
+        "idx:PPI-C241@2025-08": {
+          "month": "2025-08",
+          "series": "PPI-C241",
+          "value": 99.4
+        },
+        "idx:PPI-C241@2026-08": {
+          "month": "2026-08",
+          "series": "PPI-C241",
+          "value": 105.9
+        },
+        "idx:LCI-C@2025-08": {
+          "month": "2025-08",
+          "series": "LCI-C",
+          "value": 117.0
+        }
+      },
+      "hosted": true
+    },
+    "result": {
+      "ended": true,
+      "deal": true,
+      "supplier_id": "sup:70340",
+      "offer_id": "offer:70340-1",
+      "terms": {
+        "volume_per_year": 18790,
+        "contract_months": 24,
+        "payment_days": 14,
+        "lead_time_days": 21,
+        "incoterm": "DAP",
+        "index_clause": null,
+        "tooling_eur": 0,
+        "unit_price": 16.85
+      },
+      "c_open": 652603.76,
+      "c_deal": 639695.95,
+      "c_alt": null,
+      "c_best": 577486.85,
+      "score": 0.17183627494794515,
+      "must_haves_ok": true,
+      "cost_breakdown": {
+        "price": 633223.0,
+        "uncovered_need": 0.0,
+        "fallback_risk": 0.0,
+        "payment_terms": 6472.946222222223,
+        "freight": 0.0,
+        "late_delivery": 0,
+        "quality": 0.0,
+        "tooling": 0.0,
+        "index_clause": 0.0,
+        "index_risk": 0.0,
+        "relationship": 0.0
+      }
+    },
+    "wall_s": 25.79,
+    "session_id": "sim3",
+    "standard_terms": {
+      "sup:70340": {
+        "payment_days": 14,
+        "lead_time_days": 21
+      },
+      "sup:70360": {
+        "payment_days": 14,
+        "lead_time_days": 21
+      }
+    },
+    "session": {
+      "session_id": "sim3",
+      "case_id": "case:S02",
+      "set": "practice",
+      "status": "ended",
+      "end_reason": "accepted",
+      "threads": {
+        "sup:70340": {
+          "offer_id": "offer:70340-1",
+          "status": "agreed",
+          "closed": "accepted",
+          "offers": 1,
+          "seconds_left": null
+        },
+        "sup:70360": {
+          "offer_id": "offer:70360-1",
+          "status": "open",
+          "closed": "accepted",
+          "offers": 1,
+          "seconds_left": null
+        }
+      },
+      "rounds": 2,
+      "opening": {
+        "sup:70340": {
+          "offer_id": "offer:70340-0",
+          "round": 0,
+          "status": "open",
+          "terms": {
+            "unit_price": 17.19
+          },
+          "missing_fields": [
+            "lead_time_days",
+            "payment_days"
+          ],
+          "claims": [],
+          "claim_results": [],
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "text": "Simulated supplier. Our quote is attached."
+        },
+        "sup:70360": {
+          "offer_id": "offer:70360-0",
+          "round": 0,
+          "status": "open",
+          "terms": {
+            "unit_price": 17.51
+          },
+          "missing_fields": [
+            "lead_time_days",
+            "payment_days"
+          ],
+          "claims": [],
+          "claim_results": [],
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "text": "Simulated supplier. Our quote is attached."
+        }
+      },
+      "moves": [],
+      "result": {
+        "ended": true,
+        "deal": true,
+        "supplier_id": "sup:70340",
+        "offer_id": "offer:70340-1",
+        "terms": {
+          "volume_per_year": 18790,
+          "contract_months": 24,
+          "payment_days": 14,
+          "lead_time_days": 21,
+          "incoterm": "DAP",
+          "index_clause": null,
+          "tooling_eur": 0,
+          "unit_price": 16.85
+        },
+        "c_open": 652603.76,
+        "c_deal": 639695.95,
+        "c_alt": null,
+        "c_best": 577486.85,
+        "score": 0.17183627494794515,
+        "must_haves_ok": true,
+        "cost_breakdown": {
+          "price": 633223.0,
+          "uncovered_need": 0.0,
+          "fallback_risk": 0.0,
+          "payment_terms": 6472.946222222223,
+          "freight": 0.0,
+          "late_delivery": 0,
+          "quality": 0.0,
+          "tooling": 0.0,
+          "index_clause": 0.0,
+          "index_risk": 0.0,
+          "relationship": 0.0
+        },
+        "trace": [
+          {
+            "round": 1,
+            "actor": "sup:70340",
+            "move": {
+              "offer_id": "offer:70340-1",
+              "round": 1,
+              "status": "open",
+              "terms": {
+                "unit_price": 16.85
+              },
+              "missing_fields": [
+                "lead_time_days",
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [
+                {
+                  "index": 0,
+                  "result": "verified"
+                },
+                {
+                  "index": 1,
+                  "result": "verified"
+                },
+                {
+                  "index": 2,
+                  "result": "verified"
+                }
+              ],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          },
+          {
+            "round": 1,
+            "actor": "sup:70360",
+            "move": {
+              "offer_id": "offer:70360-1",
+              "round": 1,
+              "status": "open",
+              "terms": {
+                "unit_price": 17.16
+              },
+              "missing_fields": [
+                "lead_time_days",
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [
+                {
+                  "index": 0,
+                  "result": "verified"
+                },
+                {
+                  "index": 1,
+                  "result": "verified"
+                }
+              ],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          }
+        ]
+      },
+      "replay_url": "/replay/sim3"
+    },
+    "threads": {
+      "sup:70340": {
+        "supplier_id": "sup:70340",
+        "offer_id": "offer:70340-1",
+        "status": "agreed",
+        "closed": "accepted",
+        "messages": [
+          {
+            "thread_id": "thread:S02:70340",
+            "message_id": "msg:70340-0-1",
+            "in_reply_to": null,
+            "from": "sales@70340",
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Simulated supplier. Our quote is attached.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70340-0",
+                "terms": {
+                  "unit_price": 17.19
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "lead_time_days",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70340-0-quote",
+                "name": "quote.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Dear colleagues at Metallbau Steinfelder KG,\n\nThank you for your quote and for explaining your position.\n\nOur demand forecast for this part has changed +2.3% (fc:330030@2026-09). German producer prices for electric power generation, transmission and distribution changed -3.7% from 2025-08 to 2026-08 (idx:PPI-D351@2025-08, idx:PPI-D351@2026-08).\n\nWe have analysed the cost situation of this part carefully; the options below reflect that analysis.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 14.01 per unit, payment 90 days net, lead time 42 days.\nOption B: EUR 13.78 per unit, payment 14 days net, lead time 42 days.\nOption C: EUR 13.87 per unit, payment 45 days net, lead time 42 days.\n\nCould you share a cost breakdown for this part - material, conversion, overhead?\n\nWe look forward to your view on these options.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 14.01,
+                  "payment_days": 90,
+                  "lead_time_days": 42
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 13.78,
+                  "payment_days": 14,
+                  "lead_time_days": 42
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 13.87,
+                  "payment_days": 45,
+                  "lead_time_days": 42
+                }
+              }
+            ],
+            "refs": [
+              "fc:330030@2026-09",
+              "idx:PPI-D351@2025-08",
+              "idx:PPI-D351@2026-08"
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S02:70340",
+            "message_id": "msg:70340-1-2",
+            "in_reply_to": null,
+            "from": "sales@70340",
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70340-1",
+                "terms": {
+                  "unit_price": 16.85
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [
+              {
+                "index": 0,
+                "result": "verified"
+              },
+              {
+                "index": 1,
+                "result": "verified"
+              },
+              {
+                "index": 2,
+                "result": "verified"
+              }
+            ],
+            "missing_fields": [
+              "lead_time_days",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70340-1-cost-breakdown",
+                "name": "cost-breakdown.xlsx",
+                "type": "xlsx",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "thread_id": "thread:S02:70340",
+            "message_id": "msg:70340-1-3",
+            "in_reply_to": null,
+            "from": "sales@70340",
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Simulated supplier. Thank you for your order.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70340-1",
+                "terms": {
+                  "unit_price": 16.85
+                }
+              }
+            ],
+            "status": "agreed",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "lead_time_days",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70340-1-order-confirmation",
+                "name": "order-confirmation.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          }
+        ],
+        "timeouts": []
+      },
+      "sup:70360": {
+        "supplier_id": "sup:70360",
+        "offer_id": "offer:70360-1",
+        "status": "open",
+        "closed": "accepted",
+        "messages": [
+          {
+            "thread_id": "thread:S02:70360",
+            "message_id": "msg:70360-0-1",
+            "in_reply_to": null,
+            "from": "sales@70360",
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Simulated supplier. Our quote is attached.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70360-0",
+                "terms": {
+                  "unit_price": 17.51
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "lead_time_days",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70360-0-quote",
+                "name": "quote.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Dear colleagues at Kantteile Strasser GmbH,\n\nThank you for your offer, which we have compared with the other offers we hold for this part.\n\nYour on-time delivery over the last four quarters was 76.0% (sc:70360@2026Q3).\n\nWe are weighing several offers for this part; the options below would make yours the one we choose. A competing supplier has offered EUR 17.19 per unit (offer:70340-0).\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 14.01 per unit, payment 90 days net, lead time 42 days.\nOption B: EUR 13.78 per unit, payment 14 days net, lead time 42 days.\nOption C: EUR 13.87 per unit, payment 45 days net, lead time 42 days.\n\nCould you share a cost breakdown for this part - material, conversion, overhead?\n\nWe would like to work with you and look forward to an offer we can compare favourably.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 14.01,
+                  "payment_days": 90,
+                  "lead_time_days": 42
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 13.78,
+                  "payment_days": 14,
+                  "lead_time_days": 42
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 13.87,
+                  "payment_days": 45,
+                  "lead_time_days": 42
+                }
+              }
+            ],
+            "refs": [
+              "sc:70360@2026Q3",
+              "offer:70340-0"
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S02:70360",
+            "message_id": "msg:70360-1-2",
+            "in_reply_to": null,
+            "from": "sales@70360",
+            "subject": "Re: Motor bracket HB: two quotes",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70360-1",
+                "terms": {
+                  "unit_price": 17.16
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [
+              {
+                "index": 0,
+                "result": "verified"
+              },
+              {
+                "index": 1,
+                "result": "verified"
+              }
+            ],
+            "missing_fields": [
+              "lead_time_days",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70360-1-cost-breakdown",
+                "name": "cost-breakdown.xlsx",
+                "type": "xlsx",
+                "content_b64": null
+              }
+            ]
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "audit": {
+      "reply_statuses": [
+        "open",
+        "open",
+        "agreed",
+        "open",
+        "open"
+      ],
+      "contradicted": [],
+      "timeout_mentions": [],
+      "timeouts": [],
+      "buyer_without_company": []
+    }
+  },
+  "case:S01": {
+    "case_id": "case:S01",
+    "case": {
+      "case_id": "case:S01",
+      "set": "practice",
+      "type": "price_increase",
+      "title": "Adapter piece HI: a price increase",
+      "briefing": "Simulator example. You buy part:320050 for Hollerau Pumpenwerke from sup:70270. Need: 6650 pc a year for 1 year(s). The supplier in the simulator is a plain script, not a real bot.",
+      "trigger_doc": null,
+      "parts": [
+        "part:320050"
+      ],
+      "suppliers": [
+        "sup:70270"
+      ],
+      "negotiable": [
+        "unit_price",
+        "payment_days"
+      ],
+      "fixed_terms": {
+        "lead_time_days": 42,
+        "volume_per_year": 6650,
+        "contract_months": 12,
+        "index_clause": null,
+        "incoterm": "FCA",
+        "tooling_eur": 0
+      },
+      "term_options": {
+        "payment_days": [
+          14,
+          30,
+          45,
+          60,
+          90
+        ]
+      },
+      "buyer": {
+        "need_per_year": 6650,
+        "horizon_years": 1,
+        "current_unit_price": 15.88,
+        "fallback_unit_price": 18.26,
+        "interest_rate": 0.08,
+        "reference_payment_days": 60,
+        "need_lead_time_days": 42,
+        "category_goal": "leverage",
+        "fallback_risk_pct": 3,
+        "index_risk_pct": 1,
+        "late_cost_per_day": 200,
+        "cost_per_defect": 50,
+        "freight_eur_per_unit": {
+          "EXW": 0.48,
+          "FCA": 0.32,
+          "DAP": 0.0
+        },
+        "index_paths": {},
+        "must_haves": [],
+        "alternative": {
+          "kind": "none",
+          "ref": null,
+          "terms": {}
+        }
+      },
+      "round_limit": 10,
+      "refs": [
+        "sc:70270@2026Q3",
+        "idx:LCI-C@2025-08",
+        "idx:PPI-C2431@2025-08",
+        "idx:PPI-C2431@2026-08"
+      ],
+      "facts": {
+        "sc:70270@2026Q3": {
+          "colour": "amber",
+          "otd_confirmed_pct": 88.5,
+          "otd_pct": 84.6,
+          "ppm": 1531,
+          "quarter": "2026Q3",
+          "supplier": "sup:70270"
+        },
+        "idx:LCI-C@2025-08": {
+          "month": "2025-08",
+          "series": "LCI-C",
+          "value": 117.0
+        },
+        "idx:PPI-C2431@2025-08": {
+          "month": "2025-08",
+          "series": "PPI-C2431",
+          "value": 115.0
+        },
+        "idx:PPI-C2431@2026-08": {
+          "month": "2026-08",
+          "series": "PPI-C2431",
+          "value": 129.1
+        }
+      },
+      "hosted": true
+    },
+    "result": {
+      "ended": true,
+      "deal": true,
+      "supplier_id": "sup:70270",
+      "offer_id": "offer:70270-1",
+      "terms": {
+        "volume_per_year": 6650,
+        "contract_months": 12,
+        "payment_days": 14,
+        "lead_time_days": 42,
+        "incoterm": "FCA",
+        "index_clause": null,
+        "tooling_eur": 0,
+        "unit_price": 17.12
+      },
+      "c_open": 119491.07,
+      "c_deal": 117139.78,
+      "c_alt": null,
+      "c_best": 105969.08,
+      "score": 0.17388638802424844,
+      "must_haves_ok": true,
+      "cost_breakdown": {
+        "price": 113848.0,
+        "uncovered_need": 0.0,
+        "fallback_risk": 0.0,
+        "payment_terms": 1163.7795555555556,
+        "freight": 2128.0,
+        "late_delivery": 0,
+        "quality": 0.0,
+        "tooling": 0.0,
+        "index_clause": 0.0,
+        "index_risk": 0.0,
+        "relationship": 0.0
+      }
+    },
+    "wall_s": 33.69,
+    "session_id": "sim2",
+    "standard_terms": {
+      "sup:70270": {
+        "payment_days": 14
+      }
+    },
+    "session": {
+      "session_id": "sim2",
+      "case_id": "case:S01",
+      "set": "practice",
+      "status": "ended",
+      "end_reason": "accepted",
+      "threads": {
+        "sup:70270": {
+          "offer_id": "offer:70270-1",
+          "status": "agreed",
+          "closed": "accepted",
+          "offers": 1,
+          "seconds_left": null
+        }
+      },
+      "rounds": 1,
+      "opening": {
+        "sup:70270": {
+          "offer_id": "offer:70270-0",
+          "round": 0,
+          "status": "open",
+          "terms": {
+            "unit_price": 17.47
+          },
+          "missing_fields": [
+            "payment_days"
+          ],
+          "claims": [],
+          "claim_results": [],
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "text": "Simulated supplier. Our quote is attached."
+        }
+      },
+      "moves": [],
+      "result": {
+        "ended": true,
+        "deal": true,
+        "supplier_id": "sup:70270",
+        "offer_id": "offer:70270-1",
+        "terms": {
+          "volume_per_year": 6650,
+          "contract_months": 12,
+          "payment_days": 14,
+          "lead_time_days": 42,
+          "incoterm": "FCA",
+          "index_clause": null,
+          "tooling_eur": 0,
+          "unit_price": 17.12
+        },
+        "c_open": 119491.07,
+        "c_deal": 117139.78,
+        "c_alt": null,
+        "c_best": 105969.08,
+        "score": 0.17388638802424844,
+        "must_haves_ok": true,
+        "cost_breakdown": {
+          "price": 113848.0,
+          "uncovered_need": 0.0,
+          "fallback_risk": 0.0,
+          "payment_terms": 1163.7795555555556,
+          "freight": 2128.0,
+          "late_delivery": 0,
+          "quality": 0.0,
+          "tooling": 0.0,
+          "index_clause": 0.0,
+          "index_risk": 0.0,
+          "relationship": 0.0
+        },
+        "trace": [
+          {
+            "round": 1,
+            "actor": "sup:70270",
+            "move": {
+              "offer_id": "offer:70270-1",
+              "round": 1,
+              "status": "open",
+              "terms": {
+                "unit_price": 17.12
+              },
+              "missing_fields": [
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [
+                {
+                  "index": 0,
+                  "result": "verified"
+                }
+              ],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          }
+        ]
+      },
+      "replay_url": "/replay/sim2"
+    },
+    "threads": {
+      "sup:70270": {
+        "supplier_id": "sup:70270",
+        "offer_id": "offer:70270-1",
+        "status": "agreed",
+        "closed": "accepted",
+        "messages": [
+          {
+            "thread_id": "thread:S01:70270",
+            "message_id": "msg:70270-0-1",
+            "in_reply_to": null,
+            "from": "sales@70270",
+            "subject": "Re: Adapter piece HI: a price increase",
+            "body": "Simulated supplier. Our quote is attached.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70270-0",
+                "terms": {
+                  "unit_price": 17.47
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70270-0-quote",
+                "name": "quote.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "subject": "Re: Adapter piece HI: a price increase",
+            "body": "Dear colleagues at Obrábění Kraslin s.r.o.,\n\nThank you for your quote and for your earlier support in maintaining the old price. We recognise that rising material and labour costs deserve consideration.\n\nOur demand forecast for this part has changed +13.1% (fc:320050@2026-09).\n\nOur proposal rests on our analysis and pairs a sharper unit price with a choice of payment terms to support the continuing relationship. We are flexible on payment terms; please choose the option that works best for you.\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 14.95 per unit, payment 90 days net.\nOption B: EUR 14.70 per unit, payment 14 days net.\nOption C: EUR 14.80 per unit, payment 45 days net.\n\nCould you share a cost breakdown for this part - material, conversion, overhead?\n\nWe appreciate your past support and are committed to doing our part by paying reliably within the agreed terms.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 14.95,
+                  "payment_days": 90
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 14.7,
+                  "payment_days": 14
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 14.8,
+                  "payment_days": 45
+                }
+              }
+            ],
+            "refs": [
+              "fc:320050@2026-09"
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S01:70270",
+            "message_id": "msg:70270-1-2",
+            "in_reply_to": null,
+            "from": "sales@70270",
+            "subject": "Re: Adapter piece HI: a price increase",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70270-1",
+                "terms": {
+                  "unit_price": 17.12
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [
+              {
+                "index": 0,
+                "result": "verified"
+              }
+            ],
+            "missing_fields": [
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70270-1-cost-breakdown",
+                "name": "cost-breakdown.xlsx",
+                "type": "xlsx",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "thread_id": "thread:S01:70270",
+            "message_id": "msg:70270-1-3",
+            "in_reply_to": null,
+            "from": "sales@70270",
+            "subject": "Re: Adapter piece HI: a price increase",
+            "body": "Simulated supplier. Thank you for your order.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70270-1",
+                "terms": {
+                  "unit_price": 17.12
+                }
+              }
+            ],
+            "status": "agreed",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70270-1-order-confirmation",
+                "name": "order-confirmation.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "audit": {
+      "reply_statuses": [
+        "open",
+        "open",
+        "agreed"
+      ],
+      "contradicted": [],
+      "timeout_mentions": [],
+      "timeouts": [],
+      "buyer_without_company": []
+    }
+  },
+  "case:S03": {
+    "case_id": "case:S03",
+    "case": {
+      "case_id": "case:S03",
+      "set": "practice",
+      "type": "renewal",
+      "title": "Motor IE3 4 kW: framework renewal",
+      "briefing": "Simulator example. You buy part:350010 for Hollerau Pumpenwerke from sup:70520. Need: 8490 pc a year for 2 year(s). The supplier in the simulator is a plain script, not a real bot.",
+      "trigger_doc": null,
+      "parts": [
+        "part:350010"
+      ],
+      "suppliers": [
+        "sup:70520"
+      ],
+      "negotiable": [
+        "unit_price",
+        "payment_days",
+        "contract_months",
+        "incoterm"
+      ],
+      "fixed_terms": {
+        "lead_time_days": 35,
+        "volume_per_year": 8490,
+        "index_clause": null,
+        "tooling_eur": 0
+      },
+      "term_options": {
+        "payment_days": [
+          14,
+          30,
+          45,
+          60,
+          90
+        ],
+        "contract_months": [
+          12,
+          24
+        ],
+        "incoterm": [
+          "EXW",
+          "FCA",
+          "DAP"
+        ]
+      },
+      "buyer": {
+        "need_per_year": 8490,
+        "horizon_years": 2,
+        "current_unit_price": 217.77,
+        "fallback_unit_price": 250.44,
+        "interest_rate": 0.08,
+        "reference_payment_days": 60,
+        "need_lead_time_days": 42,
+        "category_goal": "routine",
+        "fallback_risk_pct": 5,
+        "index_risk_pct": 2,
+        "late_cost_per_day": 200,
+        "cost_per_defect": 50,
+        "freight_eur_per_unit": {
+          "EXW": 6.53,
+          "FCA": 4.36,
+          "DAP": 0.0
+        },
+        "index_paths": {},
+        "must_haves": [],
+        "alternative": {
+          "kind": "quote",
+          "ref": "quote:7100042",
+          "terms": {
+            "unit_price": 245.59,
+            "payment_days": 30,
+            "lead_time_days": 42,
+            "incoterm": "DAP"
+          }
+        }
+      },
+      "round_limit": 10,
+      "refs": [
+        "sc:70520@2026Q3",
+        "idx:CU-NOTATION@2025-08",
+        "idx:CU-NOTATION@2026-08",
+        "idx:LCI-C@2025-08",
+        "quote:7100042"
+      ],
+      "facts": {
+        "sc:70520@2026Q3": {
+          "colour": "green",
+          "otd_confirmed_pct": 83.0,
+          "otd_pct": 81.1,
+          "ppm": 764,
+          "quarter": "2026Q3",
+          "supplier": "sup:70520"
+        },
+        "idx:CU-NOTATION@2025-08": {
+          "month": "2025-08",
+          "series": "CU-NOTATION",
+          "value": 852.1524
+        },
+        "idx:CU-NOTATION@2026-08": {
+          "month": "2026-08",
+          "series": "CU-NOTATION",
+          "value": 1266.6289
+        },
+        "idx:LCI-C@2025-08": {
+          "month": "2025-08",
+          "series": "LCI-C",
+          "value": 117.0
+        },
+        "quote:7100042": {
+          "date": "2025-01-15",
+          "incoterm": "DAP",
+          "lead_time_days": 42,
+          "part": "part:350010",
+          "payment_days": 30,
+          "price_unit": 1,
+          "supplier": "sup:70510",
+          "unit_price": 245.59
+        }
+      },
+      "hosted": true
+    },
+    "result": {
+      "ended": true,
+      "deal": true,
+      "supplier_id": "sup:70520",
+      "offer_id": "offer:70520-4",
+      "terms": {
+        "volume_per_year": 8490,
+        "contract_months": 24,
+        "payment_days": 14,
+        "lead_time_days": 35,
+        "incoterm": "EXW",
+        "index_clause": null,
+        "tooling_eur": 0,
+        "unit_price": 220.6
+      },
+      "c_open": 4342556.33,
+      "c_deal": 3894957.68,
+      "c_alt": 4197918.99,
+      "c_best": 3636482.08,
+      "score": 0.6339257521429225,
+      "must_haves_ok": true,
+      "cost_breakdown": {
+        "price": 3745788.0,
+        "uncovered_need": 0.0,
+        "fallback_risk": 0.0,
+        "payment_terms": 38290.27733333333,
+        "freight": 110879.40000000001,
+        "late_delivery": 0,
+        "quality": 0.0,
+        "tooling": 0.0,
+        "index_clause": 0.0,
+        "index_risk": 0.0,
+        "relationship": 0.0
+      }
+    },
+    "wall_s": 68.67,
+    "session_id": "sim1",
+    "standard_terms": {
+      "sup:70520": {
+        "payment_days": 14,
+        "contract_months": 12,
+        "incoterm": "EXW"
+      }
+    },
+    "session": {
+      "session_id": "sim1",
+      "case_id": "case:S03",
+      "set": "practice",
+      "status": "ended",
+      "end_reason": "accepted",
+      "threads": {
+        "sup:70520": {
+          "offer_id": "offer:70520-4",
+          "status": "agreed",
+          "closed": "accepted",
+          "offers": 4,
+          "seconds_left": null
+        }
+      },
+      "rounds": 4,
+      "opening": {
+        "sup:70520": {
+          "offer_id": "offer:70520-0",
+          "round": 0,
+          "status": "open",
+          "terms": {
+            "unit_price": 239.55
+          },
+          "missing_fields": [
+            "contract_months",
+            "incoterm",
+            "payment_days"
+          ],
+          "claims": [],
+          "claim_results": [],
+          "signals": {
+            "reply_delay_days": 1,
+            "validity_days": 30
+          },
+          "text": "Simulated supplier. Our quote is attached."
+        }
+      },
+      "moves": [],
+      "result": {
+        "ended": true,
+        "deal": true,
+        "supplier_id": "sup:70520",
+        "offer_id": "offer:70520-4",
+        "terms": {
+          "volume_per_year": 8490,
+          "contract_months": 24,
+          "payment_days": 14,
+          "lead_time_days": 35,
+          "incoterm": "EXW",
+          "index_clause": null,
+          "tooling_eur": 0,
+          "unit_price": 220.6
+        },
+        "c_open": 4342556.33,
+        "c_deal": 3894957.68,
+        "c_alt": 4197918.99,
+        "c_best": 3636482.08,
+        "score": 0.6339257521429225,
+        "must_haves_ok": true,
+        "cost_breakdown": {
+          "price": 3745788.0,
+          "uncovered_need": 0.0,
+          "fallback_risk": 0.0,
+          "payment_terms": 38290.27733333333,
+          "freight": 110879.40000000001,
+          "late_delivery": 0,
+          "quality": 0.0,
+          "tooling": 0.0,
+          "index_clause": 0.0,
+          "index_risk": 0.0,
+          "relationship": 0.0
+        },
+        "trace": [
+          {
+            "round": 1,
+            "actor": "sup:70520",
+            "move": {
+              "offer_id": "offer:70520-1",
+              "round": 1,
+              "status": "open",
+              "terms": {
+                "unit_price": 234.76
+              },
+              "missing_fields": [
+                "contract_months",
+                "incoterm",
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [
+                {
+                  "index": 0,
+                  "result": "verified"
+                }
+              ],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          },
+          {
+            "round": 2,
+            "actor": "sup:70520",
+            "move": {
+              "offer_id": "offer:70520-2",
+              "round": 2,
+              "status": "open",
+              "terms": {
+                "unit_price": 229.97
+              },
+              "missing_fields": [
+                "contract_months",
+                "incoterm",
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          },
+          {
+            "round": 3,
+            "actor": "sup:70520",
+            "move": {
+              "offer_id": "offer:70520-3",
+              "round": 3,
+              "status": "open",
+              "terms": {
+                "unit_price": 225.18
+              },
+              "missing_fields": [
+                "contract_months",
+                "incoterm",
+                "payment_days"
+              ],
+              "claims": [],
+              "claim_results": [],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. Our counter-offer."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          },
+          {
+            "round": 4,
+            "actor": "sup:70520",
+            "move": {
+              "offer_id": "offer:70520-4",
+              "round": 4,
+              "status": "agreed",
+              "terms": {
+                "unit_price": 220.6,
+                "payment_days": 14,
+                "contract_months": 24,
+                "incoterm": "EXW"
+              },
+              "missing_fields": [],
+              "claims": [],
+              "claim_results": [],
+              "signals": {
+                "reply_delay_days": 1,
+                "validity_days": 30
+              },
+              "text": "Simulated supplier. We agree."
+            },
+            "reasons": [
+              "A fixed script: it concedes the same step per term sheet, down to its floor."
+            ]
+          }
+        ]
+      },
+      "replay_url": "/replay/sim1"
+    },
+    "threads": {
+      "sup:70520": {
+        "supplier_id": "sup:70520",
+        "offer_id": "offer:70520-4",
+        "status": "agreed",
+        "closed": "accepted",
+        "messages": [
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-0-1",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. Our quote is attached.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-0",
+                "terms": {
+                  "unit_price": 239.55
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "contract_months",
+              "incoterm",
+              "payment_days"
+            ],
+            "attachments": [
+              {
+                "attachment_id": "att:70520-0-quote",
+                "name": "quote.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Dear colleagues at Vesmo Elektromotory a.s.,\n\nThank you for sending your renewal quote. Our counterproposal rests on our assessment of the growing volume opportunity and the commercial value of a longer agreement.\n\nYour on-time delivery over the last four quarters was 81.1% (sc:70520@2026Q3).\n\nA longer agreement offers clearer account visibility in exchange for improved pricing, while our growing forecast supports planning without guaranteeing orders. We are flexible on payment terms and have linked each payment option to its price; which works best for your approval process?\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 217.05 per unit, payment 90 days net, 24-month agreement, Incoterm EXW.\nOption B: EUR 213.42 per unit, payment 14 days net, 24-month agreement, Incoterm EXW.\nOption C: EUR 214.88 per unit, payment 45 days net, 24-month agreement, Incoterm EXW.\n\nWe appreciate the relationship and look forward to agreeing a practical renewal package.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 217.05,
+                  "payment_days": 90,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 213.42,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 214.88,
+                  "payment_days": 45,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              }
+            ],
+            "refs": [
+              "sc:70520@2026Q3"
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-1-2",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-1",
+                "terms": {
+                  "unit_price": 234.76
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [
+              {
+                "index": 0,
+                "result": "verified"
+              }
+            ],
+            "missing_fields": [
+              "contract_months",
+              "incoterm",
+              "payment_days"
+            ],
+            "attachments": []
+          },
+          {
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Dear colleagues at Vesmo Elektromotory a.s.,\n\nThank you for your counteroffer and the price movement towards our position. We recognise your concession and are making a modest step in return, with the expectation of further movement from your side.\n\nWe are flexible on the incoterm: under the EXW option, we take responsibility for collection and onward transport in exchange for a lower price. The FCA and DAP options link greater delivery responsibility on your side to higher prices; which arrangement works best for you?\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 222.28 per unit, Incoterm DAP, 24-month agreement, payment 14 days net.\nOption B: EUR 215.81 per unit, Incoterm EXW, 24-month agreement, payment 14 days net.\nOption C: EUR 217.96 per unit, Incoterm FCA, 24-month agreement, payment 14 days net.\n\nWe appreciate your constructive engagement and look forward to continuing our supply relationship.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 222.28,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "DAP"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 215.81,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 217.96,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "FCA"
+                }
+              }
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-2-3",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-2",
+                "terms": {
+                  "unit_price": 229.97
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "contract_months",
+              "incoterm",
+              "payment_days"
+            ],
+            "attachments": []
+          },
+          {
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Dear colleagues at Vesmo Elektromotory a.s.,\n\nThank you for improving your counteroffer; we appreciate your movement towards our position. We are making a modest price concession in return and expect a further step from your side.\n\nWe are flexible on the incoterm: EXW gives you less delivery responsibility in exchange for a lower price, while FCA and DAP reflect the responsibilities you retain. With the longer agreement and payment terms unchanged, which delivery arrangement works best for your approval process?\n\nWe can offer either of these packages - please choose the one that suits you better:\nOption A: EUR 224.67 per unit, Incoterm DAP, 24-month agreement, payment 14 days net.\nOption B: EUR 218.21 per unit, Incoterm EXW, 24-month agreement, payment 14 days net.\nOption C: EUR 220.36 per unit, Incoterm FCA, 24-month agreement, payment 14 days net.\n\nWe appreciate your constructive approach and look forward to agreeing the renewal package.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 224.67,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "DAP"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 218.21,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              },
+              {
+                "terms": {
+                  "unit_price": 220.36,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "FCA"
+                }
+              }
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-3-4",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. Our counter-offer.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-3",
+                "terms": {
+                  "unit_price": 225.18
+                }
+              }
+            ],
+            "status": "open",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [
+              "contract_months",
+              "incoterm",
+              "payment_days"
+            ],
+            "attachments": []
+          },
+          {
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Dear colleagues at Vesmo Elektromotory a.s.,\n\nThank you for the price movement in your counteroffer; we recognise the progress you have made towards our position. We are making a modest price concession in return and expect a further step from you.\n\nOur EXW proposal puts collection and onward transport with us in exchange for a lower price, while retaining the longer agreement and shorter payment terms. This gives you account visibility and less delivery responsibility in a straightforward package for internal approval.\n\nWe propose: EUR 220.60 per unit, 24-month agreement, payment 14 days net, Incoterm EXW.\n\nWe appreciate your continued movement and look forward to your response to this package.\n\nKind regards\nPurchasing\nHollerau Pumpenwerke GmbH",
+            "term_sheets": [
+              {
+                "terms": {
+                  "unit_price": 220.6,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              }
+            ],
+            "from": "buyer"
+          },
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-4-5",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. We agree.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-4",
+                "terms": {
+                  "unit_price": 220.6,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              }
+            ],
+            "status": "agreed",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [],
+            "attachments": [
+              {
+                "attachment_id": "att:70520-4-quote",
+                "name": "quote.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          },
+          {
+            "thread_id": "thread:S03:70520",
+            "message_id": "msg:70520-4-6",
+            "in_reply_to": null,
+            "from": "sales@70520",
+            "subject": "Re: Motor IE3 4 kW: framework renewal",
+            "body": "Simulated supplier. Thank you for your order.",
+            "refs": [],
+            "action": null,
+            "term_sheets": [
+              {
+                "term_sheet_id": "offer:70520-4",
+                "terms": {
+                  "unit_price": 220.6,
+                  "payment_days": 14,
+                  "contract_months": 24,
+                  "incoterm": "EXW"
+                }
+              }
+            ],
+            "status": "agreed",
+            "signals": {
+              "reply_delay_days": 1,
+              "validity_days": 30
+            },
+            "claim_results": [],
+            "missing_fields": [],
+            "attachments": [
+              {
+                "attachment_id": "att:70520-4-order-confirmation",
+                "name": "order-confirmation.pdf",
+                "type": "pdf",
+                "content_b64": null
+              }
+            ]
+          }
+        ],
+        "timeouts": []
+      }
+    },
+    "audit": {
+      "reply_statuses": [
+        "open",
+        "open",
+        "open",
+        "open",
+        "agreed",
+        "agreed"
+      ],
+      "contradicted": [],
+      "timeout_mentions": [],
+      "timeouts": [],
+      "buyer_without_company": []
+    }
+  }
+}

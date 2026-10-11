@@ -1,0 +1,62 @@
+03:25:19 HTTP Request: POST https://arena.tacto.ai/v1/sessions "HTTP/1.1 200 OK"
+03:25:19 session 313c8a7ef7e8c640
+03:25:19 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-0-quote "HTTP/1.1 200 OK"
+03:25:19 negotiation dossier cache hit for case:P11 (1 ms)
+03:25:19 case:P11 sup:70140 quality_first, steps: ppm_commitment (8,586 EUR), chargeback_eur_per_complaint (2,146 EUR)
+03:25:19 case:P11 sup:70140 step ppm_commitment, locked {}, target C 722,734: {"unit_price": 43.78, "ppm_commitment": 300} | {"unit_price": 43.55, "ppm_commitment": 800} | {"unit_price": 43.24, "ppm_commitment": 1500}
+03:25:27 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:25:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140 "HTTP/1.1 200 OK"
+03:25:45 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:25:47 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-1-eight_d "HTTP/1.1 200 OK"
+03:25:47 sup:70140 open {'unit_price': 46.5, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+03:25:47 case:P11 sup:70140 step chargeback_eur_per_complaint, locked {"ppm_commitment": 300}, target C 729,222: {"unit_price": 44.32, "chargeback_eur_per_complaint": 500} | {"unit_price": 44.19, "chargeback_eur_per_complaint": 0.0} | {"unit_price": 44.23, "chargeback_eur_per_complaint": 150}
+03:25:56 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:25:56 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140 "HTTP/1.1 200 OK"
+03:26:18 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:26:18 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-2-eight_d "HTTP/1.1 200 OK"
+03:26:18 sup:70140 open {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+03:26:18 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 733,503: {"unit_price": 44.46}
+03:26:27 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:26:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140 "HTTP/1.1 200 OK"
+03:26:50 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:26:50 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-3-eight_d "HTTP/1.1 200 OK"
+03:26:50 sup:70140 open {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+03:26:50 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 737,219: {"unit_price": 44.69}
+03:26:56 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:26:57 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140 "HTTP/1.1 200 OK"
+03:27:08 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:27:09 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-4-eight_d "HTTP/1.1 200 OK"
+03:27:09 sup:70140 open {'unit_price': 45.5, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+03:27:09 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 739,135: {"unit_price": 44.81}
+03:27:14 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:27:15 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140 "HTTP/1.1 200 OK"
+03:27:35 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:27:35 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-5-quote "HTTP/1.1 200 OK"
+03:27:35 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/attachments/att:70140-5-eight_d "HTTP/1.1 200 OK"
+03:27:35 sup:70140 final_offer {'unit_price': 45.5, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+03:27:35 sup:70140 {'type': 'accept', 'term_sheet_id': 'offer:70140-5'}
+03:27:35 HTTP Request: POST https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640/threads/sup:70140/messages "HTTP/1.1 200 OK"
+03:27:35 HTTP Request: GET https://arena.tacto.ai/v1/sessions/313c8a7ef7e8c640 "HTTP/1.1 200 OK"
+{
+  "deal": true,
+  "supplier_id": "sup:70140",
+  "terms": {
+    "payment_days": 60,
+    "lead_time_days": 56,
+    "volume_per_year": 15900,
+    "contract_months": 12,
+    "effective_date": "2027-01-01",
+    "index_clause": null,
+    "incoterm": "FCA",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 300,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 45.5
+  },
+  "c_open": 817578.0,
+  "c_deal": 750082.5,
+  "c_best": 722500.02,
+  "score": 0.7098962346486538
+}
+replay: https://arena.tacto.ai/replay/313c8a7ef7e8c640
+practice sessions left today: 338

@@ -1,0 +1,58 @@
+02:52:48 HTTP Request: POST https://arena.tacto.ai/v1/sessions "HTTP/1.1 200 OK"
+02:52:48 session eb74db7ff984aada
+02:52:49 HTTP Request: GET https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/attachments/att:70110-0-quote "HTTP/1.1 200 OK"
+02:52:49 negotiation dossier cache hit for case:P01 (1 ms)
+02:52:49 case:P01 sup:70110 stabilise, steps: payment_days (19,071 EUR), effective_date (38,966 EUR)
+02:52:49 case:P01 sup:70110 step payment_days, locked {}, target C 1,097,682: {"unit_price": 131.24, "payment_days": 90} | {"unit_price": 130.59, "payment_days": 60} | {"unit_price": 130.2, "payment_days": 45}
+02:52:54 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:53:21 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:53:21 sup:70110 open {'unit_price': 136.7, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:53:21 case:P01 sup:70110 step effective_date, locked {"payment_days": 45}, target C 1,103,263: {"unit_price": 136.48, "effective_date": "2027-04-01"} | {"unit_price": 132.37, "effective_date": "2026-11-01"} | {"unit_price": 133.54, "effective_date": "2027-01-01"}
+02:53:29 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:54:07 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:54:07 HTTP Request: GET https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/attachments/att:70110-2-delivery_schedule "HTTP/1.1 200 OK"
+02:54:07 sup:70110 open {'unit_price': 135.8, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:54:07 case:P01 sup:70110 price, locked {"payment_days": 45, "effective_date": "2026-11-01"}, target C 1,106,896: {"unit_price": 133.07}
+02:54:11 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:54:25 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:54:25 HTTP Request: GET https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/attachments/att:70110-3-delivery_schedule "HTTP/1.1 200 OK"
+02:54:25 sup:70110 open {'unit_price': 135.3, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:54:25 case:P01 sup:70110 price, locked {"payment_days": 45, "effective_date": "2026-11-01"}, target C 1,109,388: {"unit_price": 133.47}
+02:54:29 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:54:39 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:54:39 sup:70110 open {'unit_price': 134.9, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:54:39 case:P01 sup:70110 price, locked {"payment_days": 45, "effective_date": "2026-11-01"}, target C 1,110,980: {"unit_price": 133.71}
+02:54:44 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:55:00 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:55:00 sup:70110 open {'unit_price': 134.5, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:55:00 case:P01 sup:70110 price, locked {"payment_days": 45, "effective_date": "2026-11-01"}, target C 1,111,314: {"unit_price": 133.76}
+02:55:04 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+02:55:27 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:55:27 HTTP Request: GET https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/attachments/att:70110-6-quote "HTTP/1.1 200 OK"
+02:55:27 sup:70110 final_offer {'unit_price': 134.5, 'payment_days': 45, 'effective_date': '2026-11-01'}
+02:55:27 sup:70110 {'type': 'accept', 'term_sheet_id': 'offer:70110-6'}
+02:55:27 HTTP Request: POST https://arena.tacto.ai/v1/sessions/eb74db7ff984aada/threads/sup:70110/messages "HTTP/1.1 200 OK"
+02:55:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/eb74db7ff984aada "HTTP/1.1 200 OK"
+{
+  "deal": true,
+  "supplier_id": "sup:70110",
+  "terms": {
+    "payment_days": 45,
+    "lead_time_days": 42,
+    "volume_per_year": 8150,
+    "contract_months": 12,
+    "effective_date": "2026-11-01",
+    "index_clause": null,
+    "incoterm": "FCA",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 900,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 134.5
+  },
+  "c_open": 1153779.74,
+  "c_deal": 1116906.36,
+  "c_best": 1096815.78,
+  "score": 0.6473106855632914
+}
+replay: https://arena.tacto.ai/replay/eb74db7ff984aada
+practice sessions left today: 352

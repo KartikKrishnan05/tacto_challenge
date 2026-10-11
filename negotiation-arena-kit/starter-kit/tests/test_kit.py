@@ -9,7 +9,7 @@ from arena_kit import ArenaClient, ArenaError, complete_offer, play_all, total_c
 from arena_kit.agents import LLMAgent, NaiveAgent
 from arena_kit.cost import cost_breakdown, must_haves_ok, relationship_cost, score, supplier_value
 from arena_kit.data import DataPackage
-from arena_kit.docs import quote_terms, read_document
+from arena_kit.docs import quote_terms, read_document, standard_terms
 from arena_kit.play import hosted, quota_used_up
 from arena_kit.sim import Sim
 
@@ -242,25 +242,29 @@ def opened():
 
 def test_llm_agent_writes_e_mails_and_drops_unknown_ids(package):
     case = {**CASE, "trigger_doc": "doc:L1", "refs": ["sc:A@2026Q3", "cost:T1"]}
-    decision = {
-        "supplier_id": "sup:A",
-        "action": "send",
-        "subject": "Your quote",
-        "body": "Our should-cost estimate is 36.20 EUR per unit (cost:T1).\n"
-        "Scrap fell 30% (idx:S1@2020-01). Could you send a cost breakdown?",
-        "term_sheets": [{"unit_price": 39.0}, {"unit_price": 38.0, "payment_days": 14}],
+    text = {
+        "salutation": "Dear colleagues,",
+        "opening": "Thank you for your quote. Scrap fell 30% (idx:S1@2020-01).",
+        "claims": [],
+        "bridge": "We are flexible on the payment terms.",
+        "question": "",
+        "closing": "We look forward to your reply.",
     }
-    complete, calls = scripted("```json\n" + json.dumps(decision) + "\n```")
-    msg = LLMAgent(complete, package).decide(case, opened())["message"]
-    assert msg["term_sheets"] == [
-        {"terms": {"unit_price": 39.0, "payment_days": 60}},
-        {"terms": {"unit_price": 38.0, "payment_days": 14}},
-    ]
-    assert msg["body"] == (  # a known ID stays; one the data does not have is removed
-        "Our should-cost estimate is 36.20 EUR per unit (cost:T1).\nScrap fell 30%. Could you send a cost breakdown?"
-    )
+    complete, calls = scripted("```json\n" + json.dumps(text) + "\n```")
+    threads = opened()
+    out = LLMAgent(complete, package).decide(case, threads)
+    msg, events = out["message"], threads[out["supplier_id"]]
+    # code builds the term sheets: alternatives on payment days, each costing us the same C
+    sheets = [s["terms"] for s in msg["term_sheets"]]
+    assert len(sheets) > 1 and len({s["payment_days"] for s in sheets}) == len(sheets)
+    costs = [total_cost(case, s, standard_terms(events)) for s in sheets]
+    assert max(costs) - min(costs) < 0.01 * 4000 * 2 * 1.5  # equal up to rounding the price to cents
+    body = msg["body"]  # code assembles it: the model's sentences, linted, and the options from the sheets
+    assert "Thank you for your quote." in body and "Scrap fell" not in body  # the model may not cite IDs itself
+    assert "(cost:T1)" in body  # the first e-mail argues: code inserts the strongest checked arguments
+    assert "Option A: EUR" in body and body.endswith("Hollerau Pumpenwerke GmbH")
     prompt = calls[0]
-    assert "We raise prices by 8%." in prompt and "Payment terms (days net) 30" in prompt
+    assert "We raise prices by 8%." in prompt and "PLAN:" in prompt
     assert 'cost:T1: {"part": "part:T1", "unit_cost": 36.2}' in prompt  # facts the case cites
 
 

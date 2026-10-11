@@ -1,0 +1,34 @@
+01:37:27 session 1ced2b1205b139e9
+01:37:27 case:P01 sup:70110 steps: effective_date (40,527 EUR), payment_days (19,071 EUR)
+01:37:27 case:P01 sup:70110 step 1/2 effective_date, locked {}, target C 1,048,289: {"unit_price": 126.53, "effective_date": "2027-04-01"} | {"unit_price": 126.53, "effective_date": "2026-11-01"} | {"unit_price": 126.53, "effective_date": "2027-01-01"}
+01:37:59 sup:70110 open {'unit_price': 142.5, 'payment_days': 60, 'effective_date': '2027-04-01'}
+01:37:59 case:P01 sup:70110 step 2/2 payment_days, locked {"effective_date": "2027-04-01"}, target C 1,063,551: {"unit_price": 131.19, "payment_days": 90} | {"unit_price": 129.72, "payment_days": 60} | {"unit_price": 129.0, "payment_days": 45}
+01:38:29 sup:70110 open {'unit_price': 139.6, 'payment_days': 45, 'effective_date': '2027-04-01'}
+01:38:29 case:P01 sup:70110 price, locked {"effective_date": "2027-04-01", "payment_days": 45}, target C 1,074,284: {"unit_price": 131.24}
+01:38:58 sup:70110 open {'unit_price': 138.6, 'payment_days': 45, 'effective_date': '2027-04-01'}
+01:38:58 case:P01 sup:70110 price, locked {"effective_date": "2027-04-01", "payment_days": 45}, target C 1,079,965: {"unit_price": 132.42}
+01:39:14 sup:70110 final_offer {'unit_price': 137.8, 'payment_days': 45, 'effective_date': '2027-04-01'}
+01:39:14 sup:70110 {'type': 'accept', 'term_sheet_id': 'offer:70110-4'}
+{
+  "deal": true,
+  "supplier_id": "sup:70110",
+  "terms": {
+    "payment_days": 45,
+    "lead_time_days": 42,
+    "volume_per_year": 8150,
+    "contract_months": 12,
+    "effective_date": "2027-04-01",
+    "index_clause": null,
+    "incoterm": "FCA",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 900,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 137.8
+  },
+  "c_open": 1153779.74,
+  "c_deal": 1107514.58,
+  "c_best": 1096815.78,
+  "score": 0.8121830013222386
+}
+replay: https://arena.tacto.ai/replay/1ced2b1205b139e9
+practice sessions left today: 376

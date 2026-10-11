@@ -1,0 +1,19 @@
+{
+  "started": "2026-10-11T06:05:30+0200",
+  "git_head": "4ff0f597003306a6a4483f44a82b0a312357aca7",
+  "source_sha256": "a69b6beca13d6b25872037da1fa7364bd16b05fb2333cd0b621f1b2e39dd8560",
+  "model": null,
+  "provider": null,
+  "cases": [
+    "case:P01",
+    "case:P02",
+    "case:P03",
+    "case:P04",
+    "case:P05",
+    "case:P07",
+    "case:P08",
+    "case:P10",
+    "case:P11",
+    "case:P18"
+  ]
+}

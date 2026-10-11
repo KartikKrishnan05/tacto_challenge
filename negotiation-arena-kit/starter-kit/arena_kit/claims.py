@@ -7,12 +7,13 @@ forecast change; a letter's notice against the contract's. Here code computes ea
 the arena does and writes one sentence per argument - the language model only chooses among them,
 and they go into the e-mail word for word. Each ID counts once per case (a rival's quote once per
 supplier), so `Ledger` remembers what has been cited.
+
+Only arguments that argue our side are offered to the model: an index that rose "confirms the
+supplier's case" (P02, P04), so it is kept out unless it rose far less than the increase asked for.
 """
 
 import re
 from dataclasses import dataclass, field
-
-from .dossier import safe_query
 
 DATA_END = "2026-09"  # the data is frozen at 2026-09-30
 
@@ -26,15 +27,18 @@ class Claim:
     favourable: bool = True  # False: true, but it argues the supplier's side
     note: str = ""  # for the model: why it matters
     figure: float | None = None
-    strength: float = 1.0  # how hard it argues our case: ranks the arguments when no profile does
+    strength: float = 1.0  # how hard it argues our case: ranks the arguments
     extra: list = field(default_factory=list)  # context sentences without IDs, sent with the claim
 
 
 class Ledger:
-    """What has been cited in this case, and how each citation checked out."""
+    """What has been cited in this case."""
 
     def __init__(self):
-        self.used, self.results = set(), {}
+        self.used = set()
+        # Kept for BuyerAgent/DualAgent compatibility.  SpecAgent stores the same feedback in
+        # its own result map, while the older agents read it from the ledger.
+        self.results = {}
 
     def spent(self, claim, sid):
         return any(self._key(i, sid) in self.used for i in claim.ids)
@@ -46,6 +50,13 @@ class Ledger:
     @staticmethod
     def _key(ref, sid):
         return (sid, ref) if ref.startswith(("quote:", "offer:")) else ref
+
+
+def safe_query(package, sql, params=()):
+    try:
+        return package.query(sql, params)
+    except Exception:  # no package, no tables, or a table this release does not have
+        return []
 
 
 def _fact(package, case, ref):
@@ -105,7 +116,7 @@ def index_change(package, case, series, end=None):
 
 
 def candidates(package, case, sid, their_price=None, rivals=None):
-    """Every argument the data gives for this supplier, best first within each kind.
+    """Every argument the data gives for this supplier, strongest first.
     `their_price`: the supplier's standing unit price; `rivals`: {offer_id: unit price} of the other
     suppliers in this session."""
     out = []
@@ -132,7 +143,9 @@ def candidates(package, case, sid, their_price=None, rivals=None):
             continue
         chg, a, b = got
         impact += w * chg
-        fav = chg <= 1.0 or (asked is not None and chg < asked / 2)
+        # a rise argues the supplier's side ("your figures confirm our case") - unless it is far
+        # below the increase it asks for
+        fav = chg <= 0 or (asked is not None and chg < asked / 2)
         out.append(
             Claim(
                 key=f"index:{series}",
@@ -156,7 +169,8 @@ def candidates(package, case, sid, their_price=None, rivals=None):
                 favourable=impact < asked,
                 sentence=f"Weighted with the cost structure of this part, the index movements explain about "
                 f"{impact:+.1f}% on the price - not {asked:g}%.",
-                note="no ID: our own reasoning, not a checked claim",
+                note="no ID: our own arithmetic on the supplier's own drivers",
+                strength=5.0,
             )
         )
 
@@ -180,10 +194,11 @@ def candidates(package, case, sid, their_price=None, rivals=None):
             )
 
     # 3. Delivery and quality record.
+    num = sid.split(":")[1]
     sc = sorted(
         i
-        for i in ([*case.get("refs", [])] + (package.ids(f"sc:{sid.split(':')[1]}@") if package else []))
-        if i.startswith(f"sc:{sid.split(':')[1]}@")
+        for i in ([*case.get("refs", [])] + (package.ids(f"sc:{num}@") if package else []))
+        if i.startswith(f"sc:{num}@")
     )
     if sc and (row := _fact(package, case, sc[-1])):
         if case.get("type") == "quality" or (row.get("ppm") or 0) >= 1000:
@@ -269,8 +284,8 @@ def candidates(package, case, sid, their_price=None, rivals=None):
         for p in parts:
             fcs = package.ids(f"fc:{p.split(':')[1]}@")
             if fcs and (row := _fact(package, case, fcs[-1])) and row.get("change_pct") is not None:
-                # Only as growth if the volume did grow: P01's +10.1% sat next to a forecast that fell
-                # from 8,200 to 8,150 - a supplier who sees both reads it as overstated.
+                # only as growth if the volume did grow: a forecast change next to a falling volume
+                # reads as overstated
                 before = _fact(package, case, fcs[-2]) if len(fcs) > 1 else None
                 grew = not before or (row.get("volume_per_year") or 0) >= (before.get("volume_per_year") or 0)
                 out.append(
@@ -286,22 +301,6 @@ def candidates(package, case, sid, their_price=None, rivals=None):
                         strength=1.5,
                     )
                 )
-
-    # 7. News about the supplier: true by ID; the model judges whether it helps.
-    if package:
-        for r in safe_query(
-            package, "SELECT id, headline, topic FROM news WHERE supplier_id = ? ORDER BY date DESC LIMIT 3", (sid,)
-        ):
-            out.append(
-                Claim(
-                    key=f"news:{r['id']}",
-                    kind="news",
-                    ids=[r["id"]],
-                    favourable=False,
-                    sentence=f"We have followed the news about your company ({r['id']}).",
-                    note=f"{r['topic']}: {r['headline']}",
-                )
-            )
     out.sort(key=lambda c: -c.strength)
     return out
 

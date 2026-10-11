@@ -52,7 +52,7 @@ memo). `DataPackage` merges its facts and documents automatically; hidden cases 
 `master.json` with:
 
 ```bash
-uv run arena-build-master-data ../data
+uv run arena-build-master-data data/package
 ```
 
 `DataPackage` reads that JSON for lookups, documents, cases and negotiation dossiers. It refreshes
@@ -75,6 +75,27 @@ ARENA_URL=http://127.0.0.1:8000 ARENA_API_KEY=<the api_key> uv run arena play ca
 
 It prints the deal, `c_deal` against `c_open` and `c_best`, the score and a replay link - open it
 in your browser: the result on top, then every e-mail of the negotiation.
+
+## SpecAgent requirements and rehearsals
+
+`--agent spec` uses code for prices, term sheets and closing decisions, with the configured model
+for supplier profiles, extraction and wording. See [DESIGN_NOTES.md](DESIGN_NOTES.md) for precedence
+choices and explicit deviations, and [FINAL_REPORT.md](FINAL_REPORT.md) for tests, scores and remaining
+acceptance gaps.
+
+```bash
+uv run pytest -q
+uv run ruff check arena_kit tests
+uv run python -m arena_kit.spec.evaluate --set sandbox --out runs/my-sandbox
+uv run python -m arena_kit.spec.evaluate --sim --out runs/my-sim
+uv run python -m arena_kit.spec.evaluate --set practice --parallel 5 --out runs/my-practice
+```
+
+Each output directory must be new. Evaluations retain exact scores, sessions, threads, model
+prompts/replies, source fingerprints and timeout/claim audits. Hosted practice consumes your arena
+quota; model-enabled runs send the fictional case material to your configured provider and consume
+model credits. Add `--no-model` for the code-only fallback benchmark, or `--ids P05` for a targeted
+retest. Do not publish logs if you later use this agent with real confidential business data.
 
 ## Try it by hand (Postman, curl)
 
@@ -305,83 +326,6 @@ or any client with an `mcpServers` config:
 ```json
 {"mcpServers": {"arena-data": {"command": "uv", "args": ["run", "--directory", "/path/to/starter-kit",
   "arena", "mcp", "--data", "/path/to/data/package"]}}}
-```
-
-## The buyer agent (`--agent buyer`)
-
-`agents/buyer.py` does what the plain LLM agent does, but splits up the work. Code decides the
-numbers, the model reads the supplier and writes, and code checks every e-mail before it goes out:
-
-| Step | Module | What |
-|---|---|---|
-| Before the session opens | `dossier.py` | everything the package says about each supplier: notes, letters, past negotiations, finances, our payment record, scorecards, cost drivers, contract |
-| | `agents/buyer.py` | one model call per supplier turns the dossier into a profile: persona, tone, pressures, the terms it values, what to avoid, which arguments will land |
-| Every round | `strategy.py` | the target C (an anchor for the goal, shrinking concessions, half a step when the supplier did not move, never worse than the alternative); up to 3 term sheets around it (their terms plus gains for both sides, a trade the supplier values for a lower price, our terms for a higher one); accept or walk |
-| | `claims.py` | data arguments computed from `facts.json` the way the arena checks them, each ID used once per case, and dropped if it would argue the supplier's side |
-| | `writing.py` | the model writes the opening, the bridge, a question and the close; code inserts the arguments word for word and the options from the term sheets, then removes any sentence that leaks urgency or a budget, carries an ID, or states a figure that is not in the material |
-
-In an RFQ it writes to every live thread at once, so no thread sits idle into the 60-second rule.
-If the model is slow or fails, code writes a plain e-mail that still carries the best arguments.
-`llm.jsonl` in the run log has the profile, every prompt, the target C, the sheets and the
-sentences the lint removed.
-
-```bash
-uv run arena play case:P01 --agent buyer -v      # uses a practice session
-```
-
-**Without spending practice sessions:** listing cases is free, so save the practice case files
-and play them against the local simulator. The case, the data, the checks on your arguments and
-your e-mails are real; the supplier is the simulator's script.
-
-```bash
-uv run arena cases --save data/practice_cases.json
-uv run arena-sim serve --data data/package --cases data/practice_cases.json
-ARENA_URL=http://127.0.0.1:8000 uv run arena register "Local" sim       # a simulator key
-ARENA_URL=http://127.0.0.1:8000 ARENA_API_KEY=<that key> uv run arena play case:P01 --agent buyer -v
-```
-
-## Run log: every negotiation on disk
-
-Every `arena` command writes a folder under `starter-kit/logs/` (git-ignored), and so does every
-`play()` from your own script. Each case played gets a folder with all of it in it: the e-mails,
-what the agent decided and why, and every API call:
-
-```
-logs/
-  index.jsonl                       one line per case: when, case, session, deal, score, folder
-  2026-10-10_143205_play_case-P01/  one folder per command
-    run.json  run.log  output.txt   command, git commit, model, how it ended; full DEBUG log; what it printed
-    case-P01/
-      transcript.md                 the e-mail discussion, readable: bodies, term sheets, claim results, result, back office
-      session.json                  case file, every thread, result, session state
-      decisions.jsonl  llm.jsonl    every move chosen; every model call (prompt, raw reply, what was sent)
-      http.jsonl                    every API call: request, response, status, ms (never the key)
-      attachments/                  quote PDFs and XLSX as received
-```
-
-```bash
-uv run arena logs                 # the last 20 cases: deal, score, folder
-uv run arena logs case:P01        # the latest transcript of that case (or pass a session id)
-```
-
-`ARENA_LOG_DIR` puts the logs elsewhere; `ARENA_LOG=0` switches them off.
-
-## Cheatsheet: tips learned from past sessions
-
-`python -m arena_kit.cheatsheet` reads the new hosted sessions in `logs/` and updates `knowledge/`
-(tracked in git). The model (`LLM_CHEATSHEET_MODEL`, else `LLM_MODEL`) writes up to five lessons per
-session as *when <situation> - do <action> - because <mechanism>* and files each under a tip; code
-counts the evidence. `cheatsheet.md` holds only general principles: no case, ID, supplier, price,
-euro amount or term value, and a tip is *established* only with support from sessions of several
-cases and case types (a "do" tip whose sessions scored worse than others of the same case is
-*doubtful*). Numbers about the cases played so far live apart in `diagnostics.md`.
-
-**It is kept out of negotiating:** no agent reads it and `arena run` / `play` never build it - only
-the command below does (a test fails if negotiation code imports it).
-
-```bash
-uv run python -m arena_kit.cheatsheet             # update by hand (new sessions only)
-uv run python -m arena_kit.cheatsheet --no-llm    # numbers only
 ```
 
 ## Good to know

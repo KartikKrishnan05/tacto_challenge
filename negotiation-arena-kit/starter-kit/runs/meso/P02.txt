@@ -1,0 +1,35 @@
+01:39:21 session f673f8e59074b63a
+01:39:21 case:P02 sup:70510 steps: index_clause (40,798 EUR), payment_days (38,280 EUR)
+01:39:21 case:P02 sup:70510 step 1/2 index_clause, locked {}, target C 2,143,615: {"unit_price": 348.32, "index_clause": null} | {"unit_price": 344.22, "index_clause": {"series": "CU-NOTATION", "material_share": 0.2, "deadband_pct": 3, "base_month": "2026-08"}} | {"unit_price": 345.57, "index_clause": {"series": "CU-NOTATION", "material_share": 0.2, "deadband_pct": 5, "base_month": "2026-08"}}
+01:39:47 sup:70510 open {'unit_price': 346.41, 'payment_days': 30, 'index_clause': {'series': 'CU-NOTATION', 'material_share': 0.2, 'deadband_pct': 3.0, 'base_month': '2026-08'}}
+01:39:47 case:P02 sup:70510 step 2/2 payment_days, locked {"index_clause": {"series": "CU-NOTATION", "material_share": 0.2, "deadband_pct": 3.0, "base_month": "2026-08"}}, target C 2,157,266: {"unit_price": 346.41, "payment_days": 90} | {"unit_price": 346.41, "payment_days": 30} | {"unit_price": 346.41, "payment_days": 45}
+01:40:05 sup:70510 agreed {'unit_price': 346.41, 'payment_days': 30, 'index_clause': {'series': 'CU-NOTATION', 'material_share': 0.2, 'deadband_pct': 3.0, 'base_month': '2026-08'}}
+01:40:05 sup:70510 {'type': 'accept', 'term_sheet_id': 'offer:70510-2'}
+{
+  "deal": true,
+  "supplier_id": "sup:70510",
+  "terms": {
+    "payment_days": 30,
+    "lead_time_days": 35,
+    "volume_per_year": 6110,
+    "contract_months": 12,
+    "effective_date": "2027-01-01",
+    "index_clause": {
+      "series": "CU-NOTATION",
+      "material_share": 0.2,
+      "deadband_pct": 3.0,
+      "base_month": "2026-08"
+    },
+    "incoterm": "DAP",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 250,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 346.41
+  },
+  "c_open": 2282867.49,
+  "c_deal": 2288681.33,
+  "c_best": 2235514.05,
+  "score": 0.0
+}
+replay: https://arena.tacto.ai/replay/f673f8e59074b63a
+practice sessions left today: 374

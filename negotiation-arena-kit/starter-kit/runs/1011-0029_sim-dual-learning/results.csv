@@ -1,0 +1,4 @@
+case_id,title,goal,deal,score,supplier_id,c_open,c_deal,c_best,c_alt,rounds,seconds,end_reason,error,replay,price,uncovered_need,fallback_risk,payment_terms,freight,late_delivery,quality,tooling,index_clause,index_risk,relationship
+case:S01,Adapter piece HI: a price increase,leverage,True,0.7731532119162936,sup:70270,119491.07,109036.5,105969.08,,5,64.8,,,http://127.0.0.1:58230/replay/sim2,106200.5,0.0,0.0,708.0033333333333,2128.0,0,0.0,0.0,0.0,0.0,0.0
+case:S02,Motor bracket HB: two quotes,leverage,True,0.7783062428952408,sup:70340,652603.76,594139.8,577486.85,,5,70.5,,,http://127.0.0.1:58230/replay/sim3,594139.8,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0
+case:S03,Motor IE3 4 kW: framework renewal,routine,True,0.5770516769305779,sup:70520,4342556.33,3935115.0,3636482.08,4197918.99,3,45.2,,,http://127.0.0.1:58230/replay/sim1,3824235.6,0.0,0.0,0.0,110879.40000000001,0,0.0,0.0,0.0,0.0,0.0

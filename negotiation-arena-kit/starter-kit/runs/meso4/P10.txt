@@ -1,0 +1,32 @@
+03:25:18 HTTP Request: POST https://arena.tacto.ai/v1/sessions "HTTP/1.1 200 OK"
+03:25:18 session 49bf39b20542239d
+03:25:18 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/attachments/att:70410-0-quote "HTTP/1.1 200 OK"
+03:25:18 negotiation dossier cache hit for case:P10 (1 ms)
+03:25:18 case:P10 sup:70410 secure_supply, steps: lead_time_days (33,600 EUR)
+03:25:18 case:P10 sup:70410 step lead_time_days, locked {}, target C 1,849,626: {"unit_price": 32.02, "lead_time_days": 35} | {"unit_price": 30.59, "lead_time_days": 56} | {"unit_price": 32.02, "lead_time_days": 42}
+03:25:27 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:25:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/threads/sup:70410 "HTTP/1.1 200 OK"
+03:25:52 HTTP Request: POST https://arena.tacto.ai/v1/sessions/49bf39b20542239d/threads/sup:70410/messages "HTTP/1.1 200 OK"
+03:25:52 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/attachments/att:70410-1-delivery_schedule "HTTP/1.1 200 OK"
+03:25:52 sup:70410 open {'unit_price': 32.0, 'lead_time_days': 56, 'volume_per_year': 19890, 'contract_months': 12}
+03:25:52 case:P10 sup:70410 price, locked {"lead_time_days": 56}, target C 1,862,247: {"unit_price": 31.13}
+03:26:02 HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+03:26:03 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/threads/sup:70410 "HTTP/1.1 200 OK"
+03:26:26 HTTP Request: POST https://arena.tacto.ai/v1/sessions/49bf39b20542239d/threads/sup:70410/messages "HTTP/1.1 200 OK"
+03:26:27 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/attachments/att:70410-2-quote "HTTP/1.1 200 OK"
+03:26:27 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d/attachments/att:70410-2-delivery_schedule "HTTP/1.1 200 OK"
+03:26:27 sup:70410 final_offer {'unit_price': 31.8, 'lead_time_days': 56, 'volume_per_year': 19890, 'contract_months': 12}
+03:26:27 sup:70410 {'type': 'walk_away'}
+03:26:28 HTTP Request: POST https://arena.tacto.ai/v1/sessions/49bf39b20542239d/threads/sup:70410/messages "HTTP/1.1 200 OK"
+03:26:28 HTTP Request: GET https://arena.tacto.ai/v1/sessions/49bf39b20542239d "HTTP/1.1 200 OK"
+{
+  "deal": false,
+  "supplier_id": null,
+  "terms": null,
+  "c_open": 1932492.18,
+  "c_deal": null,
+  "c_best": 1328926.89,
+  "score": 0.0
+}
+replay: https://arena.tacto.ai/replay/49bf39b20542239d
+practice sessions left today: 342

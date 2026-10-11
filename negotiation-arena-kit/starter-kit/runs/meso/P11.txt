@@ -1,0 +1,38 @@
+01:39:21 session 5773da61f2b2e245
+01:39:21 case:P11 sup:70140 steps: ppm_commitment (8,586 EUR), chargeback_eur_per_complaint (2,146 EUR)
+01:39:21 case:P11 sup:70140 step 1/2 ppm_commitment, locked {}, target C 714,148: {"unit_price": 43.24, "ppm_commitment": 300} | {"unit_price": 43.02, "ppm_commitment": 800} | {"unit_price": 42.7, "ppm_commitment": 1500}
+01:39:46 sup:70140 open {'unit_price': 47.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:39:46 case:P11 sup:70140 step 2/2 chargeback_eur_per_complaint, locked {"ppm_commitment": 300}, target C 726,105: {"unit_price": 44.13, "chargeback_eur_per_complaint": 500} | {"unit_price": 43.99, "chargeback_eur_per_complaint": 0.0} | {"unit_price": 44.04, "chargeback_eur_per_complaint": 150}
+01:40:13 sup:70140 open {'unit_price': 46.5, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:40:13 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 732,809: {"unit_price": 44.41}
+01:40:35 sup:70140 open {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:40:35 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 735,564: {"unit_price": 44.59}
+01:41:00 sup:70140 open {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:41:00 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 740,058: {"unit_price": 44.87}
+01:41:28 sup:70140 open {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:41:28 case:P11 sup:70140 price, locked {"ppm_commitment": 300, "chargeback_eur_per_complaint": 0.0}, target C 743,653: {"unit_price": 45.1}
+01:41:51 sup:70140 final_offer {'unit_price': 46.0, 'ppm_commitment': 300, 'chargeback_eur_per_complaint': 0.0}
+01:41:51 sup:70140 {'type': 'accept', 'term_sheet_id': 'offer:70140-6'}
+{
+  "deal": true,
+  "supplier_id": "sup:70140",
+  "terms": {
+    "payment_days": 60,
+    "lead_time_days": 56,
+    "volume_per_year": 15900,
+    "contract_months": 12,
+    "effective_date": "2027-01-01",
+    "index_clause": null,
+    "incoterm": "FCA",
+    "tooling_eur": 0.0,
+    "ppm_commitment": 300,
+    "chargeback_eur_per_complaint": 0.0,
+    "unit_price": 46.0
+  },
+  "c_open": 817578.0,
+  "c_deal": 758032.5,
+  "c_best": 722500.02,
+  "score": 0.6262806593072341
+}
+replay: https://arena.tacto.ai/replay/5773da61f2b2e245
+practice sessions left today: 367
