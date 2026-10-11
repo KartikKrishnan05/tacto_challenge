@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4MD0YNYP6JY2JBEQ3Y19ZF0",
+  "strategy": "manual-commit",
+  "branch": "feature/spec-agent",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/arena_kit/agents/spec.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/__init__.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/analyst.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/clock.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/closing.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/concession.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/dossier.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/email.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/estimate.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/final.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/levers.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/llm.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/playbook.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/prep.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/pricing.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/prose.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/runner.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/sheets.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/steps.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/tactics.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/spec/terms.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 140,
+    "cache_creation_tokens": 459342,
+    "cache_read_tokens": 22609412,
+    "output_tokens": 188619,
+    "api_call_count": 70
+  }
+}

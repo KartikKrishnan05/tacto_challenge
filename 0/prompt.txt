@@ -1,0 +1,56 @@
+<pasted_content id="72da">
+Build a new buyer agent for the Tacto Negotiation Arena from the spec in
+negotiation-arena-kit/starter-kit/NEW_AGENT_REQUIREMENTS.md, on a new branch.
+
+## Setup
+1. Start from `feature/meso-agent`. The requirements file is untracked there, so commit it first
+   ("docs: new agent requirements"). Then create `feature/spec-agent` from that commit and push it
+   with upstream.
+2. Read the whole requirements file before you write any code. Section 0 describes the case JSON the
+   agent receives; treat it as the input contract. Then read `brief/api.md` (the rules, the cost
+   formula C and the score) and the starter kit's README.md.
+
+## Where the source code is
+- Sections 1-10: BuyerAgent on `feature/team-agent`: arena_kit/agents/buyer.py, strategy.py,
+  dossier.py
+- Section 11: DualAgent on `feature/team-agent`: arena_kit/agents/dual.py, intel.py, tactics.py
+- Section 12: TeamAgent on `feature/team-agent`: team/agent.py, levers.py, briefing.py, runner.py,
+  final.py, tests/test_offline.py, plus AGENTS.md
+- Section 13: the MESO agent on this branch: arena_kit/agents/llm.py, claims.py, writing.py, play.py,
+  run logs in runs/meso*/
+Read files from the other branch with `git show feature/team-agent:negotiation-arena-kit/starter-kit/<path>`.
+Port the code you need into this branch. Do not merge `feature/team-agent`.
+
+## What to build
+- A new agent, `arena_kit/agents/spec.py` (class `SpecAgent`), registered wherever the CLI picks up
+  agents (`arena run` / `arena play`), so it runs the same way as the existing agents. Put shared
+  logic in modules (levers, sheets, closing, clock, analyst), not in one big file.
+- Code decides every number: anchors, steps, term sheets, accept and walk-away. The model writes words
+  only (R9.1, R13.14-R13.15), and code-written fallbacks cover every model call (R10.1-R10.2,
+  R12.17).
+- Section 0.7 runs at case open: check the case file, compute C for every opening quote with
+  standard terms filled in and C_alt for the alternative, check coverage, build the lever table,
+  pick the playbook row, set anchor and floor, apply the must-have filter, start the clock. Never
+  crash on a field outside the ranges in section 0. Log it and use the defaults.
+- Merge R4.1 and R13.10 into one anchor table, as R13.10 asks. Write down the choice in a comment.
+- Where two requirements conflict, the more specific one wins, and section 5's concession rules stay
+  in charge (see the "Not taken from" notes). List every judgement call you make in DESIGN_NOTES.md.
+
+## Tests
+- Write every unit test listed under "Acceptance" in the requirements file, under tests/, using
+  TeamAgent's offline tests as the template. Add one test that loads all 19 cases in
+  data/practice_cases.json and runs the section 0.7 preparation without errors.
+- Run the whole test suite. It must pass before you play anything.
+- Then play the sandbox (D01, D02) and the local sim. Only after that play the 10 hosted practice
+  cases (P01-P05, P07, P08, P10, P11, P18). The key is in starter-kit/.env, and the quota is 200
+  sessions per 24 h, so don't loop on the hosted cases. Compare each score with the targets under
+  "Acceptance" (mean 71.6, all 10 cases ending in a deal, each case closed within 420 s).
+
+## Working rules
+- Commit in small steps with clear messages, and push to `feature/spec-agent`. Don't touch main or
+  the other feature branches.
+- When a practice case scores below its target, read its replay and the run log, fix the cause,
+  and record the cause and the fix in DESIGN_NOTES.md.
+- At the end, report a per-case score table (new agent vs target), the requirements you did not
+  implement or changed and why, and which tests pass.
+</pasted_content id="72da">
