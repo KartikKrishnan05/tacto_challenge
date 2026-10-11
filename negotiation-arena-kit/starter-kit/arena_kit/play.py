@@ -166,7 +166,10 @@ def closing_move(case, threads):
 
 def play(table, case_id, agent, deadline=None):
     """Play one case to its end. `deadline` (time.time(), or a function returning it): a Live Final
-    wave's cap - shortly before it, `closing_move` closes the case so it does not end without a deal."""
+    wave's cap - shortly before it, `closing_move` closes the case so it does not end without a deal.
+    An agent with its own runner (`run_case`, e.g. the spec agent) plays the case itself."""
+    if hasattr(agent, "run_case"):
+        return agent.run_case(table, case_id, deadline)
     case, threads = table.open(case_id)
     if getattr(table, "done", None):  # resumed a case that had already ended
         return table.done
