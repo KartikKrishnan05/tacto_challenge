@@ -493,10 +493,18 @@ class SpecAgent:
 
             def guard_menu(menu):
                 nonlocal guard_errors
+                notice_days, notice_date = self.contractual_notice()
                 menu = sheets.lock_coverage(ctx, menu, cover_values)
+                menu = sheets.repair_menu(
+                    ctx,
+                    menu,
+                    c_target,
+                    floor_p,
+                    minimum_notice_days=notice_days,
+                    current_date=notice_date,
+                )
                 menu = sheets.guard(ctx, menu, c_target, supplier_terms, th.last_sheets)
                 menu = sheets.no_regress(ctx, menu, [r.c for r in st["rows"] if r.valid])
-                notice_days, notice_date = self.contractual_notice()
                 errors = sheets.validate_menu(
                     ctx,
                     menu,
@@ -505,6 +513,30 @@ class SpecAgent:
                     minimum_notice_days=notice_days,
                     current_date=notice_date,
                 )
+                if errors:
+                    # A second deterministic repair handles a decoy or a
+                    # coverage lock that changed terms after the first solve.
+                    repaired = sheets.repair_menu(
+                        ctx,
+                        menu,
+                        c_target,
+                        floor_p,
+                        minimum_notice_days=notice_days,
+                        current_date=notice_date,
+                    )
+                    repaired = sheets.guard(ctx, repaired, c_target, supplier_terms, th.last_sheets)
+                    repaired = sheets.no_regress(ctx, repaired, [r.c for r in st["rows"] if r.valid])
+                    retry_errors = sheets.validate_menu(
+                        ctx,
+                        repaired,
+                        th.last_sheets,
+                        rival_price,
+                        minimum_notice_days=notice_days,
+                        current_date=notice_date,
+                    )
+                    if not retry_errors:
+                        return repaired
+                    errors.extend(retry_errors)
                 if errors:
                     guard_errors.extend(errors)
                     log.warning("%s: outgoing menu blocked by guardrails: %s", sid, " | ".join(errors))
@@ -543,12 +575,43 @@ class SpecAgent:
             if not out:
                 previous = [x for x in th.last_sheets if ctx.ok(x[1])]
                 if len(previous) >= 2:
-                    out = previous
+                    notice_days, notice_date = self.contractual_notice()
+                    previous_errors = sheets.validate_menu(
+                        ctx,
+                        previous,
+                        rival_price=rival_price,
+                        minimum_notice_days=notice_days,
+                        current_date=notice_date,
+                    )
+                    if previous_errors:
+                        previous = sheets.repair_menu(
+                            ctx,
+                            previous,
+                            target,
+                            floor_p,
+                            minimum_notice_days=notice_days,
+                            current_date=notice_date,
+                        )
+                        previous_errors = sheets.validate_menu(
+                            ctx,
+                            previous,
+                            rival_price=rival_price,
+                            minimum_notice_days=notice_days,
+                            current_date=notice_date,
+                        )
+                    if not previous_errors:
+                        out = previous
+                    else:
+                        guard_errors.extend(previous_errors)
                 else:
                     # A one-sheet fallback is an ultimatum.  Block it rather than emitting a
                     # package that violates the multi-option guardrail.
                     return {"supplier_id": sid, "idle": True, "guardrail_errors": guard_errors or [
                         "Rule 10 (multi-option): no valid two-option menu could be generated; output blocked."
+                    ]}
+                if not out:
+                    return {"supplier_id": sid, "idle": True, "guardrail_errors": guard_errors or [
+                        "No validated two-option menu remained after deterministic repair; output blocked."
                     ]}
         lock = self.lock_in(st)
         pressure = st["left"] <= PRESSURE_LEFT or st["intel"].walk_risk >= LOCK_RISK or self.clock.near_end()

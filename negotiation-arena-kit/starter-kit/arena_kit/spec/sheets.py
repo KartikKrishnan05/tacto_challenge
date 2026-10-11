@@ -19,6 +19,7 @@ before it goes out.
 import itertools
 import math
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 
 from ..cost import OPS, must_haves_ok, supplier_value
 from . import estimate as est_mod
@@ -440,6 +441,87 @@ def no_regress(ctx, sheets, supplier_costs):
         return sheets
     best = min(supplier_costs)
     return [(label, t) for label, t in sheets if ctx.c(t) < (1 - REGRESS_TOL) * best]
+
+
+def _legal_effective_date(ctx, value, minimum_notice_days=None, current_date=None):
+    """Map a generated price-change date onto the buyer's contractual date choices."""
+    if minimum_notice_days is None or value is None:
+        return value
+    try:
+        received = date.fromisoformat(str(current_date)) if current_date is not None else date.today()
+        floor = received + timedelta(days=int(minimum_notice_days))
+        proposed = date.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return value
+    if proposed >= floor:
+        return proposed.isoformat()
+    allowed = []
+    for candidate in (ctx.case.get("term_options") or {}).get("effective_date", []):
+        try:
+            candidate_date = date.fromisoformat(str(candidate))
+        except (TypeError, ValueError):
+            continue
+        if candidate_date >= floor:
+            allowed.append(candidate_date)
+    # Use the latest legal case choice when an illegal supplier date was copied
+    # into a package. It preserves the buyer's date leverage and avoids sending
+    # an option that the contract itself prohibits.
+    return (max(allowed) if allowed else floor).isoformat()
+
+
+def repair_menu(
+    ctx,
+    sheets,
+    target,
+    floor_price=0.0,
+    *,
+    minimum_notice_days=None,
+    current_date=None,
+):
+    """Repair generated packages before the final economic validator sees them.
+
+    Date changes and term trades alter total cost, so every repaired package is
+    repriced with the same cost model target. This fixes the common failure where
+    a decoy changes payment or effective date after ``price_for`` has already run.
+    """
+    out = []
+    for label, original in sheets:
+        raw = dict(original)
+        if "effective_date" in raw:
+            raw["effective_date"] = _legal_effective_date(
+                ctx,
+                raw.get("effective_date"),
+                minimum_notice_days,
+                current_date,
+            )
+        terms = complete(ctx.case, raw, ctx.std)
+        if "effective_date" in terms:
+            terms["effective_date"] = _legal_effective_date(
+                ctx,
+                terms.get("effective_date"),
+                minimum_notice_days,
+                current_date,
+            )
+        combo = {k: v for k, v in terms.items() if k != "unit_price"}
+        price = terms.get("unit_price")
+        try:
+            solved = pricing.price_for(
+                ctx.case,
+                combo,
+                ctx.std,
+                target,
+                ctx.supplier,
+                ctx.their_price,
+            )
+        except (TypeError, ValueError, OverflowError):
+            solved = None
+        if solved is not None and math.isfinite(float(solved)):
+            price = max(float(floor_price or 0.0), float(solved))
+        if price is not None:
+            terms = complete(ctx.case, {**combo, "unit_price": round(price, 2)}, ctx.std)
+        if terms not in [t for _, t in out]:
+            out.append((label, terms))
+    return out
 
 
 def validate_menu(

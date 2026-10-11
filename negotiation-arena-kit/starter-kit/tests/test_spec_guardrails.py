@@ -2,6 +2,7 @@
 
 from types import SimpleNamespace
 
+from arena_kit.spec import sheets
 from arena_kit.spec.closing import Row, View, guarded_ladder
 from arena_kit.spec.sheets import validate_menu
 from team.term_guard import anti_capitulation_check, validate_reciprocity
@@ -72,3 +73,35 @@ def test_spec_close_ladder_allows_the_same_price_after_round_three():
         ideal_price=100,
     )
     assert guarded_ladder({"sup:1": view}) == [("sup:1", "offer:1-1")]
+
+
+def test_repair_menu_moves_illegal_date_and_reprices_it(monkeypatch):
+    case = {
+        "type": "price_increase",
+        "negotiable": ["unit_price", "effective_date", "payment_days"],
+        "term_options": {
+            "effective_date": ["2027-01-01", "2027-04-01"],
+            "payment_days": [30, 90],
+        },
+        "fixed_terms": {},
+        "buyer": {
+            "need_per_year": 100,
+            "horizon_years": 1,
+            "reference_payment_days": 30,
+            "need_lead_time_days": 28,
+            "freight_eur_per_unit": {"EXW": 0},
+            "must_haves": [],
+        },
+    }
+    ctx = SimpleNamespace(case=case, std={}, supplier=None, their_price=140)
+    monkeypatch.setattr(sheets.pricing, "price_for", lambda *args, **kwargs: 130.25)
+    repaired = sheets.repair_menu(
+        ctx,
+        [("A", option(unit_price=131, effective_date="2026-11-01"))],
+        target=10_000,
+        floor_price=120,
+        minimum_notice_days=90,
+        current_date="2026-09-11",
+    )
+    assert repaired[0][1]["effective_date"] == "2027-04-01"
+    assert repaired[0][1]["unit_price"] == 130.25
