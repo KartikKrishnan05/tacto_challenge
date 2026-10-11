@@ -1,0 +1,33 @@
+<section id="data" data-transition="fade" style="background:#000000;color:#F5F5F7;font-family:'Inter', Arial, sans-serif;padding:160px;display:flex;flex-direction:column;justify-content:center;gap:72px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:30px;font-weight:600;color:#86868B">The data pipeline</p>
+<h2 style="font-size:96px;font-weight:700;line-height:1.05;letter-spacing:-3px">Arguments the arena can verify.</h2>
+</div>
+<div style="display:flex;gap:24px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;border-top:1px solid #3A3A3C;padding:28px 0 0 0">
+<p style="font-size:26px;font-weight:600;color:#86868B">Sources</p>
+<p style="font-size:30px;line-height:1.4">Contracts, orders, quotes, payments, quality, call notes, indices, cost drivers</p>
+</div>
+<x-connector style="width:40px;color:#636366"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;border-top:1px solid #3A3A3C;padding:28px 0 0 0">
+<p style="font-size:26px;font-weight:600;color:#86868B">One layer</p>
+<p style="font-size:30px;line-height:1.4">Master JSON with the Sunday release and hidden-case facts, queried as SQL</p>
+</div>
+<x-connector style="width:40px;color:#636366"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;border-top:1px solid #3A3A3C;padding:28px 0 0 0">
+<p style="font-size:26px;font-weight:600;color:#86868B">Dossier</p>
+<p style="font-size:30px;line-height:1.4">Per supplier: cash needs, capacity, scorecards, past settlements</p>
+</div>
+<x-connector style="width:40px;color:#636366"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;border-top:1px solid #FF9F0A;padding:28px 0 0 0">
+<p style="font-size:26px;font-weight:600;color:#FF9F0A">Claims</p>
+<p style="font-size:30px;line-height:1.4">Computed exactly as the arena checks them</p>
+</div>
+</div>
+<div style="display:flex;gap:64px">
+<p style="flex:1;font-size:28px;line-height:1.45;color:#A1A1A6"><span style="color:#F5F5F7">Index moves:</span> two months of one series, 12 months apart, in the latest window - only those that argue our side.</p>
+<p style="flex:1;font-size:28px;line-height:1.45;color:#A1A1A6"><span style="color:#F5F5F7">Notice periods:</span> the letter's days against the contract's. P01: 51 given, 90 required.</p>
+<p style="flex:1;font-size:28px;line-height:1.45;color:#A1A1A6"><span style="color:#F5F5F7">Each data ID once per case.</span> A wrong figure costs trust, so a claim that does not check out is never sent.</p>
+</div>
+<aside>The data pipeline. Everything - the package's 24 tables, the 208 letters and notes, the market indices, the Sunday release and the facts of a hidden case - goes into one master JSON layer we query as SQL. From it we build a dossier per supplier and claims computed exactly the way the arena checks them: index changes over a twelve-month window, notice periods against the contract - in P01 the letter gave 51 days where 90 were required. A claim that would not check out is never sent.</aside>
+</section>

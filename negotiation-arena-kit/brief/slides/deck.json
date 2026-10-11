@@ -1,0 +1,17 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-11T11:00:00Z"},
+  "lists": "css",
+  "title": "Promptly Done – How our buyer agent negotiates",
+  "order": ["cover", "insight", "first", "pipeline", "data", "loop", "meso", "evidence", "lab", "story", "results", "final", "close"],
+  "sections": {
+    "s1": {"description": "Who we are and the two facts behind our agent", "start": "cover"},
+    "s2": {"description": "The architecture: data pipeline, negotiation loop and MESO", "start": "pipeline"},
+    "s3": {"description": "How we improved it: from traces to a spec, and a deterministic lab", "start": "evidence"},
+    "s4": {"description": "Results, the live final and what we learned", "start": "results"}
+  },
+  "faces": {
+    "inter": {"family": "Inter", "href": "https://fonts.googleapis.com/css2?family=Inter:wght@300..800&display=swap"}
+  },
+  "designSystems": []
+}

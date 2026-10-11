@@ -1,0 +1,26 @@
+<section id="final" data-transition="fade" style="background:#F5F5F7;color:#1D1D1F;font-family:'Inter', Arial, sans-serif;padding:160px;display:flex;flex-direction:column;justify-content:center;gap:56px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:30px;font-weight:600;color:#6E6E73">The live final  ·  nothing may break</p>
+<h2 style="font-size:96px;font-weight:700;line-height:1.05;letter-spacing:-3px">No human in the loop.</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+<div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #D2D2D7;padding:32px 0 0 0">
+<h3 style="font-size:36px;font-weight:600;letter-spacing:-1px">One worker per supplier</h3>
+<p style="font-size:28px;line-height:1.45;color:#6E6E73">Each RFQ thread keeps its own 60-second clock.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #D2D2D7;padding:32px 0 0 0">
+<h3 style="font-size:36px;font-weight:600;letter-spacing:-1px">Validated accepts</h3>
+<p style="font-size:28px;line-height:1.45;color:#6E6E73">A refused offer moves to the next checked candidate - never to a must-have break.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #D2D2D7;padding:32px 0 0 0">
+<h3 style="font-size:36px;font-weight:600;letter-spacing:-1px">Wi-Fi proof</h3>
+<p style="font-size:28px;line-height:1.45;color:#6E6E73">Before a retry it checks whether the message already landed.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #D2D2D7;padding:32px 0 0 0">
+<h3 style="font-size:36px;font-weight:600;letter-spacing:-1px">Closes before the cap</h3>
+<p style="font-size:28px;line-height:1.45;color:#6E6E73">90 seconds before a wave's cap it takes the cheapest valid offer that beats the alternative.</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.45;color:#6E6E73">Waits through the pre-wave 403, resumes a session after a 409, follows <span style="color:#1D1D1F">seconds_left</span>. Never reads the leaderboard, event feed or screen. Rehearsed in a local two-wave simulator.</p>
+<aside>The live final runs without us, so robustness was a feature, not an afterthought. Each supplier thread has its own worker and its own sixty-second clock. Accepts are validated, so a refused offer never falls back to a sheet that breaks a must-have. Retries check whether a message already landed - a double message after a final offer would lose the deal. And before a wave's cap it closes on the cheapest valid offer.</aside>
+</section>
