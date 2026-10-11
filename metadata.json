@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4M8YXTWZ1QZJSQTKBJ510RG",
+  "strategy": "manual-commit",
+  "branch": "feature/meso-agent",
+  "checkpoints_count": 13,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/.gitignore",
+    "negotiation-arena-kit/starter-kit/README.md",
+    "negotiation-arena-kit/starter-kit/arena_kit/agents/llm.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/claims.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/data.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/play.py",
+    "negotiation-arena-kit/starter-kit/arena_kit/writing.py",
+    "negotiation-arena-kit/starter-kit/pyproject.toml",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P01.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P02.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P03.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P04.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P05.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P07.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P08.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P10.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P11.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso3/P18.txt",
+    "negotiation-arena-kit/starter-kit/tests/test_kit.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 186,
+    "cache_creation_tokens": 274204,
+    "cache_read_tokens": 19366907,
+    "output_tokens": 110164,
+    "api_call_count": 86
+  }
+}
