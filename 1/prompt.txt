@@ -1,0 +1,1 @@
+to the new agent requirements file please all the requirements and also the given information in a case json request so that it knows what values to expect and to keep that in mind and focus it?
