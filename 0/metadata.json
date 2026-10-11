@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4MD87DQ736J738S8Q9H4NXX",
+  "session_id": "6eb624ac-34d0-47ec-b9e0-e17c294f8fb9",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-11T02:39:17.194285Z",
+  "branch": "feature/spec-agent",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/tests/spec_support.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_closing.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_concession.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_prep.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_sheets.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "0cf5b7a405e2",
+  "checkpoint_transcript_start": 628,
+  "transcript_lines_at_start": 628,
+  "compact_transcript_start": 79,
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 28369,
+    "cache_read_tokens": 5139490,
+    "output_tokens": 23737,
+    "api_call_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-11T02:39:16.858232Z",
+    "agent_lines": 698,
+    "agent_removed": 0,
+    "human_added": 1,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 699,
+    "total_lines_changed": 702,
+    "agent_percentage": 99.43019943019942,
+    "metric_version": 2
+  }
+}

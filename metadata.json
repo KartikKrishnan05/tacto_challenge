@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4MD87DQ736J738S8Q9H4NXX",
+  "strategy": "manual-commit",
+  "branch": "feature/spec-agent",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/tests/spec_support.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_closing.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_concession.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_prep.py",
+    "negotiation-arena-kit/starter-kit/tests/test_spec_sheets.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 28369,
+    "cache_read_tokens": 5139490,
+    "output_tokens": 23737,
+    "api_call_count": 10
+  }
+}
