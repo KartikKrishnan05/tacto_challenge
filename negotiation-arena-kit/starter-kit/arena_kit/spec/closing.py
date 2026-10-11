@@ -195,11 +195,9 @@ def decide(views, sid, must_close=False):
         if may_accept and (not rfq or best_sid == sid):
             return accept(views, "agreed to our terms")
 
-    if stalled(v) and best_sid == sid:  # R12.13
+    if stalled(v):  # R12.13: back to its earlier, cheaper offer once - never a deadlock close (R5.3, R7)
         if (r := earlier_cheaper(v)) is not None:
             return Close("offer_back", "stalled: back to its own earlier, cheaper offer", sid, r.id, terms=r.terms)
-        if may_accept:
-            return accept(views, "stalled: no more movement")
 
     best = v.best
     if best is not None and v.sent >= 1 and v.target is not None:
