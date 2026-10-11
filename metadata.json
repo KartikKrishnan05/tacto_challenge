@@ -3,8 +3,9 @@
   "checkpoint_id": "01M4N0T8XTZP7CDV9YW8JFPFXZ",
   "strategy": "manual-commit",
   "branch": "feature/spec-agent",
-  "checkpoints_count": 13,
+  "checkpoints_count": 14,
   "files_touched": [
+    "SpecAgent_pitch.pptx",
     "negotiation-arena-kit/starter-kit/DESIGN_NOTES.md",
     "negotiation-arena-kit/starter-kit/README.md",
     "negotiation-arena-kit/starter-kit/arena_kit/agents/spec.py",
@@ -41,13 +42,20 @@
       "compact_transcript": "/1/transcript.jsonl",
       "content_hash": "/1/content_hash.txt",
       "prompt": "/1/prompt.txt"
+    },
+    {
+      "metadata": "/2/metadata.json",
+      "transcript": "/2/full.jsonl",
+      "compact_transcript": "/2/transcript.jsonl",
+      "content_hash": "/2/content_hash.txt",
+      "prompt": "/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 252,
-    "cache_creation_tokens": 314655,
-    "cache_read_tokens": 24695854,
-    "output_tokens": 110864,
-    "api_call_count": 124
+    "input_tokens": 284,
+    "cache_creation_tokens": 372478,
+    "cache_read_tokens": 26027735,
+    "output_tokens": 123568,
+    "api_call_count": 140
   }
 }
