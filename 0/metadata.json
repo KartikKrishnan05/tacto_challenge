@@ -1,0 +1,78 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4M9BRKWW6FPQK96GR9NC6QZ",
+  "session_id": "1e7f2285-a1fd-41b2-aeec-3ce8dce78e4f",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-11T01:31:16.350657Z",
+  "branch": "feature/meso-agent",
+  "checkpoints_count": 8,
+  "save_step_count": 1,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/runs/meso4/P01.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P02.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P03.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P04.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P05.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P07.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P08.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P10.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P11.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P18.txt"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "c83a96ceefb8",
+  "checkpoint_transcript_start": 706,
+  "transcript_lines_at_start": 706,
+  "compact_transcript_start": 103,
+  "token_usage": {
+    "input_tokens": 56,
+    "cache_creation_tokens": 24207,
+    "cache_read_tokens": 7051684,
+    "output_tokens": 14736,
+    "api_call_count": 21
+  },
+  "session_metrics": {
+    "turn_count": 21
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-11T01:31:16.148746Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 916,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 916,
+    "total_lines_changed": 942,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 431,
+      "user_lines_removed": 0,
+      "agent_lines_added": 86,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "negotiation-arena-kit/starter-kit/runs/meso4/P01.txt": 47,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P02.txt": 38,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P03.txt": 30,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P04.txt": 40,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P05.txt": 60,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P07.txt": 47,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P08.txt": 46,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P10.txt": 24,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P11.txt": 54,
+        "negotiation-arena-kit/starter-kit/runs/meso4/P18.txt": 45
+      }
+    }
+  ]
+}

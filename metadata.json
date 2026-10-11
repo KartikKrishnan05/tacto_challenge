@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.10.2",
+  "checkpoint_id": "01M4M9BRKWW6FPQK96GR9NC6QZ",
+  "strategy": "manual-commit",
+  "branch": "feature/meso-agent",
+  "checkpoints_count": 8,
+  "files_touched": [
+    "negotiation-arena-kit/starter-kit/runs/meso4/P01.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P02.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P03.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P04.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P05.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P07.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P08.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P10.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P11.txt",
+    "negotiation-arena-kit/starter-kit/runs/meso4/P18.txt"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 56,
+    "cache_creation_tokens": 24207,
+    "cache_read_tokens": 7051684,
+    "output_tokens": 14736,
+    "api_call_count": 21
+  }
+}
